@@ -226,10 +226,14 @@ const GroupAPI = {
         
         const now = new Date();
         const yearMonthNow = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentId = Number(currentUser.id);
 
-        // 1. GASTOS TOTALES (Basado en el string YYYY-MM para evitar errores de zona horaria)
+        // 1. GASTOS TOTALES (Validación flexible de ID y Fecha)
         const allMonthlyExpenses = LocalDB.expenses.filter(e => {
-            return e.fecha && e.fecha.startsWith(yearMonthNow) && e.pagadoPorId === currentUser.id;
+            const expenseUserId = Number(e.pagadoPorId);
+            return e.fecha && 
+                   e.fecha.includes(yearMonthNow) && 
+                   expenseUserId === currentId;
         });
         
         const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => {
