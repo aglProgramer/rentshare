@@ -84,13 +84,26 @@ const AuthAPI = {
     updateProfile: async (id, data) => {
         await delay();
         const users = LocalDB.users;
-        const index = users.findIndex(u => u.id === id);
-        if (index === -1) throw new ApiError('Usuario no encontrado', 404);
+        // Castear a Number para evitar fallos de === entre "1" o 1
+        let index = users.findIndex(u => Number(u.id) === Number(id));
         
-        users[index] = { ...users[index], ...data };
+        let sessionUser = LocalDB.getCurrentUser();
+        
+        if (index === -1) {
+            // Autenticación de Migración: 
+            // Si el usuario viene del antiguo Backend Java y su SessionStorage sigue viva, 
+            // no existe en LocalDB.users aún. Lo inyectamos de maravilla.
+            sessionUser = { ...sessionUser, ...data };
+            users.push(sessionUser);
+            index = users.length - 1;
+        } else {
+            users[index] = { ...users[index], ...data };
+            sessionUser = users[index];
+        }
+        
         LocalDB.users = users;
 
-        const tokenUser = { ...users[index] };
+        const tokenUser = { ...sessionUser };
         delete tokenUser.password;
         sessionStorage.setItem('rentshare_user', JSON.stringify(tokenUser));
         return tokenUser;
