@@ -1,14 +1,13 @@
 /**
  * api-client.js — RentShare Frontend (Modo Cloud: SUPABASE)
- * 
- * ¡Modo NUBE Activado! Los datos ahora se sincronizan en tiempo real
- * con tu proyecto en Supabase.
+ * Versión 18.2 — Arreglo Definitivo de Sintaxis
  */
 
 const SUPABASE_URL = "https://fcwbsbykxvsxwhkjvezg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjd2JzYnlreHZzeHdoa2p2ZXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzQxNzQsImV4cCI6MjA5MTUxMDE3NH0.8XikD3kBqX0aSvInlOauB82B47DIjnoCtpM94BXJNqM";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Usamos window.supabase para ser explícitos y sbClient para evitar colisiones
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 class ApiError extends Error {
     constructor(message, statusCode, fieldErrors = null) {
@@ -19,27 +18,22 @@ class ApiError extends Error {
     }
 }
 
-// Helper para manejar usuarios en sesión
 const Auth = {
     getUser: () => JSON.parse(sessionStorage.getItem('rentshare_user')),
     setUser: (user) => sessionStorage.setItem('rentshare_user', JSON.stringify(user)),
     clear: () => sessionStorage.clear()
 };
 
-// ===========================
-// Servicios Auth (Supabase)
-// ===========================
 const AuthAPI = {
     async login(credentials) {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
+        const { data, error } = await sbClient.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password
         });
         
         if (error) throw new ApiError('Usuario o contraseña incorrectos', 400);
 
-        // Obtener el perfil extendido
-        const { data: profile } = await supabaseClient
+        const { data: profile } = await sbClient
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
@@ -51,13 +45,11 @@ const AuthAPI = {
     },
 
     async register(userData) {
-        const { data, error } = await supabaseClient.auth.signUp({
+        const { data, error } = await sbClient.auth.signUp({
             email: userData.email,
             password: userData.password,
             options: {
-                data: {
-                    nombre: userData.nombre
-                }
+                data: { nombre: userData.nombre }
             }
         });
 
@@ -66,7 +58,7 @@ const AuthAPI = {
     },
 
     async updateProfile(id, updateData) {
-        const { data, error } = await supabaseClient
+        const { data, error } = await sbClient
             .from('profiles')
             .update(updateData)
             .eq('id', id)
@@ -87,15 +79,12 @@ const AuthAPI = {
     }
 };
 
-// ===========================
-// Servicios de Gastos (Supabase)
-// ===========================
 const ExpenseAPI = {
     async getAll() {
         const user = Auth.getUser();
         if (!user) throw new ApiError('No autorizado', 401);
 
-        const { data, error } = await supabaseClient
+        const { data, error } = await sbClient
             .from('expenses')
             .select('*')
             .eq('invite_code', user.invite_code)
@@ -107,7 +96,7 @@ const ExpenseAPI = {
 
     async create(expenseData) {
         const user = Auth.getUser();
-        const { data, error } = await supabaseClient
+        const { data, error } = await sbClient
             .from('expenses')
             .insert([{
                 ...expenseData,
@@ -123,7 +112,7 @@ const ExpenseAPI = {
     },
 
     async update(id, expenseData) {
-        const { data, error } = await supabaseClient
+        const { data, error } = await sbClient
             .from('expenses')
             .update(expenseData)
             .eq('id', id)
@@ -135,7 +124,7 @@ const ExpenseAPI = {
     },
 
     async delete(id) {
-        const { error } = await supabaseClient
+        const { error } = await sbClient
             .from('expenses')
             .delete()
             .eq('id', id);
@@ -145,9 +134,6 @@ const ExpenseAPI = {
     }
 };
 
-// ===========================
-// Servicios de Balance (Cloud logic)
-// ===========================
 const GroupAPI = {
     async getBalance() {
         const user = Auth.getUser();
@@ -157,9 +143,7 @@ const GroupAPI = {
         const currentMonth = now.getMonth() + 1;
         const currentYear = now.getFullYear();
 
-        // 1. GASTO ACUMULADO TOTAL (Mes actual)
-        // Usamos una consulta filtrada por fecha
-        const { data: monthExpenses, error } = await supabaseClient
+        const { data: monthExpenses, error } = await sbClient
             .from('expenses')
             .select('*')
             .gte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-01`)
@@ -169,21 +153,11 @@ const GroupAPI = {
 
         const totalGeneral = monthExpenses.reduce((sum, e) => sum + Number(e.monto || 0), 0);
 
-        // 2. LÓGICA GRUPAL
         if (!user.invite_code || user.invite_code === '---') {
-            return {
-                totalGeneral,
-                totalGrupal: 0,
-                miAporte: 0,
-                balancePesos: 0,
-                isDeudor: false,
-                balanceStatus: 'Sin Casa Activa',
-                debts: []
-            };
+            return { totalGeneral, totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Casa Activa', debts: [] };
         }
 
-        // Obtener miembros del grupo
-        const { data: members } = await supabaseClient
+        const { data: members } = await sbClient
             .from('profiles')
             .select('id, nombre')
             .eq('invite_code', user.invite_code);
@@ -193,27 +167,23 @@ const GroupAPI = {
         let totalGrupal = 0;
         let miAporte = 0;
         const balances = {};
-        members.forEach(m => balances[m.id] = 0);
+        (members || []).forEach(m => balances[m.id] = 0);
 
         groupExpenses.forEach(exp => {
             const amount = Number(exp.monto);
             totalGrupal += amount;
             if (exp.pagado_por_id === user.id) miAporte += amount;
-            if (balances[exp.pagado_por_id] !== undefined) {
-                balances[exp.pagado_por_id] += amount;
-            }
+            if (balances[exp.pagado_por_id] !== undefined) balances[exp.pagado_por_id] += amount;
         });
 
-        const numMembers = members.length || 1;
+        const numMembers = (members || []).length || 1;
         const fairShare = totalGrupal / numMembers;
-        
-        let miEstado = balances[user.id] - fairShare;
-        let isDeudor = miEstado < -1;
+        const miEstado = (balances[user.id] || 0) - fairShare;
+        const isDeudor = miEstado < -1;
 
-        // Cálculos de deudas entre miembros (Algoritmo Greedy)
         const creditors = [];
         const debtors = [];
-        members.forEach(m => {
+        (members || []).forEach(m => {
             const net = balances[m.id] - fairShare;
             if (net > 1) creditors.push({ name: m.nombre, amount: net });
             else if (net < -1) debtors.push({ name: m.nombre, amount: Math.abs(net) });
@@ -230,21 +200,13 @@ const GroupAPI = {
             if (creditors[j].amount <= 1) j++;
         }
 
-        return {
-            totalGeneral,
-            totalGrupal,
-            miAporte,
-            balancePesos: Math.abs(miEstado),
-            isDeudor,
-            balanceStatus: isDeudor ? 'Debes dinero' : (miEstado > 1 ? 'Te deben dinero' : 'Vas al día'),
-            debts
-        };
+        return { totalGeneral, totalGrupal, miAporte, balancePesos: Math.abs(miEstado), isDeudor, balanceStatus: isDeudor ? 'Debes dinero' : (miEstado > 1 ? 'Te deben dinero' : 'Vas al día'), debts };
     }
 };
 
-// Exportar a global para compatibilidad con código existente
+// Exportar a global
 window.AuthAPI    = AuthAPI;
 window.ExpenseAPI = ExpenseAPI;
 window.GroupAPI   = GroupAPI;
 window.ApiError   = ApiError;
-window.LocalDB    = { nuke: AuthAPI.nuke }; // Mock de LocalDB para compatibilidad
+window.LocalDB    = { nuke: AuthAPI.nuke };
