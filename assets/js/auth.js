@@ -87,14 +87,16 @@ const Auth = {
             
             const userParams = await AuthAPI.register(payload);
             
-            Toast.success(`¡Cuenta creada! Revisa tu email para confirmar y luego inicia sesión.`);
-            // No hacemos login automático para permitir la confirmación de email si está activa
-            this.toggleForms();
+            Toast.success(`¡Cuenta creada! Revisa tu email para confirmar e inicia sesión.`);
+            // Usamos el nombre del objeto para evitar errores de contexto (this)
+            Auth.toggleForms();
 
         } catch (error) {
             if (error.fieldErrors) {
                 Toast.warning('Revisa los datos ingresados');
                 // Podríamos pintar los campos aquí igual que en gastos
+            } else if (error.status === 429) {
+                Toast.error('⛔ Demasiados intentos. Por favor espera unos minutos.');
             } else {
                 Toast.error(error.message || 'Error al registrar usuario');
             }
