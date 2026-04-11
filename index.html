@@ -86,7 +86,9 @@
         </a>
 
         <div class="navbar__actions">
-            <div id="box-invite-code" class="invite-badge" style="cursor: pointer; background: var(--bg-800); border: 1px dashed var(--accent); padding: 5px 10px; border-radius: 8px; margin-right: 15px;" title="Copiar código para invitar">
+            <div id="box-invite-code" class="invite-badge" style="cursor: pointer; background: var(--bg-800); border: 1px dashed var(--accent); padding: 5px 10px; border-radius: 8px; margin-right: 15px;" 
+                 onclick="UI.handleInviteCodeActions()"
+                 title="Click para gestionar tu casa (Generar o Unirse)">
                 <span class="text-sm">Código: <strong id="invite-code-display" class="text-accent"></strong></span>
             </div>
             <div class="user-chip">
@@ -403,9 +405,9 @@
 <!-- =============================================
      SCRIPTS (orden importante)
      ============================================= -->
-<script src="assets/js/api-client.js?v=7"></script>
-<script src="assets/js/auth.js?v=7"></script>
-<script src="assets/js/ui-render.js?v=7"></script>
+<script src="assets/js/api-client.js?v=9"></script>
+<script src="assets/js/auth.js?v=9"></script>
+<script src="assets/js/ui-render.js?v=9"></script>
 <!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
 
 </body>

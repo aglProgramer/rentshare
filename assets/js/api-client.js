@@ -209,7 +209,27 @@ const GroupAPI = {
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
-        // SOLAMENTE los gastos UNIFICADOS del MES ACTUAL aportan a la deuda del grupo
+        // 1. GASTOS TOTALES (Todo lo del mes actual para control personal)
+        const allMonthlyExpenses = LocalDB.expenses.filter(e => {
+            const expDate = new Date(e.fecha);
+            return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+        });
+        const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => sum + parseFloat(e.monto), 0);
+
+        // Si no hay código de grupo, solo retornamos el total general
+        if (!groupCode || groupCode === '---') {
+            return {
+                totalGeneral: totalMensualGeneral,
+                totalGrupal: 0,
+                miAporte: 0,
+                balancePesos: 0,
+                isDeudor: false,
+                balanceStatus: 'Sin Grupo Activo',
+                debts: []
+            };
+        }
+
+        // 2. GASTOS COMPARTIDOS (Solo Unificados para balances)
         const groupExpenses = LocalDB.expenses.filter(e => {
             const expDate = new Date(e.fecha);
             return e.inviteCode === groupCode && 
@@ -238,7 +258,7 @@ const GroupAPI = {
         });
         
         const numMembers = groupUsers.length || 1;
-        const fairShare = totalGrupal / numMembers; // Cota Justa
+        const fairShare = totalGrupal / numMembers; 
         
         let miEstado = 0;
         let balanceStatus = "Vas al día";
@@ -249,7 +269,7 @@ const GroupAPI = {
         
         for (const userId of Object.keys(balances)) {
             const id = parseInt(userId);
-            const net = balances[id] - fairShare; // Positivo = Le Deben. Negativo = El debe.
+            const net = balances[id] - fairShare; 
             const userObj = groupUsers.find(u => u.id === id);
             
             if (id === currentUser.id) {
@@ -266,7 +286,7 @@ const GroupAPI = {
             else if (net < -0.01) debtors.push({ id, name: userObj.nombre, amount: Math.abs(net) });
         }
         
-        // Algoritmo Greedy de Simplificación de Deudas
+        // Algoritmo de Simplificación
         creditors.sort((a, b) => b.amount - a.amount);
         debtors.sort((a, b) => b.amount - a.amount);
         
@@ -275,29 +295,21 @@ const GroupAPI = {
         while (i < debtors.length && j < creditors.length) {
             let debtor = debtors[i];
             let creditor = creditors[j];
-            
             let amount = Math.min(debtor.amount, creditor.amount);
-            
             if (amount > 0.01) {
-                debts.push({
-                    deudorNombre: debtor.name,
-                    acreedorNombre: creditor.name,
-                    monto: amount,
-                    isMiDeuda: (debtor.id === currentUser.id) || (creditor.id === currentUser.id)
-                });
+                debts.push({ deudorNombre: debtor.name, acreedorNombre: creditor.name, monto: amount });
             }
-            
             debtor.amount -= amount;
             creditor.amount -= amount;
-            
             if (debtor.amount < 0.01) i++;
             if (creditor.amount < 0.01) j++;
         }
         
         return {
+            totalGeneral: totalMensualGeneral,
             totalGrupal,
             miAporte,
-            balancePesos: isDeudor ? Math.abs(miEstado) : miEstado, // Enviar en absoluto si es deuda para UI
+            balancePesos: isDeudor ? Math.abs(miEstado) : miEstado,
             isDeudor,
             balanceStatus,
             debts

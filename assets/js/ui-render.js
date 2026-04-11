@@ -350,7 +350,20 @@ const UI = {
             const balance = await GroupAPI.getBalance();
             if (!balance) return;
             
-            document.getElementById('stat-total-grupal').textContent = Format.currency(balance.totalGrupal);
+            const totalGrupalEl = document.getElementById('stat-total-grupal');
+            const totalGrupalLabel = totalGrupalEl.nextElementSibling;
+
+            // Inteligencia de Pestañas: 
+            // Si quieres ver todo o lo tuyo, la primera tarjeta suma TODO el mes. 
+            // Si solo ves lo grupal, se ciñe al fondo compartido.
+            if (this.currentFilter === 'INDIVIDUAL' || this.currentFilter === 'ALL') {
+                totalGrupalEl.textContent = Format.currency(balance.totalGeneral);
+                totalGrupalLabel.textContent = this.currentFilter === 'INDIVIDUAL' ? 'Tu Gasto del Mes' : 'Gasto Acumulado (Total)';
+            } else {
+                totalGrupalEl.textContent = Format.currency(balance.totalGrupal);
+                totalGrupalLabel.textContent = 'Total Grupal Unificado';
+            }
+            
             document.getElementById('stat-tu-aporte').textContent = Format.currency(balance.miAporte);
             
             const cardBalance = document.getElementById('card-tu-balance');
@@ -490,14 +503,22 @@ const UI = {
         submitBtn.disabled = true;
 
         try {
+            const user = Auth.getUser();
+            const tipo = document.getElementById('tipo').value;
+
+            // BLOQUEO: No dejar crear compartidos si no hay grupo
+            if (tipo === 'UNIFICADO' && (!user.inviteCode || user.inviteCode === '---')) {
+                throw { status: 400, message: "❌ No puedes crear un gasto 'Unificado' si no tienes un grupo activo. Únete a una casa arriba a la derecha." };
+            }
+
             const data = {
                 descripcion: document.getElementById('descripcion').value.trim(),
                 monto:       parseFloat(document.getElementById('monto').value),
                 fecha:       document.getElementById('fecha').value,
                 categoria:   document.getElementById('categoria').value,
-                tipo:        document.getElementById('tipo').value,
+                tipo:        tipo,
                 pagadoPorId: parseInt(document.getElementById('pagado-por').value),
-                grupoId:     1, // Grupo por defecto para desarrollo
+                grupoId:     1, 
             };
 
             if (this.currentEditId) {
@@ -725,6 +746,39 @@ const UI = {
             }
         };
         reader.readAsText(file);
+    },
+
+    // ===========================
+    // GESTIÓN DE CÓDIGO DE GRUPO
+    // ===========================
+    async handleInviteCodeActions() {
+        const user = Auth.getUser();
+        const hasGroup = user.inviteCode && user.inviteCode !== '---';
+        
+        let message = `🏠 Estatus: ${hasGroup ? 'En casa (' + user.inviteCode + ')' : 'Sin hogar activo'}\n\n`;
+        message += "¿Qué deseas hacer?\n";
+        message += "[G] - Generar un código para una casa nueva\n";
+        message += "[U] - Unirme a una casa con código\n";
+        if (hasGroup) message += "[C] - Copiar mi código para invitar amigos\n";
+
+        const action = (prompt(message, '') || '').toUpperCase();
+
+        if (action === 'G') {
+            const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            await AuthAPI.updateProfile(user.id, { inviteCode: newCode });
+            Toast.success(`¡Casa nueva creada! Código: ${newCode} 🏠`);
+            setTimeout(() => window.location.reload(), 1000);
+        } else if (action === 'U') {
+            const invite = prompt("Pega el código de invitación de tus compañeros:", "");
+            if (invite && invite.trim().length >= 4) {
+                await AuthAPI.updateProfile(user.id, { inviteCode: invite.trim().toUpperCase() });
+                Toast.success(`¡Te has unido con éxito! 👥`);
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        } else if (action === 'C' && hasGroup) {
+            navigator.clipboard.writeText(user.inviteCode);
+            Toast.success('¡Código copiado al portapapeles! 📋');
+        }
     }
 };
 
