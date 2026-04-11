@@ -35,14 +35,11 @@ const Auth = {
             loginContainer.style.display = 'none';
             dashboardContainer.style.display = 'block';
             
-            // Mostrar nombre del usuario logueado y código de invitación
+            const userNameDisplays = document.querySelectorAll('.user-name, #user-name');
             userNameDisplays.forEach(el => el.textContent = user.nombre);
             
-            const groupNameDisplay = document.getElementById('group-name-display');
-            if (groupNameDisplay) groupNameDisplay.textContent = user.homeGroupNombre;
-            
             const inviteCodeDisplay = document.getElementById('invite-code-display');
-            if (inviteCodeDisplay) inviteCodeDisplay.textContent = user.inviteCode;
+            if (inviteCodeDisplay) inviteCodeDisplay.textContent = user.invite_code || '---';
 
             // Iniciar UI
             UI.init();
@@ -61,8 +58,8 @@ const Auth = {
 
             const userParams = await AuthAPI.login({ email, password });
             
-            Auth.setUser(userParams);
-            Toast.success(`¡Hola de nuevo, ${userParams.nombre}!`);
+            Auth.setUser(userParams.user); // Extraer el objeto user
+            Toast.success(`¡Hola de nuevo, ${userParams.user.nombre}!`);
             Auth.requireAuth();
 
         } catch (error) {
@@ -90,9 +87,9 @@ const Auth = {
             
             const userParams = await AuthAPI.register(payload);
             
-            Auth.setUser(userParams);
-            Toast.success(`¡Cuenta creada con éxito! Bienvenido al grupo.`);
-            Auth.requireAuth();
+            Toast.success(`¡Cuenta creada! Revisa tu email para confirmar y luego inicia sesión.`);
+            // No hacemos login automático para permitir la confirmación de email si está activa
+            this.toggleForms();
 
         } catch (error) {
             if (error.fieldErrors) {

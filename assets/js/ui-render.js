@@ -256,8 +256,8 @@ const ExpenseTable = {
                 </td>
                 <td>
                     <div class="user-chip">
-                        <span class="user-chip__avatar">${expense.pagadoPorNombre?.charAt(0) || '?'}</span>
-                        <span class="user-chip__name">${expense.pagadoPorNombre || '—'}</span>
+                        <span class="user-chip__avatar">${expense.pagado_por_nombre?.charAt(0) || '?'}</span>
+                        <span class="user-chip__name">${expense.pagado_por_nombre || '—'}</span>
                     </div>
                 </td>
                 <td class="date-cell">${Format.date(expense.fecha)}</td>

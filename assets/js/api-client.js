@@ -1,10 +1,14 @@
 /**
- * api-client.js — RentShare Frontend (Modo LocalStorage / GitHub Pages)
+ * api-client.js — RentShare Frontend (Modo Cloud: SUPABASE)
  * 
- * ¡Modo Serverless Activado! Todo el backend de Java ha sido sustituido por 
- * una base de datos local en el navegador del usuario usando LocalStorage.
- * Esto hace la app 100% estática y funcional gratis para siempre en Github Pages.
+ * ¡Modo NUBE Activado! Los datos ahora se sincronizan en tiempo real
+ * con tu proyecto en Supabase.
  */
+
+const SUPABASE_URL = "https://fcwbsbykxvsxwhkjvezg.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjd2JzYnlreHZzeHdoa2p2ZXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzQxNzQsImV4cCI6MjA5MTUxMDE3NH0.8XikD3kBqX0aSvInlOauB82B47DIjnoCtpM94BXJNqM";
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 class ApiError extends Error {
     constructor(message, statusCode, fieldErrors = null) {
@@ -15,344 +19,234 @@ class ApiError extends Error {
     }
 }
 
-// Simulador de Base de Datos
-const LocalDB = {
-    load: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
-    save: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
-    
-    get users() { return this.load('rentshare_users'); },
-    set users(data) { this.save('rentshare_users', data); },
-    
-    get expenses() { return this.load('rentshare_expenses'); },
-    set expenses(data) { this.save('rentshare_expenses', data); },
-
-    nuke: () => {
-        localStorage.clear();
-        sessionStorage.clear();
-        location.reload();
-    },
-
-    getCurrentUser: () => JSON.parse(sessionStorage.getItem('rentshare_user'))
+// Helper para manejar usuarios en sesión
+const Auth = {
+    getUser: () => JSON.parse(sessionStorage.getItem('rentshare_user')),
+    setUser: (user) => sessionStorage.setItem('rentshare_user', JSON.stringify(user)),
+    clear: () => sessionStorage.clear()
 };
 
-// Generador de Códigos
-const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
-
-// Simulador de retraso de red (UX suave)
-const delay = (ms = 300) => new Promise(res => setTimeout(res, ms));
-
-
 // ===========================
-// Servicios Auth
+// Servicios Auth (Supabase)
 // ===========================
 const AuthAPI = {
-    login: async (credentials) => {
-        await delay();
-        const users = LocalDB.users;
-        const user = users.find(u => u.email === credentials.email && u.password === credentials.password);
+    async login(credentials) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password
+        });
         
-        if (!user) throw new ApiError('Credenciales incorrectas', 400);
+        if (error) throw new ApiError('Usuario o contraseña incorrectos', 400);
 
-        // Ocultar contraseña en el token
-        const tokenUser = { ...user };
-        delete tokenUser.password;
-        return { user: tokenUser, token: "local-jwt-token" };
+        // Obtener el perfil extendido
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+        const fullUser = { ...data.user, ...profile };
+        Auth.setUser(fullUser);
+        return { user: fullUser };
     },
 
-    register: async (userData) => {
-        await delay();
-        const users = LocalDB.users;
-        if (users.find(u => u.email === userData.email)) {
-            throw new ApiError('❌ El correo electrónico ya está registrado', 400);
-        }
-
-        const newUser = {
-            id: Date.now(),
-            nombre: userData.nombre,
+    async register(userData) {
+        const { data, error } = await supabase.auth.signUp({
             email: userData.email,
             password: userData.password,
-            role: userData.role || 'MEMBER',
-            inviteCode: userData.inviteCode || generateCode()
-        };
+            options: {
+                data: {
+                    nombre: userData.nombre
+                }
+            }
+        });
 
-        if (!userData.inviteCode) {
-            newUser.role = 'ADMIN'; // Creadores de grupos nuevos siempre son admin
-        }
-
-        users.push(newUser);
-        LocalDB.users = users;
-
-        const tokenUser = { ...newUser };
-        delete tokenUser.password;
-        return { user: tokenUser, token: "local-jwt-token" };
+        if (error) throw new ApiError(error.message, 400);
+        return { user: data.user };
     },
 
-    updateProfile: async (id, data) => {
-        await delay();
-        const users = LocalDB.users;
-        // Castear a Number para evitar fallos de === entre "1" o 1
-        let index = users.findIndex(u => Number(u.id) === Number(id));
-        
-        let sessionUser = LocalDB.getCurrentUser();
-        
-        if (index === -1) {
-            // Autenticación de Migración: 
-            // Si el usuario viene del antiguo Backend Java y su SessionStorage sigue viva, 
-            // no existe en LocalDB.users aún. Lo inyectamos de maravilla.
-            sessionUser = { ...sessionUser, ...data };
-            users.push(sessionUser);
-            index = users.length - 1;
-        } else {
-            users[index] = { ...users[index], ...data };
-            sessionUser = users[index];
-        }
-        
-        LocalDB.users = users;
+    async updateProfile(id, updateData) {
+        const { data, error } = await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
 
-        const tokenUser = { ...sessionUser };
-        delete tokenUser.password;
-        sessionStorage.setItem('rentshare_user', JSON.stringify(tokenUser));
-        return tokenUser;
+        if (error) throw new ApiError('Error al actualizar perfil', 400);
+        
+        const currentUser = Auth.getUser();
+        Auth.setUser({ ...currentUser, ...data });
+        return data;
     },
 
-    async deleteAccount(id) {
-        // Esta función queda obsoleta por 'Reiniciar App' que es más efectiva
-        return this.nuke();
-    },
-
-    nuke() {
+    async nuke() {
+        // En modo Nube, el nuke borra el LocalStorage de soporte, pero no la cuenta de Supabase 
+        // (Por seguridad)
         localStorage.clear();
         sessionStorage.clear();
         location.reload();
+    }
+};
+
+// ===========================
+// Servicios de Gastos (Supabase)
+// ===========================
+const ExpenseAPI = {
+    async getAll() {
+        const user = Auth.getUser();
+        if (!user) throw new ApiError('No autorizado', 401);
+
+        const { data, error } = await supabase
+            .from('expenses')
+            .select('*')
+            .eq('invite_code', user.invite_code)
+            .order('fecha', { ascending: false });
+
+        if (error) throw new ApiError('Error al cargar gastos', 400);
+        return data;
+    },
+
+    async create(expenseData) {
+        const user = Auth.getUser();
+        const { data, error } = await supabase
+            .from('expenses')
+            .insert([{
+                ...expenseData,
+                pagado_por_id: user.id,
+                pagado_por_nombre: user.nombre,
+                invite_code: user.invite_code
+            }])
+            .select()
+            .single();
+
+        if (error) throw new ApiError(error.message, 400);
+        return data;
+    },
+
+    async update(id, expenseData) {
+        const { data, error } = await supabase
+            .from('expenses')
+            .update(expenseData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw new ApiError('Error al actualizar gasto', 400);
+        return data;
+    },
+
+    async delete(id) {
+        const { error } = await supabase
+            .from('expenses')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw new ApiError('Error al borrar gasto', 400);
         return true;
     }
 };
 
-// =============================================
-// PRÓXIMO PASO: CONEXIÓN A LA NUBE (SUPABASE)
-// Para activar el login desde cualquier PC,
-// pega tus llaves aquí abajo cuando las tengas:
-// =============================================
-const CLOUD_CONFIG = {
-    url: "", 
-    key: ""  
-};
-
 // ===========================
-// Servicios de Gastos
-// ===========================
-const ExpenseAPI = {
-    async getAll() {
-        await delay();
-        const me = LocalDB.getCurrentUser();
-        if (!me) throw new ApiError('No autorizado', 401);
-
-        const all = LocalDB.expenses;
-        // Solo retornar gastos del mismo Code Group y ordenados por fecha descendente
-        return all
-            .filter(e => e.inviteCode === me.inviteCode)
-            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    },
-
-    async getById(id) {
-        await delay();
-        const expense = LocalDB.expenses.find(e => e.id === Number(id));
-        if (!expense) throw new ApiError('Gasto no encontrado', 404);
-        return expense;
-    },
-
-    async create(data) {
-        await delay();
-        const me = LocalDB.getCurrentUser();
-        
-        if (data.monto <= 0) {
-            throw new ApiError('Datos inválidos', 400, { monto: "El monto no puede ser negativo o cero" });
-        }
-
-        const expense = {
-            id: Date.now(),
-            ...data,
-            monto: parseFloat(data.monto),
-            pagadoPorId: me.id,
-            pagadoPorNombre: me.nombre,
-            inviteCode: me.inviteCode
-        };
-
-        const list = LocalDB.expenses;
-        list.push(expense);
-        LocalDB.expenses = list;
-        return expense;
-    },
-
-    async update(id, data) {
-        await delay();
-        const me = LocalDB.getCurrentUser();
-        const list = LocalDB.expenses;
-        const index = list.findIndex(e => e.id === Number(id));
-        
-        if (index === -1) throw new ApiError('Gasto no encontrado', 404);
-        
-        const oldExpense = list[index];
-
-        // Fix de seguridad de asignación de IDs: Preserve true Ownership origin
-        list[index] = { 
-            ...oldExpense, 
-            ...data, 
-            monto: parseFloat(data.monto), 
-            pagadoPorId: oldExpense.pagadoPorId, // Nunca sobrescribir con parseInt desbordados de la UI
-            pagadoPorNombre: oldExpense.pagadoPorNombre
-        };
-        LocalDB.expenses = list;
-        return list[index];
-    },
-
-    async delete(id) {
-        await delay();
-        const me = LocalDB.getCurrentUser();
-        const list = LocalDB.expenses;
-        const index = list.findIndex(e => e.id === Number(id));
-        
-        if (index === -1) throw new ApiError('Gasto no encontrado', 404);
-        
-        const oldExpense = list[index];
-
-        list.splice(index, 1);
-        LocalDB.expenses = list;
-        return null;
-    }
-};
-
-// ===========================
-// Simulación Algoritmo de Conciliación y Deudas (Backend Ported a JS)
+// Servicios de Balance (Cloud logic)
 // ===========================
 const GroupAPI = {
     async getBalance() {
-        await delay();
-        const currentUser = LocalDB.getCurrentUser();
-        const groupCode = currentUser.inviteCode;
-        
-        if (!groupCode) return { totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Grupo', debts: [] };
-        
+        const user = Auth.getUser();
+        if (!user) return null;
+
         const now = new Date();
-        const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
-        const currentYearStr = String(now.getFullYear());
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
 
-        // 1. GASTOS TOTALES (Detección inteligente de mes/año sin importar el formato ISO o DD/MM)
-        const allMonthlyExpenses = LocalDB.expenses.filter(e => {
-            if (!e.fecha) return false;
-            // Acepta 2026-04-11 (ISO) o 11/04/2026 (Latino)
-            const matchesMonth = e.fecha.includes(`-${currentMonthStr}-`) || e.fecha.includes(`/${currentMonthStr}/`);
-            const matchesYear  = e.fecha.includes(currentYearStr);
-            return matchesMonth && matchesYear;
-        });
-        
-        const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => {
-            const val = parseFloat(String(e.monto).replace(/\./g, '').replace(',', '.'));
-            return sum + (isNaN(val) ? 0 : val);
-        }, 0);
+        // 1. GASTO ACUMULADO TOTAL (Mes actual)
+        // Usamos una consulta filtrada por fecha
+        const { data: monthExpenses, error } = await supabase
+            .from('expenses')
+            .select('*')
+            .gte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-01`)
+            .lte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-31`);
 
-        // Si no hay código de grupo, solo retornamos el total general
-        if (!groupCode || groupCode === '---') {
+        if (error || !monthExpenses) return null;
+
+        const totalGeneral = monthExpenses.reduce((sum, e) => sum + Number(e.monto || 0), 0);
+
+        // 2. LÓGICA GRUPAL
+        if (!user.invite_code || user.invite_code === '---') {
             return {
-                totalGeneral: totalMensualGeneral,
+                totalGeneral,
                 totalGrupal: 0,
                 miAporte: 0,
                 balancePesos: 0,
                 isDeudor: false,
-                balanceStatus: 'Sin Grupo Activo',
+                balanceStatus: 'Sin Casa Activa',
                 debts: []
             };
         }
 
-        // 2. GASTOS COMPARTIDOS (Solo Unificados para balances)
-        const groupExpenses = LocalDB.expenses.filter(e => {
-            const expDate = new Date(e.fecha);
-            return e.inviteCode === groupCode && 
-                   e.tipo === 'UNIFICADO' &&
-                   expDate.getMonth() === currentMonth &&
-                   expDate.getFullYear() === currentYear;
-        });
+        // Obtener miembros del grupo
+        const { data: members } = await supabase
+            .from('profiles')
+            .select('id, nombre')
+            .eq('invite_code', user.invite_code);
 
-        const groupUsers = LocalDB.users.filter(u => u.inviteCode === groupCode);
+        const groupExpenses = monthExpenses.filter(e => e.invite_code === user.invite_code && e.tipo === 'UNIFICADO');
         
         let totalGrupal = 0;
         let miAporte = 0;
-        
-        // Inicializar balances de usuarios
-        const balances = {}; 
-        groupUsers.forEach(u => balances[u.id] = 0);
-        
+        const balances = {};
+        members.forEach(m => balances[m.id] = 0);
+
         groupExpenses.forEach(exp => {
-            const amount = parseFloat(exp.monto);
+            const amount = Number(exp.monto);
             totalGrupal += amount;
-            if (exp.pagadoPorId === currentUser.id) miAporte += amount;
-            
-            if (balances[exp.pagadoPorId] !== undefined) {
-                balances[exp.pagadoPorId] += amount;
+            if (exp.pagado_por_id === user.id) miAporte += amount;
+            if (balances[exp.pagado_por_id] !== undefined) {
+                balances[exp.pagado_por_id] += amount;
             }
         });
+
+        const numMembers = members.length || 1;
+        const fairShare = totalGrupal / numMembers;
         
-        const numMembers = groupUsers.length || 1;
-        const fairShare = totalGrupal / numMembers; 
-        
-        let miEstado = 0;
-        let balanceStatus = "Vas al día";
-        let isDeudor = false;
-        
-        const creditors = []; 
+        let miEstado = balances[user.id] - fairShare;
+        let isDeudor = miEstado < -1;
+
+        // Cálculos de deudas entre miembros (Algoritmo Greedy)
+        const creditors = [];
         const debtors = [];
-        
-        for (const userId of Object.keys(balances)) {
-            const id = parseInt(userId);
-            const net = balances[id] - fairShare; 
-            const userObj = groupUsers.find(u => u.id === id);
-            
-            if (id === currentUser.id) {
-                miEstado = net;
-                if (net <= -1) {
-                    balanceStatus = "Debes dinero";
-                    isDeudor = true;
-                } else if (net >= 1) {
-                    balanceStatus = "Te deben dinero";
-                }
-            }
-            
-            if (net > 0.01) creditors.push({ id, name: userObj.nombre, amount: net });
-            else if (net < -0.01) debtors.push({ id, name: userObj.nombre, amount: Math.abs(net) });
-        }
-        
-        // Algoritmo de Simplificación
-        creditors.sort((a, b) => b.amount - a.amount);
-        debtors.sort((a, b) => b.amount - a.amount);
-        
+        members.forEach(m => {
+            const net = balances[m.id] - fairShare;
+            if (net > 1) creditors.push({ name: m.nombre, amount: net });
+            else if (net < -1) debtors.push({ name: m.nombre, amount: Math.abs(net) });
+        });
+
         const debts = [];
         let i = 0, j = 0;
         while (i < debtors.length && j < creditors.length) {
-            let debtor = debtors[i];
-            let creditor = creditors[j];
-            let amount = Math.min(debtor.amount, creditor.amount);
-            if (amount > 0.01) {
-                debts.push({ deudorNombre: debtor.name, acreedorNombre: creditor.name, monto: amount });
-            }
-            debtor.amount -= amount;
-            creditor.amount -= amount;
-            if (debtor.amount < 0.01) i++;
-            if (creditor.amount < 0.01) j++;
+            let amount = Math.min(debtors[i].amount, creditors[j].amount);
+            debts.push({ deudorNombre: debtors[i].name, acreedorNombre: creditors[j].name, monto: amount });
+            debtors[i].amount -= amount;
+            creditors[j].amount -= amount;
+            if (debtors[i].amount <= 1) i++;
+            if (creditors[j].amount <= 1) j++;
         }
-        
+
         return {
-            totalGeneral: totalMensualGeneral,
+            totalGeneral,
             totalGrupal,
             miAporte,
-            balancePesos: isDeudor ? Math.abs(miEstado) : miEstado,
+            balancePesos: Math.abs(miEstado),
             isDeudor,
-            balanceStatus,
+            balanceStatus: isDeudor ? 'Debes dinero' : (miEstado > 1 ? 'Te deben dinero' : 'Vas al día'),
             debts
         };
     }
 };
 
+// Exportar a global para compatibilidad con código existente
 window.AuthAPI    = AuthAPI;
-window.GroupAPI   = GroupAPI;
 window.ExpenseAPI = ExpenseAPI;
+window.GroupAPI   = GroupAPI;
 window.ApiError   = ApiError;
+window.LocalDB    = { nuke: AuthAPI.nuke }; // Mock de LocalDB para compatibilidad
