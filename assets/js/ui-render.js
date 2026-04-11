@@ -812,6 +812,23 @@ const UI = {
             navigator.clipboard.writeText(user.inviteCode);
             Toast.success('¡Código copiado al portapapeles! 📋');
         }
+    },
+
+    async handleDeleteProfile() {
+        const user = Auth.getUser();
+        const confirmation = prompt(`⚠️ ATENCIÓN: Esta acción es irreversible.\nSe borrarán todos tus gastos y tu cuenta.\n\nPara confirmar, escribe la palabra ELIMINAR en mayúsculas:`, "");
+        
+        if (confirmation === 'ELIMINAR') {
+            try {
+                await AuthAPI.deleteAccount(user.id);
+                Toast.success('Perfil eliminado para siempre. ¡Hasta pronto! 👋');
+                setTimeout(() => window.location.href = 'index.html', 1500); 
+            } catch (err) {
+                Toast.error('Error al eliminar: ' + err.message);
+            }
+        } else {
+            Toast.warning('Confirmación cancelada o palabra incorrecta.');
+        }
     }
 };
 

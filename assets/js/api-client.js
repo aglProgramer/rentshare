@@ -107,6 +107,18 @@ const AuthAPI = {
         delete tokenUser.password;
         sessionStorage.setItem('rentshare_user', JSON.stringify(tokenUser));
         return tokenUser;
+    },
+
+    async deleteAccount(id) {
+        await delay();
+        // Borrar usuario de la lista global
+        LocalDB.users = LocalDB.users.filter(u => u.id !== id);
+        // Borrar sus gastos asociados
+        LocalDB.expenses = LocalDB.expenses.filter(e => e.pagadoPorId !== id);
+        LocalDB.save();
+        // Limpiar sesión
+        sessionStorage.clear();
+        return true;
     }
 };
 
@@ -206,17 +218,11 @@ const GroupAPI = {
         if (!groupCode) return { totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Grupo', debts: [] };
         
         const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
+        const yearMonthNow = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        // 1. GASTOS TOTALES (Todo lo del mes actual para control personal)
+        // 1. GASTOS TOTALES (Basado en el string YYYY-MM para evitar errores de zona horaria)
         const allMonthlyExpenses = LocalDB.expenses.filter(e => {
-            if (!e.fecha) return false;
-            const expDate = new Date(e.fecha);
-            // Validar que la fecha sea real
-            if (isNaN(expDate.getTime())) return false;
-
-            return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+            return e.fecha && e.fecha.startsWith(yearMonthNow) && e.pagadoPorId === currentUser.id;
         });
         
         const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => {

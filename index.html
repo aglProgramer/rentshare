@@ -389,6 +389,15 @@
                     </div>
                     <p style="font-size: 0.7rem; color: #888; margin-top: 8px;">Guarda una copia de tus gastos y usuarios para restaurarlos en otro navegador.</p>
                 </div>
+
+                <!-- Danger Zone -->
+                <div style="border-top: 1px dashed var(--danger); padding-top: 15px; margin-top: 20px;">
+                    <label style="color: var(--danger); font-weight: bold; font-size: 0.9rem;">☣️ Zona Peligrosa</label>
+                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 10px;">Esta acción borrará todos tus datos personales y gastos registrados.</p>
+                    <button type="button" class="btn btn--secondary" style="background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid var(--danger); width: 100%; justify-content: center;" onclick="UI.handleDeleteProfile()">
+                        Eliminar Perfil por Completo
+                    </button>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -449,9 +458,9 @@
 <!-- =============================================
      SCRIPTS (orden importante)
      ============================================= -->
-<script src="assets/js/api-client.js?v=11"></script>
-<script src="assets/js/auth.js?v=11"></script>
-<script src="assets/js/ui-render.js?v=11"></script>
+<script src="assets/js/api-client.js?v=12"></script>
+<script src="assets/js/auth.js?v=12"></script>
+<script src="assets/js/ui-render.js?v=12"></script>
 <!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
 
 </body>
