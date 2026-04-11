@@ -238,19 +238,19 @@ const UI = {
             if (!balance) return;
             
             document.getElementById('stat-total-grupal').textContent = Format.currency(balance.totalGrupal);
-            document.getElementById('stat-tu-aporte').textContent = Format.currency(balance.tuAporte);
+            document.getElementById('stat-tu-aporte').textContent = Format.currency(balance.miAporte);
             
             const cardBalance = document.getElementById('card-tu-balance');
             const statBalance = document.getElementById('stat-tu-balance');
             const labelBalance = document.getElementById('label-tu-balance');
             
-            statBalance.textContent = Format.currency(Math.abs(balance.tuBalance));
+            statBalance.textContent = Format.currency(Math.abs(balance.balancePesos));
             
-            if (balance.tuBalance > 0) {
+            if (balance.balancePesos > 0 && !balance.isDeudor) {
                 cardBalance.style.borderColor = 'var(--success)';
                 statBalance.className = 'stat-card__value text-success';
                 labelBalance.textContent = '🌟 Te deben dinero';
-            } else if (balance.tuBalance < 0) {
+            } else if (balance.isDeudor) {
                 cardBalance.style.borderColor = 'var(--danger)';
                 statBalance.className = 'stat-card__value text-danger';
                 labelBalance.textContent = '⚠️ Debes dinero';
@@ -264,11 +264,11 @@ const UI = {
             const settlementSection = document.getElementById('settlement-section');
             const deudasList = document.getElementById('deudas-list');
             
-            if (balance.detallesDeuda && balance.detallesDeuda.length > 0) {
+            if (balance.debts && balance.debts.length > 0) {
                 settlementSection.style.display = 'block';
-                deudasList.innerHTML = balance.detallesDeuda.map(d => 
+                deudasList.innerHTML = balance.debts.map(d => 
                     `<li style="padding:12px; background:var(--bg-900); border-radius:8px; border-left: 4px solid var(--accent); margin-bottom: 8px;">
-                     👤 <strong>${d.deudor}</strong> debe pagarle a <strong>${d.acreedor}</strong>: <span class="text-accent fw-bold" style="font-size: 1.1em">${Format.currency(d.monto)}</span>
+                     👤 <strong>${d.deudorNombre}</strong> debe pagarle a <strong>${d.acreedorNombre}</strong>: <span class="text-accent fw-bold" style="font-size: 1.1em">${Format.currency(d.monto)}</span>
                      </li>`
                 ).join('');
             } else {

@@ -205,7 +205,8 @@ const GroupAPI = {
         
         if (!groupCode) return { totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Grupo', debts: [] };
 
-        const groupExpenses = LocalDB.expenses.filter(e => e.inviteCode === groupCode);
+        // SOLAMENTE los gastos UNIFICADOS aportan a la deuda del grupo
+        const groupExpenses = LocalDB.expenses.filter(e => e.inviteCode === groupCode && e.tipo === 'UNIFICADO');
         const groupUsers = LocalDB.users.filter(u => u.inviteCode === groupCode);
         
         let totalGrupal = 0;
