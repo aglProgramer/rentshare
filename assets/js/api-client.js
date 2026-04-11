@@ -33,11 +33,25 @@ const AuthAPI = {
         
         if (error) throw new ApiError('Usuario o contraseña incorrectos', 400);
 
-        const { data: profile } = await sbClient
+        // Intentar obtener perfil (Con fallback si el trigger de Supabase falla)
+        let { data: profile } = await sbClient
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
-            .single();
+            .maybeSingle();
+
+        if (!profile) {
+            const { data: nProfile } = await sbClient
+                .from('profiles')
+                .insert([{ 
+                    id: data.user.id, 
+                    nombre: data.user.user_metadata?.nombre || 'Nuevo Usuario',
+                    invite_code: '---' 
+                }])
+                .select()
+                .single();
+            profile = nProfile;
+        }
 
         const fullUser = { ...data.user, ...profile };
         SessionManager.setUser(fullUser);
@@ -142,12 +156,16 @@ const GroupAPI = {
         const now = new Date();
         const currentMonth = now.getMonth() + 1;
         const currentYear = now.getFullYear();
+        
+        // Obtener el último día real del mes (30, 31, 28...)
+        const lastDay = new Date(currentYear, currentMonth, 0).getDate();
 
+        // 1. GASTO ACUMULADO TOTAL (Mes actual)
         const { data: monthExpenses, error } = await sbClient
             .from('expenses')
             .select('*')
             .gte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-01`)
-            .lte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-31`);
+            .lte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-${lastDay}`);
 
         if (error || !monthExpenses) return null;
 

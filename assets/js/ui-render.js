@@ -697,7 +697,9 @@ const UI = {
             this.renderUserInfo();
             
             // Refrescar página para empujar recálculo completo del grupo
-            document.getElementById('invite-code-display').textContent = data.inviteCode;
+            const inviteDisp = document.getElementById('invite-code-display');
+            if (inviteDisp) inviteDisp.textContent = data.inviteCode;
+            
             await this.loadExpenses();
             await this.loadBalance();
         } catch(e) {
