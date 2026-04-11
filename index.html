@@ -126,39 +126,48 @@
             </button>
         </div>
 
-        <!-- Stats Cards (Deuda y Balances) -->
-        <section class="stats-grid" aria-label="Resumen de gastos">
-            <div class="stat-card">
-                <div class="stat-card__icon" aria-hidden="true">📊</div>
-                <div class="stat-card__value" id="stat-total-grupal">—</div>
-                <div class="stat-card__label">Total Grupal Unificado</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__icon" aria-hidden="true">💰</div>
-                <div class="stat-card__value text-success" id="stat-tu-aporte">—</div>
-                <div class="stat-card__label">Tu Aporte al Grupo</div>
-            </div>
-            <div class="stat-card" id="card-tu-balance">
-                <div class="stat-card__icon" aria-hidden="true">⚖️</div>
-                <div class="stat-card__value" id="stat-tu-balance">—</div>
-                <div class="stat-card__label" id="label-tu-balance">Cálculo de Deuda...</div>
-            </div>
-        </section>
+        <!-- =============================================
+             NUEVO DASHBOARD: RESUMEN DEL MES
+             ============================================= -->
+        <section class="dashboard-hero" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            
+            <!-- Columna 1: Info Numérica -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <h2 style="margin-bottom: -0.5rem; font-size: 1.2rem; color: var(--text-400);">📅 Resumen de este mes</h2>
+                
+                <div class="stats-grid" style="display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%;" aria-label="Resumen de gastos">
+                    <div class="stat-card">
+                        <div class="stat-card__icon" aria-hidden="true">📊</div>
+                        <div class="stat-card__value" id="stat-total-grupal">$ 0</div>
+                        <div class="stat-card__label">Total Grupal del Mes</div>
+                    </div>
+                    
+                    <div class="stat-card" id="card-tu-balance">
+                        <div class="stat-card__icon" aria-hidden="true">⚖️</div>
+                        <div class="stat-card__value" id="stat-tu-balance">$ 0</div>
+                        <div class="stat-card__label" id="label-tu-balance">Cálculo de Deuda...</div>
+                    </div>
 
-        <!-- Visual Analytics -->
-        <section id="analytics-section" style="margin-bottom: 2rem; display:none;">
-            <div class="table-header">
-                <h2 class="table-header__title">📊 Distribución de Gastos</h2>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--bg-800) 0%, var(--bg-900) 100%);">
+                        <div class="stat-card__label" style="margin-top: 5px;">💰 Has aportado: <strong id="stat-tu-aporte" class="text-success">$ 0</strong></div>
+                    </div>
+                </div>
             </div>
-            <div style="background: var(--bg-800); border-radius: 12px; padding: 2rem; display: flex; justify-content: center; align-items: center; border: 1px solid var(--bg-700);">
-                <div style="max-width: 300px; width: 100%;">
+
+            <!-- Columna 2: Gráfica de Análisis -->
+            <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; align-self: flex-start;">🍕 Gastos por Categoría</h3>
+                <div style="width: 220px; height: 220px;">
                     <canvas id="categoryChart"></canvas>
+                </div>
+                <div id="no-chart-data" style="position: absolute; text-align:center; color: var(--text-400); font-size: 0.9rem; display:none;">
+                    Sin gastos compartidos<br>para graficar.
                 </div>
             </div>
         </section>
 
         <!-- Settlement Section -->
-        <section id="settlement-section" style="margin-bottom: 2rem; background: var(--bg-800); border-radius:12px; padding: 1.5rem; border: 1px dashed var(--accent); display:none;">
+        <section id="settlement-section" style="margin-bottom: 3rem; background: rgba(99, 102, 241, 0.1); border-radius:16px; padding: 1.5rem; border: 1px dashed var(--primary); display:none;">
             <h3>🤝 Resumen de Liquidación</h3>
             <ul id="deudas-list" style="margin-top: 15px; list-style-type: none; padding-left:0; display:flex; flex-direction:column; gap:10px;"></ul>
         </section>

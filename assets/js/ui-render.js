@@ -15,14 +15,17 @@ const ChartManager = {
 
     update(expenses) {
         const ctx = document.getElementById('categoryChart');
+        const emptyMsg = document.getElementById('no-chart-data');
         if (!ctx) return;
 
-        const analyticsSection = document.getElementById('analytics-section');
         if (!expenses || expenses.length === 0) {
-            analyticsSection.style.display = 'none';
+            ctx.style.display = 'none';
+            if (emptyMsg) emptyMsg.style.display = 'block';
             return;
         }
-        analyticsSection.style.display = 'block';
+        
+        ctx.style.display = 'block';
+        if (emptyMsg) emptyMsg.style.display = 'none';
 
         // Agrupar por categoría
         const categories = {};
@@ -366,6 +369,13 @@ const UI = {
         const avatarEl = document.getElementById('user-avatar');
         const nameEl   = document.getElementById('user-name');
         
+        // Mostrar nombre del grupo si existe
+        const groupDisplay = document.getElementById('group-name-display');
+        const inviteCodeDisplay = document.getElementById('invite-code-display');
+        
+        if (groupDisplay) groupDisplay.textContent = user.inviteCode ? `Casa ${user.inviteCode}` : 'Sin Grupo';
+        if (inviteCodeDisplay) inviteCodeDisplay.textContent = user.inviteCode || '---';
+
         if (avatarEl) {
             if (user.avatar) {
                  avatarEl.innerHTML = `<img src="${user.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;

@@ -204,9 +204,20 @@ const GroupAPI = {
         const groupCode = currentUser.inviteCode;
         
         if (!groupCode) return { totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Grupo', debts: [] };
+        
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
 
-        // SOLAMENTE los gastos UNIFICADOS aportan a la deuda del grupo
-        const groupExpenses = LocalDB.expenses.filter(e => e.inviteCode === groupCode && e.tipo === 'UNIFICADO');
+        // SOLAMENTE los gastos UNIFICADOS del MES ACTUAL aportan a la deuda del grupo
+        const groupExpenses = LocalDB.expenses.filter(e => {
+            const expDate = new Date(e.fecha);
+            return e.inviteCode === groupCode && 
+                   e.tipo === 'UNIFICADO' &&
+                   expDate.getMonth() === currentMonth &&
+                   expDate.getFullYear() === currentYear;
+        });
+
         const groupUsers = LocalDB.users.filter(u => u.inviteCode === groupCode);
         
         let totalGrupal = 0;
