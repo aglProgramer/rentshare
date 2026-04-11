@@ -18,7 +18,7 @@ class ApiError extends Error {
     }
 }
 
-const Auth = {
+const SessionManager = {
     getUser: () => JSON.parse(sessionStorage.getItem('rentshare_user')),
     setUser: (user) => sessionStorage.setItem('rentshare_user', JSON.stringify(user)),
     clear: () => sessionStorage.clear()
@@ -40,7 +40,7 @@ const AuthAPI = {
             .single();
 
         const fullUser = { ...data.user, ...profile };
-        Auth.setUser(fullUser);
+        SessionManager.setUser(fullUser);
         return { user: fullUser };
     },
 
@@ -67,8 +67,8 @@ const AuthAPI = {
 
         if (error) throw new ApiError('Error al actualizar perfil', 400);
         
-        const currentUser = Auth.getUser();
-        Auth.setUser({ ...currentUser, ...data });
+        const currentUser = SessionManager.getUser();
+        SessionManager.setUser({ ...currentUser, ...data });
         return data;
     },
 
@@ -81,7 +81,7 @@ const AuthAPI = {
 
 const ExpenseAPI = {
     async getAll() {
-        const user = Auth.getUser();
+        const user = SessionManager.getUser();
         if (!user) throw new ApiError('No autorizado', 401);
 
         const { data, error } = await sbClient
@@ -95,7 +95,7 @@ const ExpenseAPI = {
     },
 
     async create(expenseData) {
-        const user = Auth.getUser();
+        const user = SessionManager.getUser();
         const { data, error } = await sbClient
             .from('expenses')
             .insert([{
@@ -136,7 +136,7 @@ const ExpenseAPI = {
 
 const GroupAPI = {
     async getBalance() {
-        const user = Auth.getUser();
+        const user = SessionManager.getUser();
         if (!user) return null;
 
         const now = new Date();
