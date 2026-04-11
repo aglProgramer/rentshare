@@ -517,9 +517,7 @@ const UI = {
                 monto:       parseFloat(document.getElementById('monto').value),
                 fecha:       document.getElementById('fecha').value,
                 categoria:   document.getElementById('categoria').value,
-                tipo:        tipo,
-                pagadoPorId: parseInt(document.getElementById('pagado-por').value),
-                grupoId:     1, 
+                tipo:        tipo
             };
 
             if (this.currentEditId) {
@@ -685,8 +683,8 @@ const UI = {
                 nombre: document.getElementById('profile-nombre').value.trim(),
                 celular: document.getElementById('profile-celular').value.trim(),
                 direccion: document.getElementById('profile-direccion').value.trim(),
-                inviteCode: document.getElementById('profile-inviteCode').value.trim(),
-                avatar: previewSrc.startsWith('data:image/svg') ? null : previewSrc
+                invite_code: document.getElementById('profile-inviteCode').value.trim(),
+                avatar_url: previewSrc.startsWith('data:image/svg') ? null : previewSrc
             };
             
             await AuthAPI.updateProfile(user.id, data);

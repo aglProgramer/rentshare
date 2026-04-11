@@ -66,7 +66,10 @@ const AuthAPI = {
             email: userData.email,
             password: userData.password,
             options: {
-                data: { nombre: userData.nombre }
+                data: { 
+                    nombre: userData.nombre,
+                    invite_code: userData.invite_code || '---'
+                }
             }
         });
 
@@ -85,8 +88,10 @@ const AuthAPI = {
         if (error) throw new ApiError('Error al actualizar perfil', 400);
         
         const currentUser = SessionManager.getUser();
-        SessionManager.setUser({ ...currentUser, ...data });
-        return data;
+        // Fusionar datos respetando los nombres de columna de la imagen (invite_code, avatar_url)
+        const updatedUser = { ...currentUser, ...data };
+        SessionManager.setUser(updatedUser);
+        return updatedUser;
     },
 
     async nuke() {
