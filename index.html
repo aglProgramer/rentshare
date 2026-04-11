@@ -92,6 +92,12 @@
                 <div class="user-avatar" id="user-avatar" aria-label="Avatar del usuario">U</div>
                 <span class="user-name" id="user-name">Usuario</span>
             </div>
+            <button class="btn btn--ghost btn--sm" style="margin-right:8px;"
+                    id="profile-btn"
+                    onclick="UI.toggleProfile()"
+                    aria-label="Mi Perfil">
+                ⚙️ Perfil
+            </button>
             <button class="btn btn--ghost btn--sm"
                     id="logout-btn"
                     onclick="Auth.logout()"
@@ -284,6 +290,66 @@
                         class="btn btn--accent">
                     💾 Guardar Gasto
                 </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- =============================================
+     MODAL: Mi Perfil (Avatar + Dirección + Celular)
+     ============================================= -->
+<div class="modal-overlay"
+     id="profile-modal"
+     role="dialog"
+     aria-modal="true"
+     onclick="if(event.target===this) UI.toggleProfile()">
+    <div class="modal" style="max-width: 450px;">
+        <div class="modal__header">
+            <h2 class="modal__title">⚙️ Configuración del Perfil</h2>
+            <button class="modal__close" onclick="UI.toggleProfile()">✕</button>
+        </div>
+
+        <form id="profile-form" novalidate>
+            <div class="form-grid">
+                <!-- Avatar Setup -->
+                <div class="form-group form-group--full" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                    <img id="profile-avatar-preview" src="" alt="Avatar" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); background: var(--bg-800);">
+                    <div style="text-align: center;">
+                        <label for="profile-avatar-input" class="btn btn--ghost btn--sm" style="cursor: pointer; display: inline-block;">📸 Cambiar Foto</label>
+                        <input type="file" id="profile-avatar-input" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="UI.previewAvatar(event)">
+                        <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">Máximo permitido: 500 KB (Evita borrar tu DB)</div>
+                    </div>
+                </div>
+
+                <!-- Personal Info -->
+                <div class="form-group form-group--full">
+                    <label for="profile-nombre">Nombre Completo *</label>
+                    <input type="text" id="profile-nombre" required>
+                </div>
+                
+                <div class="form-group form-group--full">
+                    <label for="profile-celular">Número Celular</label>
+                    <input type="text" id="profile-celular" placeholder="Ej: 300 123 4567">
+                </div>
+
+                <div class="form-group form-group--full">
+                    <label for="profile-direccion">Dirección de Vivienda</label>
+                    <input type="text" id="profile-direccion" placeholder="Ej: Calle 123 #45-67, Apto 301">
+                </div>
+
+                <!-- Mudanza/Grupo -->
+                <div class="form-group form-group--full" style="border-top: 1px dashed var(--bg-700); padding-top: 15px; margin-top: 10px;">
+                    <label for="profile-inviteCode">
+                        Código de Grupo
+                        <span style="font-weight:normal; color:#888; display:block; font-size:0.8rem;">Modifica esto si te mudas y quieres unirte a otra casa. Todos los gastos que tenías en la casa antigua se quedarán allí.</span>
+                    </label>
+                    <input type="text" id="profile-inviteCode" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn--ghost" onclick="UI.toggleProfile()">Cancelar</button>
+                <button type="submit" id="submit-profile-btn" class="btn btn--accent">💾 Guardar Perfil</button>
             </div>
         </form>
     </div>

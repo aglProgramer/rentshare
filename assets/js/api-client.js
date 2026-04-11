@@ -79,6 +79,21 @@ const AuthAPI = {
         const tokenUser = { ...newUser };
         delete tokenUser.password;
         return { user: tokenUser, token: "local-jwt-token" };
+    },
+
+    updateProfile: async (id, data) => {
+        await delay();
+        const users = LocalDB.users;
+        const index = users.findIndex(u => u.id === id);
+        if (index === -1) throw new ApiError('Usuario no encontrado', 404);
+        
+        users[index] = { ...users[index], ...data };
+        LocalDB.users = users;
+
+        const tokenUser = { ...users[index] };
+        delete tokenUser.password;
+        sessionStorage.setItem('rentshare_user', JSON.stringify(tokenUser));
+        return tokenUser;
     }
 };
 
@@ -141,7 +156,14 @@ const ExpenseAPI = {
             throw new ApiError('No tienes permisos para editar este gasto', 403);
         }
 
-        list[index] = { ...oldExpense, ...data, monto: parseFloat(data.monto) };
+        // Fix de seguridad de asignación de IDs: Preserve true Ownership origin
+        list[index] = { 
+            ...oldExpense, 
+            ...data, 
+            monto: parseFloat(data.monto), 
+            pagadoPorId: oldExpense.pagadoPorId, // Nunca sobrescribir con parseInt desbordados de la UI
+            pagadoPorNombre: oldExpense.pagadoPorNombre
+        };
         LocalDB.expenses = list;
         return list[index];
     },

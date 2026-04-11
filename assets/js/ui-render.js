@@ -292,8 +292,17 @@ const UI = {
 
         const avatarEl = document.getElementById('user-avatar');
         const nameEl   = document.getElementById('user-name');
-        if (avatarEl) avatarEl.textContent = user.avatar || user.nombre?.charAt(0) || '?';
-        if (nameEl)   nameEl.textContent   = user.nombre;
+        
+        if (avatarEl) {
+            if (user.avatar) {
+                 avatarEl.innerHTML = `<img src="${user.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                 avatarEl.style.padding = "0"; // Quitar padding si la imagen cubre todo el chip
+            } else {
+                 avatarEl.textContent = user.nombre?.charAt(0) || '?';
+            }
+        }
+        
+        if (nameEl) nameEl.textContent = user.nombre;
 
         // Poblar select de "pagado por" con el usuario actual logueado
         // (En una app completa aquí se pediría /api/groups/members al backend)
@@ -335,6 +344,15 @@ const UI = {
             e.preventDefault();
             await this.submitExpense(form);
         });
+
+        // Configurar formulario del Perfil
+        const profileForm = document.getElementById('profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', async (e) => {
+                 e.preventDefault();
+                 await this.submitProfile(profileForm);
+            });
+        }
     },
 
     /** Procesa el submit del formulario */
@@ -474,6 +492,80 @@ const UI = {
         }
         modal.classList.toggle('modal--open');
     },
+
+    // ================== PERFIL MODULE ==================
+    toggleProfile() {
+        const modal = document.getElementById('profile-modal');
+        if (!modal.classList.contains('modal--open')) {
+            const user = Auth.getUser();
+            document.getElementById('profile-nombre').value = user.nombre || '';
+            document.getElementById('profile-celular').value = user.celular || '';
+            document.getElementById('profile-direccion').value = user.direccion || '';
+            document.getElementById('profile-inviteCode').value = user.inviteCode || '';
+            
+            const preview = document.getElementById('profile-avatar-preview');
+            // Mock de silueta base si no hay foto
+            preview.src = user.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ecf0f1"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+        }
+        modal.classList.toggle('modal--open');
+    },
+
+    previewAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 500 * 1024) { 
+                Toast.error("⚠️ La imagen supera el umbral límite de 500 KB de este dispositivo. Por favor, recórtala.");
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-avatar-preview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    },
+
+    async submitProfile(form) {
+        if (this.isLoading) return;
+        this.isLoading = true;
+        
+        const btn = form.querySelector('[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = 'Guardando...';
+        btn.disabled = true;
+
+        try {
+            const user = Auth.getUser();
+            const previewSrc = document.getElementById('profile-avatar-preview').src;
+            
+            const data = {
+                nombre: document.getElementById('profile-nombre').value.trim(),
+                celular: document.getElementById('profile-celular').value.trim(),
+                direccion: document.getElementById('profile-direccion').value.trim(),
+                inviteCode: document.getElementById('profile-inviteCode').value.trim(),
+                avatar: previewSrc.startsWith('data:image/svg') ? null : previewSrc
+            };
+            
+            await AuthAPI.updateProfile(user.id, data);
+            
+            Toast.success('Perfil actualizado correctamente y sincronizado ✨');
+            
+            this.toggleProfile();
+            this.renderUserInfo();
+            
+            // Refrescar página para empujar recálculo completo del grupo
+            document.getElementById('invite-code-display').textContent = data.inviteCode;
+            await this.loadExpenses();
+            await this.loadBalance();
+        } catch(e) {
+            Toast.error(e.message);
+        } finally {
+            this.isLoading = false;
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
 };
 
 window.UI = UI;
