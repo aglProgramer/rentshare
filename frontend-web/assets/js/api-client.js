@@ -1,162 +1,269 @@
 /**
- * api-client.js — RentShare Frontend
+ * api-client.js — RentShare Frontend (Modo LocalStorage / GitHub Pages)
  * 
- * Centraliza TODAS las llamadas fetch() al backend.
- * Incluye manejo robusto de errores con mensajes legibles en español.
- * Todos los endpoints usan async/await con try/catch centralizado.
+ * ¡Modo Serverless Activado! Todo el backend de Java ha sido sustituido por 
+ * una base de datos local en el navegador del usuario usando LocalStorage.
+ * Esto hace la app 100% estática y funcional gratis para siempre en Github Pages.
  */
 
-const API_BASE_URL = 'http://localhost:8080/api';
-
-// ===========================
-// Función base de fetch
-// ===========================
-
-/**
- * Ejecuta un fetch y parsea la respuesta.
- * Lanza errores descriptivos en español si el servidor falla.
- */
-async function apiFetch(endpoint, method = 'GET', body = null, customHeaders = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Accept':       'application/json',
-        ...customHeaders
-    };
-
-    // Se inyecta cabecera X-User-Id si el usuario está logueado
-    const userJson = sessionStorage.getItem('rentshare_user');
-    if (userJson) {
-        const user = JSON.parse(userJson);
-        headers['X-User-Id'] = user.id;
-    }
-
-    const config = {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : null
-    };
-
-    try {
-        const response = await fetch(url, config);
-
-        // 204 No Content (ej: DELETE exitoso)
-        if (response.status === 204) return null;
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            // El GlobalExceptionHandler del backend devuelve { status, error, mensaje, fieldErrors }
-            const mensajeError = data?.mensaje || data?.error || 'Error desconocido del servidor';
-            const statusCode   = data?.status  || response.status;
-            const fieldErrors  = data?.fieldErrors || null;
-
-            throw new ApiError(mensajeError, statusCode, fieldErrors);
-        }
-
-        return data;
-
-    } catch (error) {
-        if (error instanceof ApiError) {
-            throw error; // Re-lanzar errores ya procesados
-        }
-
-        // Error de red (servidor apagado, CORS, timeout, sin internet)
-        if (error instanceof TypeError && error.message.includes('fetch')) {
-            throw new ApiError(
-                '❌ No se puede conectar con el servidor. ¿Está corriendo el backend en http://localhost:8080?',
-                0
-            );
-        }
-
-        throw new ApiError(`Error de conexión: ${error.message}`, 0);
-    }
-}
-
-// ===========================
-// Clase de error personalizada
-// ===========================
 class ApiError extends Error {
     constructor(message, statusCode, fieldErrors = null) {
         super(message);
-        this.name        = 'ApiError';
-        this.status      = statusCode;
+        this.name = 'ApiError';
+        this.status = statusCode;
         this.fieldErrors = fieldErrors;
     }
 }
 
-// ===========================
-// API de Gastos (Expenses)
-// ===========================
-const ExpenseAPI = {
+// Simulador de Base de Datos
+const LocalDB = {
+    load: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+    save: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
+    
+    get users() { return this.load('rentshare_users'); },
+    set users(data) { this.save('rentshare_users', data); },
+    
+    get expenses() { return this.load('rentshare_expenses'); },
+    set expenses(data) { this.save('rentshare_expenses', data); },
 
-    /**
-     * Obtiene todos los gastos, ordenados por fecha descendente.
-     * GET /api/expenses
-     */
-    async getAll() {
-        return await apiFetch('/expenses');
-    },
-
-    /**
-     * Obtiene un gasto específico por ID.
-     * GET /api/expenses/:id
-     */
-    async getById(id) {
-        return await apiFetch(`/expenses/${id}`);
-    },
-
-    /**
-     * Crea un nuevo gasto.
-     * POST /api/expenses
-     * @param {Object} expenseData - { descripcion, monto, fecha, categoria, tipo, pagadoPorId, grupoId? }
-     */
-    async create(expenseData) {
-        return await apiFetch('/expenses', 'POST', expenseData);
-    },
-
-    /**
-     * Actualiza un gasto.
-     * PUT /api/expenses/:id
-     */
-    async update(id, expenseData) {
-        return await apiFetch(`/expenses/${id}`, 'PUT', expenseData);
-    },
-
-    /**
-     * Elimina un gasto por ID.
-     * DELETE /api/expenses/:id
-     */
-    async delete(id) {
-        return await apiFetch(`/expenses/${id}`, 'DELETE');
-    },
+    getCurrentUser: () => JSON.parse(sessionStorage.getItem('rentshare_user'))
 };
 
+// Generador de Códigos
+const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+
+// Simulador de retraso de red (UX suave)
+const delay = (ms = 300) => new Promise(res => setTimeout(res, ms));
+
+
 // ===========================
-// Servicios Auth (AuthAPI)
+// Servicios Auth
 // ===========================
 const AuthAPI = {
     login: async (credentials) => {
-        return await apiFetch('/auth/login', 'POST', credentials);
+        await delay();
+        const users = LocalDB.users;
+        const user = users.find(u => u.email === credentials.email && u.password === credentials.password);
+        
+        if (!user) throw new ApiError('Credenciales incorrectas', 400);
+
+        // Ocultar contraseña en el token
+        const tokenUser = { ...user };
+        delete tokenUser.password;
+        return { user: tokenUser, token: "local-jwt-token" };
     },
+
     register: async (userData) => {
-        return await apiFetch('/auth/register', 'POST', userData);
+        await delay();
+        const users = LocalDB.users;
+        if (users.find(u => u.email === userData.email)) {
+            throw new ApiError('❌ El correo electrónico ya está registrado', 400);
+        }
+
+        const newUser = {
+            id: Date.now(),
+            nombre: userData.nombre,
+            email: userData.email,
+            password: userData.password,
+            role: userData.role || 'MEMBER',
+            inviteCode: userData.inviteCode || generateCode()
+        };
+
+        if (!userData.inviteCode) {
+            newUser.role = 'ADMIN'; // Creadores de grupos nuevos siempre son admin
+        }
+
+        users.push(newUser);
+        LocalDB.users = users;
+
+        const tokenUser = { ...newUser };
+        delete tokenUser.password;
+        return { user: tokenUser, token: "local-jwt-token" };
     }
 };
 
 // ===========================
-// Servicios de Grupo (GroupAPI)
+// Servicios de Gastos
+// ===========================
+const ExpenseAPI = {
+    async getAll() {
+        await delay();
+        const me = LocalDB.getCurrentUser();
+        if (!me) throw new ApiError('No autorizado', 401);
+
+        const all = LocalDB.expenses;
+        // Solo retornar gastos del mismo Code Group y ordenados por fecha descendente
+        return all
+            .filter(e => e.inviteCode === me.inviteCode)
+            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    },
+
+    async getById(id) {
+        await delay();
+        const expense = LocalDB.expenses.find(e => e.id === Number(id));
+        if (!expense) throw new ApiError('Gasto no encontrado', 404);
+        return expense;
+    },
+
+    async create(data) {
+        await delay();
+        const me = LocalDB.getCurrentUser();
+        
+        if (data.monto <= 0) {
+            throw new ApiError('Datos inválidos', 400, { monto: "El monto no puede ser negativo o cero" });
+        }
+
+        const expense = {
+            id: Date.now(),
+            ...data,
+            monto: parseFloat(data.monto),
+            pagadoPorId: me.id,
+            pagadoPorNombre: me.nombre,
+            inviteCode: me.inviteCode
+        };
+
+        const list = LocalDB.expenses;
+        list.push(expense);
+        LocalDB.expenses = list;
+        return expense;
+    },
+
+    async update(id, data) {
+        await delay();
+        const me = LocalDB.getCurrentUser();
+        const list = LocalDB.expenses;
+        const index = list.findIndex(e => e.id === Number(id));
+        
+        if (index === -1) throw new ApiError('Gasto no encontrado', 404);
+        
+        const oldExpense = list[index];
+        if (oldExpense.pagadoPorId !== me.id && me.role !== 'ADMIN') {
+            throw new ApiError('No tienes permisos para editar este gasto', 403);
+        }
+
+        list[index] = { ...oldExpense, ...data, monto: parseFloat(data.monto) };
+        LocalDB.expenses = list;
+        return list[index];
+    },
+
+    async delete(id) {
+        await delay();
+        const me = LocalDB.getCurrentUser();
+        const list = LocalDB.expenses;
+        const index = list.findIndex(e => e.id === Number(id));
+        
+        if (index === -1) throw new ApiError('Gasto no encontrado', 404);
+        
+        const oldExpense = list[index];
+        if (oldExpense.pagadoPorId !== me.id && me.role !== 'ADMIN') {
+            throw new ApiError('No tienes permisos para eliminar este gasto', 403);
+        }
+
+        list.splice(index, 1);
+        LocalDB.expenses = list;
+        return null;
+    }
+};
+
+// ===========================
+// Simulación Algoritmo de Conciliación y Deudas (Backend Ported a JS)
 // ===========================
 const GroupAPI = {
-    getBalance: async () => {
-        return await apiFetch('/groups/balance', 'GET');
+    async getBalance() {
+        await delay();
+        const currentUser = LocalDB.getCurrentUser();
+        const groupCode = currentUser.inviteCode;
+        
+        if (!groupCode) return { totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Grupo', debts: [] };
+
+        const groupExpenses = LocalDB.expenses.filter(e => e.inviteCode === groupCode);
+        const groupUsers = LocalDB.users.filter(u => u.inviteCode === groupCode);
+        
+        let totalGrupal = 0;
+        let miAporte = 0;
+        
+        // Inicializar balances de usuarios
+        const balances = {}; 
+        groupUsers.forEach(u => balances[u.id] = 0);
+        
+        groupExpenses.forEach(exp => {
+            const amount = parseFloat(exp.monto);
+            totalGrupal += amount;
+            if (exp.pagadoPorId === currentUser.id) miAporte += amount;
+            
+            if (balances[exp.pagadoPorId] !== undefined) {
+                balances[exp.pagadoPorId] += amount;
+            }
+        });
+        
+        const numMembers = groupUsers.length || 1;
+        const fairShare = totalGrupal / numMembers; // Cota Justa
+        
+        let miEstado = 0;
+        let balanceStatus = "Vas al día";
+        let isDeudor = false;
+        
+        const creditors = []; 
+        const debtors = [];
+        
+        for (const userId of Object.keys(balances)) {
+            const id = parseInt(userId);
+            const net = balances[id] - fairShare; // Positivo = Le Deben. Negativo = El debe.
+            const userObj = groupUsers.find(u => u.id === id);
+            
+            if (id === currentUser.id) {
+                miEstado = net;
+                if (net <= -1) {
+                    balanceStatus = "Debes dinero";
+                    isDeudor = true;
+                } else if (net >= 1) {
+                    balanceStatus = "Te deben dinero";
+                }
+            }
+            
+            if (net > 0.01) creditors.push({ id, name: userObj.nombre, amount: net });
+            else if (net < -0.01) debtors.push({ id, name: userObj.nombre, amount: Math.abs(net) });
+        }
+        
+        // Algoritmo Greedy de Simplificación de Deudas
+        creditors.sort((a, b) => b.amount - a.amount);
+        debtors.sort((a, b) => b.amount - a.amount);
+        
+        const debts = [];
+        let i = 0, j = 0;
+        while (i < debtors.length && j < creditors.length) {
+            let debtor = debtors[i];
+            let creditor = creditors[j];
+            
+            let amount = Math.min(debtor.amount, creditor.amount);
+            
+            if (amount > 0.01) {
+                debts.push({
+                    deudorNombre: debtor.name,
+                    acreedorNombre: creditor.name,
+                    monto: amount,
+                    isMiDeuda: (debtor.id === currentUser.id) || (creditor.id === currentUser.id)
+                });
+            }
+            
+            debtor.amount -= amount;
+            creditor.amount -= amount;
+            
+            if (debtor.amount < 0.01) i++;
+            if (creditor.amount < 0.01) j++;
+        }
+        
+        return {
+            totalGrupal,
+            miAporte,
+            balancePesos: isDeudor ? Math.abs(miEstado) : miEstado, // Enviar en absoluto si es deuda para UI
+            isDeudor,
+            balanceStatus,
+            debts
+        };
     }
 };
 
-// ===========================
-// Exportar para uso global
-// ===========================
 window.AuthAPI    = AuthAPI;
 window.GroupAPI   = GroupAPI;
 window.ExpenseAPI = ExpenseAPI;
