@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RentShare — Plataforma inteligente para gestionar y dividir gastos del hogar entre compañeros de vivienda.">
+    <title>RentShare — Gestión de Gastos Compartidos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<!-- =============================================
+     PANTALLA DE LOGIN
+     ============================================= -->
+<div id="login-screen" class="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-logo__icon">🏠</div>
+            <h1 class="login-logo__title">RentShare</h1>
+            <p class="login-logo__subtitle">Gestión inteligente de gastos compartidos</p>
+        </div>
+
+        <!-- Hint de usuarios de prueba -->
+        <div class="login-hint">
+            <strong>👤 Usuarios de prueba:</strong>
+            <code>carlos@rentshare.com</code> / <code>123456</code><br>
+            <code>maria@rentshare.com</code> / <code>123456</code>
+        </div>
+
+        <div id="login-error" role="alert" aria-live="polite"></div>
+
+        <!-- FORMULARIO DE LOGIN -->
+        <form id="login-form">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="login-email">Correo electrónico</label>
+                <input type="email" id="login-email" placeholder="usuario@rentshare.com" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="login-password">Contraseña</label>
+                <input type="password" id="login-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" id="login-btn" class="btn btn--primary" style="width:100%; justify-content:center;">
+                🔑 Iniciar sesión
+            </button>
+            <p style="text-align:center; margin-top:15px; font-size:14px;">¿No tienes cuenta? <a href="#" id="toggle-register">Regístrate</a></p>
+        </form>
+
+        <!-- FORMULARIO DE REGISTRO (oculto) -->
+        <form id="register-form" class="hidden" style="display: none;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="reg-nombre">Nombre Completo</label>
+                <input type="text" id="reg-nombre" placeholder="Juan Pérez" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="reg-email">Correo electrónico</label>
+                <input type="email" id="reg-email" placeholder="juan@ejemplo.com" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="reg-password">Contraseña</label>
+                <input type="password" id="reg-password" placeholder="••••••••" minlength="6" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="reg-invite">Código Inivitación (Opcional)</label>
+                <input type="text" id="reg-invite" placeholder="INVITE123 (Vacío para grupo nuevo)">
+            </div>
+            <button type="submit" id="register-btn" class="btn btn--accent" style="width:100%; justify-content:center;">
+                📝 Registrarse
+            </button>
+            <p style="text-align:center; margin-top:15px; font-size:14px;">¿Ya tienes cuenta? <a href="#" id="toggle-login">Inicia Sesión</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- =============================================
+     APLICACIÓN PRINCIPAL (oculta hasta login)
+     ============================================= -->
+<div id="app" class="app-container" style="display:none;">
+
+    <!-- NAVBAR -->
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+        <a href="#" class="navbar__brand" aria-label="RentShare inicio">
+            <div class="navbar__logo" aria-hidden="true">🏠</div>
+            <span class="navbar__title">RentShare</span>
+        </a>
+
+        <div class="navbar__actions">
+            <div id="box-invite-code" class="invite-badge" style="cursor: pointer; background: var(--bg-800); border: 1px dashed var(--accent); padding: 5px 10px; border-radius: 8px; margin-right: 15px;" title="Copiar código para invitar">
+                <span class="text-sm">Código: <strong id="invite-code-display" class="text-accent"></strong></span>
+            </div>
+            <div class="user-chip">
+                <div class="user-avatar" id="user-avatar" aria-label="Avatar del usuario">U</div>
+                <span class="user-name" id="user-name">Usuario</span>
+            </div>
+            <button class="btn btn--ghost btn--sm"
+                    id="logout-btn"
+                    onclick="Auth.logout()"
+                    aria-label="Cerrar sesión">
+                🚪 Salir
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header__info">
+                <h1>Dashboard de Gastos</h1>
+                <p class="subtitle">Grupo: <strong id="group-name-display" class="text-primary"></strong></p>
+            </div>
+            <button class="btn btn--accent"
+                    id="new-expense-btn"
+                    onclick="UI.toggleModal()"
+                    aria-label="Agregar nuevo gasto"
+                    aria-haspopup="dialog">
+                ✚ Nuevo Gasto
+            </button>
+        </div>
+
+        <!-- Stats Cards (Deuda y Balances) -->
+        <section class="stats-grid" aria-label="Resumen de gastos">
+            <div class="stat-card">
+                <div class="stat-card__icon" aria-hidden="true">📊</div>
+                <div class="stat-card__value" id="stat-total-grupal">—</div>
+                <div class="stat-card__label">Total Grupal Unificado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon" aria-hidden="true">💰</div>
+                <div class="stat-card__value text-success" id="stat-tu-aporte">—</div>
+                <div class="stat-card__label">Tu Aporte al Grupo</div>
+            </div>
+            <div class="stat-card" id="card-tu-balance">
+                <div class="stat-card__icon" aria-hidden="true">⚖️</div>
+                <div class="stat-card__value" id="stat-tu-balance">—</div>
+                <div class="stat-card__label" id="label-tu-balance">Cálculo de Deuda...</div>
+            </div>
+        </section>
+
+        <!-- Settlement Section -->
+        <section id="settlement-section" style="margin-bottom: 2rem; background: var(--bg-800); border-radius:12px; padding: 1.5rem; border: 1px dashed var(--accent); display:none;">
+            <h3>🤝 Resumen de Liquidación</h3>
+            <ul id="deudas-list" style="margin-top: 15px; list-style-type: none; padding-left:0; display:flex; flex-direction:column; gap:10px;"></ul>
+        </section>
+
+        <!-- Tabla de Gastos -->
+        <section class="table-section" aria-label="Lista de gastos">
+            <div class="table-header">
+                <h2 class="table-header__title">📊 Registro de Gastos</h2>
+                <button class="btn btn--ghost btn--sm"
+                        id="refresh-btn"
+                        onclick="UI.loadExpenses()"
+                        aria-label="Recargar gastos">
+                    🔄 Actualizar
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="expenses-table" role="table" aria-label="Tabla de gastos compartidos">
+                    <thead>
+                        <tr>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Monto</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Pagó</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col" aria-label="Acciones">—</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenses-tbody">
+                        <!-- Filas generadas por ui-render.js -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Estado vacío -->
+            <div id="empty-state" role="status" aria-live="polite">
+                <span class="empty-icon" aria-hidden="true">📭</span>
+                <p>No hay gastos registrados aún.</p>
+                <button class="btn btn--accent btn--sm" onclick="UI.toggleModal()">
+                    ✚ Agregar primer gasto
+                </button>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- =============================================
+     MODAL: Nuevo Gasto
+     ============================================= -->
+<div class="modal-overlay"
+     id="expense-modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="modal-title"
+     onclick="if(event.target===this) UI.toggleModal()">
+    <div class="modal">
+        <div class="modal__header">
+            <h2 class="modal__title" id="modal-title">✚ Nuevo Gasto</h2>
+            <button class="modal__close"
+                    onclick="UI.toggleModal()"
+                    aria-label="Cerrar modal">✕</button>
+        </div>
+
+        <form id="expense-form" novalidate>
+            <div class="form-grid">
+
+                <!-- Descripción -->
+                <div class="form-group form-group--full">
+                    <label for="descripcion">Descripción *</label>
+                    <input type="text"
+                           id="descripcion"
+                           name="descripcion"
+                           placeholder="Ej: Arriendo de abril, Factura de luz..."
+                           minlength="3"
+                           maxlength="200"
+                           required>
+                </div>
+
+                <!-- Monto -->
+                <div class="form-group">
+                    <label for="monto">Monto (COP) *</label>
+                    <input type="number"
+                           id="monto"
+                           name="monto"
+                           placeholder="850000"
+                           min="0.01"
+                           step="0.01"
+                           required>
+                </div>
+
+                <!-- Fecha -->
+                <div class="form-group">
+                    <label for="fecha">Fecha *</label>
+                    <input type="date"
+                           id="fecha"
+                           name="fecha"
+                           required>
+                </div>
+
+                <!-- Categoría -->
+                <div class="form-group">
+                    <label for="categoria">Categoría *</label>
+                    <select id="categoria" name="categoria" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="RENTA">🏠 Renta</option>
+                        <option value="SERVICIO">⚡ Servicio (Luz, Agua, Gas...)</option>
+                        <option value="MERCADO">🛒 Mercado</option>
+                        <option value="OTRO">📦 Otro</option>
+                    </select>
+                </div>
+
+                <!-- Tipo -->
+                <div class="form-group">
+                    <label for="tipo">Tipo *</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="UNIFICADO">👥 Unificado (se divide)</option>
+                        <option value="INDIVIDUAL">👤 Individual (personal)</option>
+                    </select>
+                </div>
+
+                <!-- Pagado por -->
+                <div class="form-group form-group--full">
+                    <label for="pagado-por">Pagado por *</label>
+                    <select id="pagado-por" name="pagadoPorId" required>
+                        <!-- Opciones generadas por ui-render.js desde Auth -->
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="button"
+                        class="btn btn--ghost"
+                        onclick="UI.toggleModal()">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        id="submit-expense-btn"
+                        class="btn btn--accent">
+                    💾 Guardar Gasto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
+
+<!-- =============================================
+     SCRIPTS (orden importante)
+     ============================================= -->
+<script src="assets/js/api-client.js?v=2"></script>
+<script src="assets/js/auth.js?v=2"></script>
+<script src="assets/js/ui-render.js?v=2"></script>
+<!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
+
+</body>
+</html>
