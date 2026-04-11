@@ -391,15 +391,10 @@
                 </div>
 
                 <!-- Danger Zone -->
-                <div style="border-top: 1px dashed var(--danger); padding-top: 15px; margin-top: 20px;">
-                    <label style="color: var(--danger); font-weight: bold; font-size: 0.9rem;">☣️ Zona Peligrosa</label>
-                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 10px;">Esta acción borrará todos tus datos personales y gastos registrados.</p>
-                    <button type="button" class="btn btn--secondary" style="background: rgba(231, 76, 60, 0.1); color: var(--danger); border: 1px solid var(--danger); width: 100%; justify-content: center;" onclick="UI.handleDeleteProfile()">
-                        Eliminar Perfil por Completo
+                    <button type="button" class="btn btn--secondary" style="background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 2px solid var(--danger); width: 100%; justify-content: center; font-weight: bold; padding: 15px;" onclick="UI.nukeApp()">
+                        ♻️ REINICIAR APP (Borrar todo el rastro)
                     </button>
-                    <button type="button" class="btn btn--ghost" style="width: 100%; justify-content: center; margin-top: 10px; font-size: 0.75rem; color: #888;" onclick="UI.nukeApp()">
-                        ♻️ Reiniciar App (Borrar todo el rastro)
-                    </button>
+                    <p style="font-size: 0.65rem; color: #888; margin-top: 10px; text-align: center;">Usa esto si quieres borrar todos tus datos y usuarios del navegador para empezar de cero.</p>
                 </div>
             </div>
 
@@ -461,9 +456,9 @@
 <!-- =============================================
      SCRIPTS (orden importante)
      ============================================= -->
-<script src="assets/js/api-client.js?v=15"></script>
-<script src="assets/js/auth.js?v=15"></script>
-<script src="assets/js/ui-render.js?v=15"></script>
+<script src="assets/js/api-client.js?v=16"></script>
+<script src="assets/js/auth.js?v=16"></script>
+<script src="assets/js/ui-render.js?v=16"></script>
 <!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
 
 </body>

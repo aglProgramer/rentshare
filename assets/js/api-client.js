@@ -116,23 +116,26 @@ const AuthAPI = {
     },
 
     async deleteAccount(id) {
-        await delay();
-        const targetId = Number(id);
-        
-        // 1. Filtrar listas usando las claves originales del sistema
-        const users = LocalDB.users.filter(u => u.id !== targetId);
-        const expenses = LocalDB.expenses.filter(e => e.pagadoPorId !== targetId);
-        
-        // 2. Guardar permanentemente en el disco del navegador
-        LocalDB.users = users;
-        LocalDB.expenses = expenses;
-        
-        // 3. Destruir rastro de sesión
+        // Esta función queda obsoleta por 'Reiniciar App' que es más efectiva
+        return this.nuke();
+    },
+
+    nuke() {
+        localStorage.clear();
         sessionStorage.clear();
-        localStorage.removeItem('rentshare_user');
-        
+        location.reload();
         return true;
     }
+};
+
+// =============================================
+// PRÓXIMO PASO: CONEXIÓN A LA NUBE (SUPABASE)
+// Para activar el login desde cualquier PC,
+// pega tus llaves aquí abajo cuando las tengas:
+// =============================================
+const CLOUD_CONFIG = {
+    url: "", 
+    key: ""  
 };
 
 // ===========================
@@ -231,15 +234,20 @@ const GroupAPI = {
         if (!groupCode) return { totalGrupal: 0, miAporte: 0, balancePesos: 0, isDeudor: false, balanceStatus: 'Sin Grupo', debts: [] };
         
         const now = new Date();
-        const yearMonthNow = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
+        const currentYearStr = String(now.getFullYear());
 
-        // 1. GASTOS TOTALES (Suma todo lo que el sistema ve este mes, sin importar el ID de usuario)
+        // 1. GASTOS TOTALES (Detección inteligente de mes/año sin importar el formato ISO o DD/MM)
         const allMonthlyExpenses = LocalDB.expenses.filter(e => {
-            return e.fecha && e.fecha.includes(yearMonthNow);
+            if (!e.fecha) return false;
+            // Acepta 2026-04-11 (ISO) o 11/04/2026 (Latino)
+            const matchesMonth = e.fecha.includes(`-${currentMonthStr}-`) || e.fecha.includes(`/${currentMonthStr}/`);
+            const matchesYear  = e.fecha.includes(currentYearStr);
+            return matchesMonth && matchesYear;
         });
         
         const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => {
-            const val = parseFloat(e.monto);
+            const val = parseFloat(String(e.monto).replace(/\./g, '').replace(',', '.'));
             return sum + (isNaN(val) ? 0 : val);
         }, 0);
 
