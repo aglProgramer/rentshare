@@ -150,11 +150,12 @@ const Toast = {
 const Format = {
     /** Formatea un número como moneda colombiana */
     currency(amount) {
+        const val = parseFloat(amount) || 0;
         return new Intl.NumberFormat('es-CO', {
             style:    'currency',
             currency: 'COP',
             minimumFractionDigits: 0,
-        }).format(amount);
+        }).format(val);
     },
 
     /** Formatea una fecha ISO a dd/mm/yyyy */

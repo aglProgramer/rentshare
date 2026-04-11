@@ -211,10 +211,18 @@ const GroupAPI = {
 
         // 1. GASTOS TOTALES (Todo lo del mes actual para control personal)
         const allMonthlyExpenses = LocalDB.expenses.filter(e => {
+            if (!e.fecha) return false;
             const expDate = new Date(e.fecha);
+            // Validar que la fecha sea real
+            if (isNaN(expDate.getTime())) return false;
+
             return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
         });
-        const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => sum + parseFloat(e.monto), 0);
+        
+        const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => {
+            const val = parseFloat(e.monto);
+            return sum + (isNaN(val) ? 0 : val);
+        }, 0);
 
         // Si no hay código de grupo, solo retornamos el total general
         if (!groupCode || groupCode === '---') {
