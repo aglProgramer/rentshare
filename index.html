@@ -174,8 +174,17 @@
 
         <!-- Tabla de Gastos -->
         <section class="table-section" aria-label="Lista de gastos">
-            <div class="table-header">
+            <div class="table-header" style="flex-wrap: wrap; gap: 1rem;">
                 <h2 class="table-header__title">📊 Registro de Gastos</h2>
+                
+                <!-- FILTER TABS -->
+                <div class="filter-tabs" style="display: flex; background: var(--bg-900); padding: 5px; border-radius: 10px; border: 1px solid var(--bg-700);">
+                    <button class="tab-btn active" onclick="UI.setFilter('ALL')" data-filter="ALL" style="padding: 6px 15px; border-radius: 8px; border:none; background:transparent; color: var(--text-400); cursor:pointer; font-weight:600; transition:all 0.2s;">🏠 Todo</button>
+                    <button class="tab-btn" onclick="UI.setFilter('UNIFICADO')" data-filter="UNIFICADO" style="padding: 6px 15px; border-radius: 8px; border:none; background:transparent; color: var(--text-400); cursor:pointer; font-weight:600; transition:all 0.2s;">👥 Grupal</button>
+                    <button class="tab-btn" onclick="UI.setFilter('INDIVIDUAL')" data-filter="INDIVIDUAL" style="padding: 6px 15px; border-radius: 8px; border:none; background:transparent; color: var(--text-400); cursor:pointer; font-weight:600; transition:all 0.2s;">👤 Mío</button>
+                </div>
+
+                <div style="flex-grow:1;"></div>
                 <button class="btn btn--ghost btn--sm"
                         id="refresh-btn"
                         onclick="UI.loadExpenses()"

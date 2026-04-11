@@ -14,9 +14,12 @@ const ChartManager = {
     instance: null,
 
     update(expenses) {
+        if (typeof Chart === 'undefined') {
+            console.warn("Chart.js no ha cargado aún");
+            return;
+        }
+
         const ctx = document.getElementById('categoryChart');
-        const emptyMsg = document.getElementById('no-chart-data');
-        if (!ctx) return;
 
         if (!expenses || expenses.length === 0) {
             ctx.style.display = 'none';
@@ -302,6 +305,7 @@ const ExpenseTable = {
 const UI = {
     isLoading: false,
     currentEditId: null,
+    currentFilter: 'ALL', // ALL, UNIFICADO, INDIVIDUAL
 
     /** Inicializa toda la UI */
     async init() {
@@ -309,8 +313,34 @@ const UI = {
         ExpenseTable.init();
         this.setupForm();
         this.renderUserInfo();
+        
+        // Estilo inicial para la pestaña ALL
+        const allTab = document.querySelector('.tab-btn[data-filter="ALL"]');
+        if (allTab) {
+            allTab.style.background = 'var(--primary)';
+            allTab.style.color = '#fff';
+        }
+
         await this.loadExpenses();
         await this.loadBalance();
+    },
+
+    /** Cambia el filtro activo y refresca la vista */
+    async setFilter(filter) {
+        this.currentFilter = filter;
+        
+        // Actualizar UI de botones
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.getAttribute('data-filter') === filter) {
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#fff';
+            } else {
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--text-400)';
+            }
+        });
+
+        await this.loadExpenses();
     },
 
     /** Carga y renderiza el resumen de deuda */
@@ -400,11 +430,17 @@ const UI = {
         }
     },
 
-    /** Carga gastos desde el backend */
+    /** Carga gastos desde el backend (LocalDB) */
     async loadExpenses() {
         ExpenseTable.showSkeleton();
         try {
-            const expenses = await ExpenseAPI.getAll();
+            let expenses = await ExpenseAPI.getAll();
+            
+            // Aplicar filtro de pestaña
+            if (this.currentFilter !== 'ALL') {
+                expenses = expenses.filter(e => e.tipo === this.currentFilter);
+            }
+
             ExpenseTable.render(expenses);
         } catch (error) {
             ExpenseTable.render([]);
