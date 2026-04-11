@@ -48,14 +48,12 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- MySQL (para producción - descomentar cuando sea necesario) -->
-        <!--
+        <!-- PostgreSQL (Para Render/Producción) -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        -->
 
         <!-- Lombok (reduce código boilerplate) -->
         <dependency>
