@@ -111,13 +111,20 @@ const AuthAPI = {
 
     async deleteAccount(id) {
         await delay();
-        // Borrar usuario de la lista global
-        LocalDB.users = LocalDB.users.filter(u => u.id !== id);
-        // Borrar sus gastos asociados
-        LocalDB.expenses = LocalDB.expenses.filter(e => e.pagadoPorId !== id);
-        LocalDB.save();
-        // Limpiar sesión
+        const targetId = Number(id);
+        
+        // 1. Filtrar listas usando las claves originales del sistema
+        const users = LocalDB.users.filter(u => u.id !== targetId);
+        const expenses = LocalDB.expenses.filter(e => e.pagadoPorId !== targetId);
+        
+        // 2. Guardar permanentemente en el disco del navegador
+        LocalDB.users = users;
+        LocalDB.expenses = expenses;
+        
+        // 3. Destruir rastro de sesión
         sessionStorage.clear();
+        localStorage.removeItem('rentshare_user');
+        
         return true;
     }
 };
