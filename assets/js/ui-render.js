@@ -7,7 +7,83 @@
  * - Notificaciones toast
  * - Estadísticas del dashboard
  * - Manejo del estado de carga (skeleton loaders)
+ * - Gráficos de estadísticas
  */
+
+const ChartManager = {
+    instance: null,
+
+    update(expenses) {
+        const ctx = document.getElementById('categoryChart');
+        if (!ctx) return;
+
+        const analyticsSection = document.getElementById('analytics-section');
+        if (!expenses || expenses.length === 0) {
+            analyticsSection.style.display = 'none';
+            return;
+        }
+        analyticsSection.style.display = 'block';
+
+        // Agrupar por categoría
+        const categories = {};
+        expenses.forEach(e => {
+            const cat = e.categoria || 'OTRO';
+            categories[cat] = (categories[cat] || 0) + parseFloat(e.monto);
+        });
+
+        const labels = Object.keys(categories).map(k => Labels.categoria[k]?.text || k);
+        const data = Object.values(categories);
+        const colors = Object.keys(categories).map(k => {
+            // Generar colores basados en las variables CSS o fijos según categoría
+            if (k === 'RENTA') return '#6366f1'; // primary
+            if (k === 'SERVICIO') return '#f59e0b'; // warning
+            if (k === 'MERCADO') return '#10b981'; // success
+            return '#8b5cf6'; // accent
+        });
+
+        if (this.instance) {
+            this.instance.destroy();
+        }
+
+        this.instance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: '#0f172a', // bg-950
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#ecf0f1',
+                            padding: 20,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) label += ': ';
+                                label += new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(context.raw);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+};
 
 // ===========================
 // Sistema de Notificaciones Toast
@@ -211,6 +287,9 @@ const ExpenseTable = {
         updateStat('stat-individual-count',
             expenses.filter(e => e.tipo === 'INDIVIDUAL').length
         );
+
+        // Actualizar Gráfico
+        ChartManager.update(expenses);
     },
 };
 
@@ -559,6 +638,46 @@ const UI = {
             btn.textContent = originalText;
             btn.disabled = false;
         }
+    },
+
+    exportData() {
+        const data = {
+            users: LocalDB.users,
+            expenses: LocalDB.expenses,
+            exportedAt: new Date().toISOString(),
+            app: 'RentShare'
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rentshare_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        Toast.success('Archivo de respaldo generado con éxito 📥');
+    },
+
+    importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.app !== 'RentShare') throw new Error('El archivo no es un respaldo válido de RentShare');
+
+                if (confirm('⚠️ Al importar se sobrescribirán tus datos actuales. ¿Deseas continuar?')) {
+                    LocalDB.users = data.users || [];
+                    LocalDB.expenses = data.expenses || [];
+                    Toast.success('Datos restaurados correctamente ✨');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            } catch (err) {
+                Toast.error('Error al importar: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
     }
 };
 

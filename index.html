@@ -7,6 +7,7 @@
     <title>RentShare — Gestión de Gastos Compartidos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -141,6 +142,18 @@
                 <div class="stat-card__icon" aria-hidden="true">⚖️</div>
                 <div class="stat-card__value" id="stat-tu-balance">—</div>
                 <div class="stat-card__label" id="label-tu-balance">Cálculo de Deuda...</div>
+            </div>
+        </section>
+
+        <!-- Visual Analytics -->
+        <section id="analytics-section" style="margin-bottom: 2rem; display:none;">
+            <div class="table-header">
+                <h2 class="table-header__title">📊 Distribución de Gastos</h2>
+            </div>
+            <div style="background: var(--bg-800); border-radius: 12px; padding: 2rem; display: flex; justify-content: center; align-items: center; border: 1px solid var(--bg-700);">
+                <div style="max-width: 300px; width: 100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
         </section>
 
@@ -344,6 +357,17 @@
                         <span style="font-weight:normal; color:#888; display:block; font-size:0.8rem;">Modifica esto si te mudas y quieres unirte a otra casa. Todos los gastos que tenías en la casa antigua se quedarán allí.</span>
                     </label>
                     <input type="text" id="profile-inviteCode" required>
+                </div>
+
+                <!-- Backup System -->
+                <div class="form-group form-group--full" style="border-top: 1px dashed var(--bg-700); padding-top: 15px; margin-top: 10px;">
+                    <label>Respaldo de Seguridad</label>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" class="btn btn--blue btn--sm" style="flex: 1;" onclick="UI.exportData()">📥 Exportar JSON</button>
+                        <button type="button" class="btn btn--ghost btn--sm" style="flex: 1;" onclick="document.getElementById('import-file').click()">📤 Importar JSON</button>
+                        <input type="file" id="import-file" style="display: none;" accept=".json" onchange="UI.importData(event)">
+                    </div>
+                    <p style="font-size: 0.7rem; color: #888; margin-top: 8px;">Guarda una copia de tus gastos y usuarios para restaurarlos en otro navegador.</p>
                 </div>
             </div>
 
