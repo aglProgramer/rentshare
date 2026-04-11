@@ -8,7 +8,7 @@
 const SUPABASE_URL = "https://fcwbsbykxvsxwhkjvezg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjd2JzYnlreHZzeHdoa2p2ZXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzQxNzQsImV4cCI6MjA5MTUxMDE3NH0.8XikD3kBqX0aSvInlOauB82B47DIjnoCtpM94BXJNqM";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 class ApiError extends Error {
     constructor(message, statusCode, fieldErrors = null) {
@@ -31,7 +31,7 @@ const Auth = {
 // ===========================
 const AuthAPI = {
     async login(credentials) {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password
         });
@@ -39,7 +39,7 @@ const AuthAPI = {
         if (error) throw new ApiError('Usuario o contraseña incorrectos', 400);
 
         // Obtener el perfil extendido
-        const { data: profile } = await supabase
+        const { data: profile } = await supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
@@ -51,7 +51,7 @@ const AuthAPI = {
     },
 
     async register(userData) {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabaseClient.auth.signUp({
             email: userData.email,
             password: userData.password,
             options: {
@@ -66,7 +66,7 @@ const AuthAPI = {
     },
 
     async updateProfile(id, updateData) {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('profiles')
             .update(updateData)
             .eq('id', id)
@@ -81,8 +81,6 @@ const AuthAPI = {
     },
 
     async nuke() {
-        // En modo Nube, el nuke borra el LocalStorage de soporte, pero no la cuenta de Supabase 
-        // (Por seguridad)
         localStorage.clear();
         sessionStorage.clear();
         location.reload();
@@ -97,7 +95,7 @@ const ExpenseAPI = {
         const user = Auth.getUser();
         if (!user) throw new ApiError('No autorizado', 401);
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('expenses')
             .select('*')
             .eq('invite_code', user.invite_code)
@@ -109,7 +107,7 @@ const ExpenseAPI = {
 
     async create(expenseData) {
         const user = Auth.getUser();
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('expenses')
             .insert([{
                 ...expenseData,
@@ -125,7 +123,7 @@ const ExpenseAPI = {
     },
 
     async update(id, expenseData) {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('expenses')
             .update(expenseData)
             .eq('id', id)
@@ -137,7 +135,7 @@ const ExpenseAPI = {
     },
 
     async delete(id) {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('expenses')
             .delete()
             .eq('id', id);
@@ -161,7 +159,7 @@ const GroupAPI = {
 
         // 1. GASTO ACUMULADO TOTAL (Mes actual)
         // Usamos una consulta filtrada por fecha
-        const { data: monthExpenses, error } = await supabase
+        const { data: monthExpenses, error } = await supabaseClient
             .from('expenses')
             .select('*')
             .gte('fecha', `${currentYear}-${String(currentMonth).padStart(2,'0')}-01`)
@@ -185,7 +183,7 @@ const GroupAPI = {
         }
 
         // Obtener miembros del grupo
-        const { data: members } = await supabase
+        const { data: members } = await supabaseClient
             .from('profiles')
             .select('id, nombre')
             .eq('invite_code', user.invite_code);
