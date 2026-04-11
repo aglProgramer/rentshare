@@ -33,15 +33,16 @@ const AuthAPI = {
         
         if (error) throw new ApiError('Usuario o contraseña incorrectos', 400);
 
-        // Intentar obtener perfil (Con fallback si el trigger de Supabase falla)
-        let { data: profile } = await sbClient
+        // Intentar obtener perfil (Usamos .select() simple para evitar el error 406 de PostgREST)
+        const { data: profiles, error: pError } = await sbClient
             .from('profiles')
             .select('*')
-            .eq('id', data.user.id)
-            .maybeSingle();
+            .eq('id', data.user.id);
+
+        let profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
         if (!profile) {
-            const { data: nProfile } = await sbClient
+            const { data: nProfile, error: insError } = await sbClient
                 .from('profiles')
                 .insert([{ 
                     id: data.user.id, 
@@ -50,6 +51,8 @@ const AuthAPI = {
                 }])
                 .select()
                 .single();
+            
+            if (insError) console.error("Error creando perfil:", insError);
             profile = nProfile;
         }
 
