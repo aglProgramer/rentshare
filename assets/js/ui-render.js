@@ -829,6 +829,12 @@ const UI = {
         } else {
             Toast.warning('Confirmación cancelada o palabra incorrecta.');
         }
+    },
+
+    nukeApp() {
+        if (confirm('⚠️ ATENCIÓN: Esto borrará ABSOLUTAMENTE TODO de este navegador y reiniciará la app. ¿Estás seguro?')) {
+            LocalDB.nuke();
+        }
     }
 };
 

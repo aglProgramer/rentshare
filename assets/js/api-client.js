@@ -26,6 +26,12 @@ const LocalDB = {
     get expenses() { return this.load('rentshare_expenses'); },
     set expenses(data) { this.save('rentshare_expenses', data); },
 
+    nuke: () => {
+        localStorage.clear();
+        sessionStorage.clear();
+        location.reload();
+    },
+
     getCurrentUser: () => JSON.parse(sessionStorage.getItem('rentshare_user'))
 };
 
@@ -226,14 +232,10 @@ const GroupAPI = {
         
         const now = new Date();
         const yearMonthNow = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const currentId = Number(currentUser.id);
 
-        // 1. GASTOS TOTALES (Validación flexible de ID y Fecha)
+        // 1. GASTOS TOTALES (Suma todo lo que el sistema ve este mes, sin importar el ID de usuario)
         const allMonthlyExpenses = LocalDB.expenses.filter(e => {
-            const expenseUserId = Number(e.pagadoPorId);
-            return e.fecha && 
-                   e.fecha.includes(yearMonthNow) && 
-                   expenseUserId === currentId;
+            return e.fecha && e.fecha.includes(yearMonthNow);
         });
         
         const totalMensualGeneral = allMonthlyExpenses.reduce((sum, e) => {
