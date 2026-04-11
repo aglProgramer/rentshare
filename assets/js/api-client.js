@@ -152,9 +152,6 @@ const ExpenseAPI = {
         if (index === -1) throw new ApiError('Gasto no encontrado', 404);
         
         const oldExpense = list[index];
-        if (oldExpense.pagadoPorId !== me.id && me.role !== 'ADMIN') {
-            throw new ApiError('No tienes permisos para editar este gasto', 403);
-        }
 
         // Fix de seguridad de asignación de IDs: Preserve true Ownership origin
         list[index] = { 
@@ -177,9 +174,6 @@ const ExpenseAPI = {
         if (index === -1) throw new ApiError('Gasto no encontrado', 404);
         
         const oldExpense = list[index];
-        if (oldExpense.pagadoPorId !== me.id && me.role !== 'ADMIN') {
-            throw new ApiError('No tienes permisos para eliminar este gasto', 403);
-        }
 
         list.splice(index, 1);
         LocalDB.expenses = list;

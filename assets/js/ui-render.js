@@ -153,10 +153,6 @@ const ExpenseTable = {
             
             const badgeTypeClass = expense.tipo === 'INDIVIDUAL' ? 'badge-tipo-ind' : 'badge-tipo-uni';
             
-            // Verificación de Autenticación para el botón Delete (Solo el dueño o ADMIN)
-            const currentUser = Auth.getUser();
-            const showDelete = currentUser && (expense.pagadoPorId === currentUser.id || currentUser.role === 'ADMIN');
-
             return `
             <tr class="expense-row" data-id="${expense.id}">
                 <td>
@@ -182,10 +178,8 @@ const ExpenseTable = {
                 </td>
                 <td class="date-cell">${Format.date(expense.fecha)}</td>
                 <td>
-                    ${showDelete ? `
-                        <button class="btn-icon btn-edit" data-id="${expense.id}" title="Editar gasto">✏️</button>
-                        <button class="btn-delete" data-id="${expense.id}" title="Eliminar gasto">🗑️</button>
-                    ` : `<span class="text-muted text-xs">🔒</span>`}
+                    <button class="btn-icon btn-edit" data-id="${expense.id}" title="Editar gasto">✏️</button>
+                    <button class="btn-delete" data-id="${expense.id}" title="Eliminar gasto">🗑️</button>
                 </td>
             </tr>`;
         }).join('');
