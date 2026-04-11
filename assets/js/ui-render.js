@@ -749,33 +749,65 @@ const UI = {
     },
 
     // ===========================
-    // GESTIÓN DE CÓDIGO DE GRUPO
+    // GESTIÓN DE CÓDIGO DE GRUPO (Personalizada)
     // ===========================
-    async handleInviteCodeActions() {
-        const user = Auth.getUser();
-        const hasGroup = user.inviteCode && user.inviteCode !== '---';
-        
-        let message = `🏠 Estatus: ${hasGroup ? 'En casa (' + user.inviteCode + ')' : 'Sin hogar activo'}\n\n`;
-        message += "¿Qué deseas hacer?\n";
-        message += "[G] - Generar un código para una casa nueva\n";
-        message += "[U] - Unirme a una casa con código\n";
-        if (hasGroup) message += "[C] - Copiar mi código para invitar amigos\n";
-
-        const action = (prompt(message, '') || '').toUpperCase();
-
-        if (action === 'G') {
-            const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            await AuthAPI.updateProfile(user.id, { inviteCode: newCode });
-            Toast.success(`¡Casa nueva creada! Código: ${newCode} 🏠`);
-            setTimeout(() => window.location.reload(), 1000);
-        } else if (action === 'U') {
-            const invite = prompt("Pega el código de invitación de tus compañeros:", "");
-            if (invite && invite.trim().length >= 4) {
-                await AuthAPI.updateProfile(user.id, { inviteCode: invite.trim().toUpperCase() });
-                Toast.success(`¡Te has unido con éxito! 👥`);
-                setTimeout(() => window.location.reload(), 1000);
+    toggleGroupModal() {
+        const modal = document.getElementById('group-modal');
+        if (!modal.classList.contains('modal--open')) {
+            const user = Auth.getUser();
+            const hasGroup = user.inviteCode && user.inviteCode !== '---';
+            
+            const statusText = document.getElementById('group-status-text');
+            const copyBox = document.getElementById('copy-group-box');
+            const joinInput = document.getElementById('join-group-input');
+            
+            if (statusText) {
+                statusText.textContent = hasGroup ? `🏠 Casa: ${user.inviteCode}` : '🚫 Sin Casa Activa';
+                statusText.style.color = hasGroup ? 'var(--success)' : 'var(--danger)';
             }
-        } else if (action === 'C' && hasGroup) {
+            
+            if (copyBox) copyBox.style.display = hasGroup ? 'block' : 'none';
+            if (joinInput) joinInput.value = '';
+        }
+        modal.classList.toggle('modal--open');
+    },
+
+    async handleInviteCodeActions() {
+        // En lugar de prompt, ahora abre el modal personalizado
+        this.toggleGroupModal();
+    },
+
+    async handleGenerateGroup() {
+        if (!confirm("¿Deseas crear una sede de gastos nueva? (Tu PIN actual cambiará)")) return;
+        
+        const user = Auth.getUser();
+        const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        
+        await AuthAPI.updateProfile(user.id, { inviteCode: newCode });
+        Toast.success(`¡Casa nueva creada! Código: ${newCode} 🏠`);
+        
+        this.toggleGroupModal();
+        setTimeout(() => window.location.reload(), 800);
+    },
+
+    async handleJoinGroup() {
+        const invite = document.getElementById('join-group-input').value.trim();
+        if (!invite || invite.length < 4) {
+            Toast.warning("Por favor ingresa un código válido de al menos 4 caracteres.");
+            return;
+        }
+        
+        const user = Auth.getUser();
+        await AuthAPI.updateProfile(user.id, { inviteCode: invite.toUpperCase() });
+        Toast.success(`¡Te has unido con éxito a la casa ${invite.toUpperCase()}! 👥`);
+        
+        this.toggleGroupModal();
+        setTimeout(() => window.location.reload(), 800);
+    },
+
+    handleCopyGroup() {
+        const user = Auth.getUser();
+        if (user.inviteCode && user.inviteCode !== '---') {
             navigator.clipboard.writeText(user.inviteCode);
             Toast.success('¡Código copiado al portapapeles! 📋');
         }

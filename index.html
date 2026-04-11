@@ -399,15 +399,59 @@
     </div>
 </div>
 
+<!-- =============================================
+     MODAL: Gestión de Casa (Generar/Unirse)
+     ============================================= -->
+<div class="modal-overlay"
+     id="group-modal"
+     role="dialog"
+     aria-modal="true"
+     onclick="if(event.target===this) UI.toggleGroupModal()">
+    <div class="modal" style="max-width: 400px; text-align: center;">
+        <div class="modal__header">
+            <h2 class="modal__title">🏢 Gestión de Vivienda</h2>
+            <button class="modal__close" onclick="UI.toggleGroupModal()">✕</button>
+        </div>
+
+        <div style="padding: 10px 0;">
+            <div id="group-status-badge" style="margin-bottom: 20px; padding: 15px; border-radius: 12px; background: var(--bg-900); border: 1px solid var(--bg-700);">
+                <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">ESTADO ACTUAL</div>
+                <div id="group-status-text" style="font-weight: bold; font-size: 1.1rem; color: var(--accent);">Sin Grupo Activo</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Acción: Generar -->
+                <button class="btn btn--primary" style="width: 100%; justify-content: center;" onclick="UI.handleGenerateGroup()">
+                    🔑 Generar Nueva Casa
+                </button>
+
+                <div style="border-top: 1px solid var(--bg-700); margin: 10px 0; padding-top: 15px;">
+                    <label style="display: block; text-align: left; font-size: 0.85rem; margin-bottom: 8px; color: #888;">¿TIENES UN CÓDIGO?</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="join-group-input" placeholder="Ej: ABC123" style="flex: 1; text-transform: uppercase;">
+                        <button class="btn btn--accent" onclick="UI.handleJoinGroup()">Unirme</button>
+                    </div>
+                </div>
+
+                <div id="copy-group-box" style="display: none; border-top: 1px solid var(--bg-700); padding-top: 15px;">
+                    <button class="btn btn--ghost" style="width: 100%; justify-content: center;" onclick="UI.handleCopyGroup()">
+                        📋 Copiar Código Actual
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast container -->
 <div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
 
 <!-- =============================================
      SCRIPTS (orden importante)
      ============================================= -->
-<script src="assets/js/api-client.js?v=9"></script>
-<script src="assets/js/auth.js?v=9"></script>
-<script src="assets/js/ui-render.js?v=9"></script>
+<script src="assets/js/api-client.js?v=10"></script>
+<script src="assets/js/auth.js?v=10"></script>
+<script src="assets/js/ui-render.js?v=10"></script>
 <!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
 
 </body>
