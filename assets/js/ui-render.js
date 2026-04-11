@@ -20,6 +20,7 @@ const ChartManager = {
         }
 
         const ctx = document.getElementById('categoryChart');
+        const emptyMsg = document.getElementById('no-chart-data');
 
         if (!expenses || expenses.length === 0) {
             ctx.style.display = 'none';
