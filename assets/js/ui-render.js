@@ -298,9 +298,6 @@ const ExpenseTable = {
 
         // Actualizar Gráfico
         ChartManager.update(expenses);
-        if (window.AnalyticsJS) {
-            window.AnalyticsJS.renderAll(expenses);
-        }
     },
 };
 

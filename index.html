@@ -6,20 +6,8 @@
     <meta name="description" content="RentShare — Plataforma inteligente para gestionar y dividir gastos del hogar entre compañeros de vivienda.">
     <title>RentShare — Gestión de Gastos Compartidos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
     <link rel="stylesheet" href="assets/css/styles.css">
-    <!-- Visualizaciones Avanzadas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
-    <!-- Tesseract para OCR -->
-    <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="assets/js/offline-sync.js?v=24"></script>
 </head>
 <body>
 
@@ -186,59 +174,6 @@
             <ul id="deudas-list" style="margin-top: 15px; list-style-type: none; padding-left:0; display:flex; flex-direction:column; gap:10px;"></ul>
         </section>
 
-        <!-- =============================================
-             ANÁLISIS AVANZADO: CHART.JS + D3.JS
-             ============================================= -->
-        <section id="advanced-analytics" style="margin-bottom: 3rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>📈 Análisis Inteligente</h2>
-                <button class="btn btn--outline btn--sm" onclick="AnalyticsJS.renderAll()" aria-label="Recargar gráficas">🔄 Visualizar Datos</button>
-            </div>
-
-            <!-- Gráficas D3 (Sankey + Heatmap) -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                
-                <!-- Sankey Diagram (D3) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">💸 Flujo de Dinero Completo (Sankey)</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-400); margin-bottom: 1rem;">Visualiza de forma interactiva quién pagó qué categorías.</p>
-                    <div id="d3-sankey-container" style="width: 100%; height: 350px; position:relative; overflow: hidden; display: flex; align-items:center; justify-content:center;">
-                        <span id="sankey-empty" style="color:var(--text-400); font-size:0.9rem;">Esperando datos de grupo...</span>
-                    </div>
-                </div>
-
-                <!-- Radar Chart (Chart.js) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">🎯 Perfil de Gastos por Usuario (Radar)</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-400); margin-bottom: 1rem;">Compara el volumen de inversión de cada persona en las distintas categorías.</p>
-                    <div style="width: 100%; height: 350px; position: relative;">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gráfica Histórica y Heatmap -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
-                
-                <!-- Line Chart Temporal (Chart.js) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">📈 Tendencia Histórica de Gastos</h3>
-                    <div style="width: 100%; height: 250px; position: relative;">
-                        <canvas id="trendChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Calendar Heatmap (D3) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">📅 Mapa de Calor: Frecuencia de Gastos</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-400); margin-bottom: 1rem;">Los días más oscuros indican mayor cantidad de dinero gastado.</p>
-                    <div id="d3-heatmap-container" style="width: 100%; height: 250px; overflow-x: auto; position:relative;">
-                        <span id="heatmap-empty" style="color:var(--text-400); font-size:0.9rem; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">Esperando datos históricos...</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Tabla de Gastos -->
         <section class="table-section" aria-label="Lista de gastos">
             <div class="table-header" style="flex-wrap: wrap; gap: 1rem;">
@@ -311,22 +246,6 @@
 
         <form id="expense-form" novalidate>
             <div class="form-grid">
-                <!-- OCR Module -->
-                <div class="form-group form-group--full" style="background: rgba(139, 92, 246, 0.1); border: 1px dashed var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <strong style="color: var(--accent); display: block; margin-bottom: 5px;">📸 Escaneo Inteligente (OCR)</strong>
-                        <span style="font-size: 0.75rem; color: #888;">Sube una foto del ticket para extraer los datos automáticamente.</span>
-                    </div>
-                    <label class="btn btn--accent btn--sm" style="cursor: pointer;">
-                        Escanear
-                        <input type="file" id="ocr-input" accept="image/*" style="display: none;" onchange="OCRApp.handleUpload(event)">
-                    </label>
-                </div>
-                <!-- Status OCR -->
-                <div id="ocr-status" class="form-group form-group--full" style="display: none; font-size: 0.8rem; color: var(--accent); align-items: center; gap: 8px;">
-                    <span class="loader-spinner" style="width:12px; height:12px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 1s linear infinite;"></span> Procesando imagen con Tesseract.js...
-                </div>
-
 
                 <!-- Descripción -->
                 <div class="form-group form-group--full">
@@ -543,9 +462,6 @@
 <script src="assets/js/api-client.js?v=24"></script>
 <script src="assets/js/auth.js?v=24"></script>
 <script src="assets/js/ui-render.js?v=24"></script>
-<script src="assets/js/websocket.js?v=24"></script>
-<script src="assets/js/analytics.js?v=24"></script>
-<script src="assets/js/ocr.js?v=24"></script>
 <!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
 
 </body>
