@@ -14,15 +14,39 @@ const Auth = {
         }
     },
 
+    async register(nombre, email, password) {
+        try {
+            const data = await AuthAPI.register(email, password, nombre);
+            if (data.token) {
+                localStorage.setItem('rentshare_token', data.token);
+                localStorage.setItem('user_email', email);
+                window.location.reload();
+            } else {
+                alert('Registro exitoso. Revisa tu correo o inicia sesión.');
+                window.location.reload();
+            }
+        } catch (err) {
+            document.getElementById('register-error').textContent = err.message;
+        }
+    },
+
     logout() {
         localStorage.clear();
         window.location.reload();
     }
 };
 
+// Event Listeners
 document.getElementById('login-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    Auth.login(email, password);
+    Auth.login(document.getElementById('login-email').value, document.getElementById('login-password').value);
+});
+
+document.getElementById('register-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    Auth.register(
+        document.getElementById('reg-name').value,
+        document.getElementById('reg-email').value,
+        document.getElementById('reg-password').value
+    );
 });

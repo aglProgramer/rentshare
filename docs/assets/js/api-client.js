@@ -1,4 +1,4 @@
-const API_BASE = 'https://backend-rentshare-production.up.railway.app/api'; // Ajustar según despliegue
+const API_BASE = 'https://backend-rentshare-production.up.railway.app/api';
 
 const apiClient = {
     getToken() {
@@ -13,21 +13,27 @@ const apiClient = {
         const options = { method, headers };
         if (body) options.body = JSON.stringify(body);
 
-        const response = await fetch(`${API_BASE}${endpoint}`, options);
-        if (response.status === 401) {
-            localStorage.clear();
-            window.location.reload();
+        try {
+            const response = await fetch(`${API_BASE}${endpoint}`, options);
+            if (response.status === 401) {
+                localStorage.clear();
+                window.location.reload();
+            }
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || 'Error en la petición');
+            }
+            return response.status === 204 ? null : response.json();
+        } catch (err) {
+            console.error('Fetch error:', err);
+            throw err;
         }
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || 'Error en la petición');
-        }
-        return response.status === 204 ? null : response.json();
     }
 };
 
 const AuthAPI = {
-    login: (email, password) => apiClient.request('POST', '/auth/login', { email, password })
+    login: (email, password) => apiClient.request('POST', '/auth/login', { email, password }),
+    register: (email, password, nombre) => apiClient.request('POST', '/auth/register', { email, password, nombre })
 };
 
 const GroupAPI = {
