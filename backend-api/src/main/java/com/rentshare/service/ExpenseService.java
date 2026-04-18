@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class ExpenseService {
         
         expense.setDescription(dto.getDescription());
         expense.setAmount(dto.getAmount());
-        expense.setExpenseDate(dto.getExpenseDate() != null ? dto.getExpenseDate().atStartOfDay(java.time.ZoneId.systemDefault()).toOffsetDateTime().toZonedDateTime() : ZonedDateTime.now());
+        expense.setExpenseDate(dto.getExpenseDate() != null ? dto.getExpenseDate() : LocalDate.now());
         expense.setSplitType(dto.getSplitType() != null ? dto.getSplitType() : "EQUAL");
         expense.setCreatedAt(ZonedDateTime.now());
         expense.setUpdatedAt(ZonedDateTime.now());
@@ -116,7 +117,7 @@ public class ExpenseService {
         }
         expense.setDescription(dto.getDescription());
         expense.setAmount(dto.getAmount());
-        expense.setExpenseDate(dto.getExpenseDate());
+        expense.setExpenseDate(dto.getExpenseDate() != null ? dto.getExpenseDate() : expense.getExpenseDate());
         expense.setSplitType(dto.getSplitType());
         expense.setUpdatedAt(ZonedDateTime.now());
 

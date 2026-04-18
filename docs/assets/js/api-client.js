@@ -33,7 +33,7 @@ const apiClient = {
 
 const AuthAPI = {
     login: (email, password) => apiClient.request('POST', '/auth/login', { email, password }),
-    register: (email, password, nombre) => apiClient.request('POST', '/auth/register', { email, password, nombre })
+    register: (email, password, name) => apiClient.request('POST', '/auth/register', { email, password, name })
 };
 
 const GroupAPI = {

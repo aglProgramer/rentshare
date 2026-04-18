@@ -9,10 +9,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
+@lombok.RequiredArgsConstructor
 public class AuthController {
+
+    private final com.rentshare.repository.ProfileRepository profileRepository;
 
     @Value("${supabase.url}")
     private String supabaseUrl;
@@ -50,8 +54,18 @@ public class AuthController {
                 Map<String, Object> finalResponse = new HashMap<>();
                 finalResponse.put("token", resBody.get("access_token"));
                 finalResponse.put("userId", user != null ? user.get("id") : null);
-                finalResponse.put("nombre", userMeta != null ? userMeta.getOrDefault("nombre", "Usuario") : "Usuario");
+                finalResponse.put("name", userMeta != null ? userMeta.getOrDefault("name", "Usuario") : "Usuario");
                 finalResponse.put("email", request.getEmail());
+
+                // Guardar/Actualizar Perfil local
+                if (user != null) {
+                    com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
+                    profile.setId(UUID.fromString((String) user.get("id")));
+                    profile.setName((String) finalResponse.get("name"));
+                    profile.setUpdatedAt(java.time.ZonedDateTime.now());
+                    profileRepository.save(profile);
+                }
+
                 return ResponseEntity.ok(finalResponse);
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -71,12 +85,12 @@ public class AuthController {
         String url = supabaseUrl + "/auth/v1/signup";
         
         Map<String, Object> options = new HashMap<>();
-        options.put("data", Map.of("nombre", request.getNombre() != null ? request.getNombre() : "Usuario"));
+        options.put("data", Map.of("name", request.getName() != null ? request.getName() : "Usuario"));
         
         Map<String, Object> body = new HashMap<>();
         body.put("email", request.getEmail());
         body.put("password", request.getPassword());
-        body.put("data", Map.of("nombre", request.getNombre() != null ? request.getNombre() : "Usuario"));
+        body.put("data", Map.of("name", request.getName() != null ? request.getName() : "Usuario"));
 
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, buildSupabaseHeaders());
@@ -90,16 +104,32 @@ public class AuthController {
                 Map<String, Object> finalResponse = new HashMap<>();
                 finalResponse.put("token", resBody.get("access_token"));
                 finalResponse.put("userId", user != null ? user.get("id") : null);
-                finalResponse.put("nombre", request.getNombre());
+                finalResponse.put("name", request.getName());
                 finalResponse.put("email", request.getEmail());
+
+                // Crear Perfil local
+                com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
+                profile.setId(UUID.fromString((String) user.get("id")));
+                profile.setName(request.getName());
+                profile.setCreatedAt(java.time.ZonedDateTime.now());
+                profile.setUpdatedAt(java.time.ZonedDateTime.now());
+                profileRepository.save(profile);
+
                 return ResponseEntity.status(HttpStatus.CREATED).body(finalResponse);
             }
             // Supabase may return user without token if email confirmation required
+            Map<String, Object> idResponse = (Map<String, Object>) resBody;
+            if (idResponse != null && idResponse.containsKey("id")) {
+                com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
+                profile.setId(UUID.fromString((String) idResponse.get("id")));
+                profile.setName(request.getName());
+                profile.setCreatedAt(java.time.ZonedDateTime.now());
+                profile.setUpdatedAt(java.time.ZonedDateTime.now());
+                profileRepository.save(profile);
+            }
+
             Map<String, Object> infoResponse = new HashMap<>();
             infoResponse.put("message", "Registro exitoso. Revisa tu correo para confirmar.");
-            if (resBody != null && resBody.containsKey("id")) {
-                infoResponse.put("userId", resBody.get("id"));
-            }
             return ResponseEntity.ok(infoResponse);
         } catch (HttpClientErrorException e) {
             return ResponseEntity.status(e.getStatusCode())

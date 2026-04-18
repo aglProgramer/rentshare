@@ -2,14 +2,14 @@ spring:
   application:
     name: rentshare-api
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:}
+    username: ${DB_USER:}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -21,7 +21,7 @@ server:
     include-message: always
 
 supabase:
-  url: ${SUPABASE_URL}
-  anon-key: ${SUPABASE_ANON_KEY}
+  url: ${SUPABASE_URL:}
+  anon-key: ${SUPABASE_ANON_KEY:}
   jwt:
-    secret: ${SUPABASE_JWT_SECRET}
+    secret: ${SUPABASE_JWT_SECRET:}

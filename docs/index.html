@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="icon" href="data:,">
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -296,7 +297,7 @@
                 document.getElementById('create-group-form').onsubmit = async (e) => {
                     e.preventDefault();
                     try {
-                        await GroupAPI.create({ nombre: document.getElementById('group-name').value });
+                        await GroupAPI.create({ name: document.getElementById('group-name').value });
                         document.getElementById('group-name').value = '';
                         document.getElementById('create-group-modal').classList.add('hidden');
                         this.loadGroups();
@@ -306,11 +307,10 @@
                     e.preventDefault();
                     try {
                         await ExpenseAPI.create({
-                            descripcion: document.getElementById('expense-desc').value,
-                            monto: parseFloat(document.getElementById('expense-amount').value),
+                            description: document.getElementById('expense-desc').value,
+                            amount: parseFloat(document.getElementById('expense-amount').value),
                             groupId: this.currentGroupId,
-                            fecha: new Date().toISOString().split('T')[0],
-                            categoria: 'GENERAL'
+                            expenseDate: new Date().toISOString().split('T')[0]
                         });
                         document.getElementById('expense-desc').value = '';
                         document.getElementById('expense-amount').value = '';

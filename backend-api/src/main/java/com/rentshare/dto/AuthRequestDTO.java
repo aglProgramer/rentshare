@@ -6,5 +6,5 @@ import lombok.Data;
 public class AuthRequestDTO {
     private String email;
     private String password;
-    private String nombre; // Solo para registro
+    private String name; // Solo para registro
 }

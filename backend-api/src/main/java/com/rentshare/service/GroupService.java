@@ -1,7 +1,9 @@
 package com.rentshare.service;
 
 import com.rentshare.model.Group;
+import com.rentshare.model.GroupMember;
 import com.rentshare.model.Profile;
+import com.rentshare.repository.GroupMemberRepository;
 import com.rentshare.repository.GroupRepository;
 import com.rentshare.repository.ProfileRepository;
 import com.rentshare.exception.ResourceNotFoundException;
@@ -19,7 +21,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final ProfileRepository profileRepository;
-    private final com.rentshare.repository.GroupMemberRepository groupMemberRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
     private Profile getAuthenticatedUser() {
         String userIdStr = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -46,12 +48,12 @@ public class GroupService {
         return savedGroup;
     }
 
-    public com.rentshare.model.GroupMember addMember(UUID groupId, UUID profileId) {
+    public GroupMember addMember(UUID groupId, UUID profileId) {
         Group group = getGroupById(groupId);
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
 
-        com.rentshare.model.GroupMember member = new com.rentshare.model.GroupMember();
+        GroupMember member = new GroupMember();
         member.setGroup(group);
         member.setProfile(profile);
         member.setJoinedAt(ZonedDateTime.now());

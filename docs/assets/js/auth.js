@@ -14,9 +14,9 @@ const Auth = {
         }
     },
 
-    async register(nombre, email, password) {
+    async register(name, email, password) {
         try {
-            const data = await AuthAPI.register(email, password, nombre);
+            const data = await AuthAPI.register(email, password, name);
             if (data.token) {
                 localStorage.setItem('rentshare_token', data.token);
                 localStorage.setItem('user_email', email);
