@@ -35,7 +35,7 @@ public class Expense {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(nullable = false)
+    @Column(name = "descripcion", nullable = false)
     private String description;
 
     @Column(nullable = false, precision = 15, scale = 2)

@@ -19,7 +19,7 @@ public class Profile {
     @Id
     private UUID id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String name;
 
     @Column(length = 20)

@@ -20,9 +20,10 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String name;
 
+    @Column(name = "descripcion")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

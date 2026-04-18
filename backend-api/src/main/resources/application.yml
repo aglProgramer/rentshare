@@ -2,9 +2,9 @@ spring:
   application:
     name: rentshare-api
   datasource:
-    url: ${DB_URL:}
-    username: ${DB_USER:}
-    password: ${DB_PASSWORD:}
+    url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres
+    username: postgres.fcwbsbykxvsxwhkjvezg
+    password: criadero123
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -21,7 +21,7 @@ server:
     include-message: always
 
 supabase:
-  url: ${SUPABASE_URL:}
-  anon-key: ${SUPABASE_ANON_KEY:}
+  url: https://fcwbsbykxvsxwhkjvezg.supabase.co
+  anon-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjd2JzYnlreHZzeHdoa2p2ZXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzQxNzQsImV4cCI6MjA5MTUxMDE3NH0.8XikD3kBqX0aSvInlOauB82B47DIjnoCtpM94BXJNqM
   jwt:
-    secret: ${SUPABASE_JWT_SECRET:}
+    secret: 44mpsFsdV+x9nA4px4YK3QkS0TQoj5MfK2p0C6eHRvsV5bfxEtW1uXMp5hGPilBtuXioA1u0t8VcvWPNJ/jBhQ==
