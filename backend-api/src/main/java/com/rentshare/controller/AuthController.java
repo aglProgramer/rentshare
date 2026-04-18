@@ -39,7 +39,8 @@ public class AuthController {
 
         try {
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, buildSupabaseHeaders());
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            @SuppressWarnings("unchecked")
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(url, entity, Map.class);
             
             Map<String, Object> resBody = response.getBody();
             if (resBody != null && resBody.containsKey("access_token")) {
@@ -79,7 +80,8 @@ public class AuthController {
 
         try {
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, buildSupabaseHeaders());
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            @SuppressWarnings("unchecked")
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(url, entity, Map.class);
 
             Map<String, Object> resBody = response.getBody();
             if (resBody != null && resBody.containsKey("access_token")) {
