@@ -116,6 +116,7 @@ public class AuthController {
                     com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
                     profile.setId(UUID.fromString((String) user.get("id")));
                     profile.setName(request.getName());
+                    profile.setNombre(request.getName());
                     profile.setCreatedAt(java.time.ZonedDateTime.now());
                     profile.setUpdatedAt(java.time.ZonedDateTime.now());
                     profileRepository.save(profile);
@@ -134,6 +135,7 @@ public class AuthController {
                     com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
                     profile.setId(UUID.fromString((String) idResponse.get("id")));
                     profile.setName(request.getName());
+                    profile.setNombre(request.getName());
                     profile.setCreatedAt(java.time.ZonedDateTime.now());
                     profile.setUpdatedAt(java.time.ZonedDateTime.now());
                     profileRepository.save(profile);

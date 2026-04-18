@@ -43,6 +43,7 @@ public class GroupService {
         group.setCreatedBy(currentUser);
         group.setCreatedAt(ZonedDateTime.now());
         group.setUpdatedAt(ZonedDateTime.now());
+        group.setNombre(group.getName());
         Group savedGroup = groupRepository.save(group);
         addMember(savedGroup.getId(), currentUser.getId()); // Creator is member
         return savedGroup;

@@ -19,8 +19,11 @@ public class Profile {
     @Id
     private UUID id;
 
-    @Column(name = "nombre", nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
 
     @Column(length = 20)
     private String celular;

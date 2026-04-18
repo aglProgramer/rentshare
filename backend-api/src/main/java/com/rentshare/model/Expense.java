@@ -35,8 +35,11 @@ public class Expense {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
+
+    @Column(name = "descripcion", nullable = false)
+    private String descripcion;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;

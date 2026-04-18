@@ -20,8 +20,11 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre; // Duplicado para compatibilidad con DB
 
     @Column
     private String description;

@@ -63,6 +63,7 @@ public class ExpenseService {
         }
         
         expense.setDescription(dto.getDescription());
+        expense.setDescripcion(dto.getDescription());
         expense.setAmount(dto.getAmount());
         expense.setExpenseDate(dto.getExpenseDate() != null ? dto.getExpenseDate() : LocalDate.now());
         expense.setSplitType(dto.getSplitType() != null ? dto.getSplitType() : "EQUAL");
@@ -116,6 +117,7 @@ public class ExpenseService {
             expense.setCategory(categoryRepository.findById(dto.getCategoryId()).orElse(null));
         }
         expense.setDescription(dto.getDescription());
+        expense.setDescripcion(dto.getDescription());
         expense.setAmount(dto.getAmount());
         expense.setExpenseDate(dto.getExpenseDate() != null ? dto.getExpenseDate() : expense.getExpenseDate());
         expense.setSplitType(dto.getSplitType());
