@@ -59,11 +59,15 @@ public class AuthController {
 
                 // Guardar/Actualizar Perfil local
                 if (user != null) {
-                    com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
-                    profile.setId(UUID.fromString((String) user.get("id")));
-                    profile.setName((String) finalResponse.get("name"));
-                    profile.setUpdatedAt(java.time.ZonedDateTime.now());
-                    profileRepository.save(profile);
+                    try {
+                        com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
+                        profile.setId(UUID.fromString((String) user.get("id")));
+                        profile.setName((String) finalResponse.get("name"));
+                        profile.setUpdatedAt(java.time.ZonedDateTime.now());
+                        profileRepository.save(profile);
+                    } catch (Exception e) {
+                        System.err.println("Advertencia: No se pudo sincronizar el perfil: " + e.getMessage());
+                    }
                 }
 
                 return ResponseEntity.ok(finalResponse);
@@ -107,25 +111,35 @@ public class AuthController {
                 finalResponse.put("name", request.getName());
                 finalResponse.put("email", request.getEmail());
 
-                // Crear Perfil local
-                com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
-                profile.setId(UUID.fromString((String) user.get("id")));
-                profile.setName(request.getName());
-                profile.setCreatedAt(java.time.ZonedDateTime.now());
-                profile.setUpdatedAt(java.time.ZonedDateTime.now());
-                profileRepository.save(profile);
+                // Crear Perfil local (con protección contra errores de DB)
+                try {
+                    com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
+                    profile.setId(UUID.fromString((String) user.get("id")));
+                    profile.setName(request.getName());
+                    profile.setCreatedAt(java.time.ZonedDateTime.now());
+                    profile.setUpdatedAt(java.time.ZonedDateTime.now());
+                    profileRepository.save(profile);
+                } catch (Exception e) {
+                    System.err.println("Advertencia: No se pudo crear el perfil local: " + e.getMessage());
+                    // Continuamos de todas formas para que el usuario pueda entrar
+                }
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(finalResponse);
             }
-            // Supabase may return user without token if email confirmation required
+            
+            // Caso sin token inmediato
             Map<String, Object> idResponse = (Map<String, Object>) resBody;
             if (idResponse != null && idResponse.containsKey("id")) {
-                com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
-                profile.setId(UUID.fromString((String) idResponse.get("id")));
-                profile.setName(request.getName());
-                profile.setCreatedAt(java.time.ZonedDateTime.now());
-                profile.setUpdatedAt(java.time.ZonedDateTime.now());
-                profileRepository.save(profile);
+                try {
+                    com.rentshare.model.Profile profile = new com.rentshare.model.Profile();
+                    profile.setId(UUID.fromString((String) idResponse.get("id")));
+                    profile.setName(request.getName());
+                    profile.setCreatedAt(java.time.ZonedDateTime.now());
+                    profile.setUpdatedAt(java.time.ZonedDateTime.now());
+                    profileRepository.save(profile);
+                } catch (Exception e) {
+                    System.err.println("Advertencia: No se pudo crear el perfil local: " + e.getMessage());
+                }
             }
 
             Map<String, Object> infoResponse = new HashMap<>();

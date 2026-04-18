@@ -2,7 +2,7 @@ spring:
   application:
     name: rentshare-api
   datasource:
-    url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres
+    url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?prepareThreshold=0
     username: postgres.fcwbsbykxvsxwhkjvezg
     password: criadero123
     driver-class-name: org.postgresql.Driver
