@@ -1,552 +1,366 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="RentShare — Plataforma inteligente para gestionar y dividir gastos del hogar entre compañeros de vivienda.">
-    <title>RentShare — Gestión de Gastos Compartidos</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <!-- Visualizaciones Avanzadas -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
-    <!-- Tesseract para OCR -->
-    <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="assets/js/offline-sync.js?v=31"></script>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>RentShare - Financial Harmony</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#c1beff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#e3dfff",
+                        "surface-container-high": "#dce9ff",
+                        "primary": "#2a14b4",
+                        "on-primary-fixed-variant": "#372abf",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#4338ca",
+                        "on-background": "#0b1c30",
+                        "on-surface": "#0b1c30",
+                        "secondary-container": "#86f2e4",
+                        "surface-tint": "#5148d7",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#00201d",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary-fixed": "#100069",
+                        "outline-variant": "#c7c4d7",
+                        "outline": "#777586",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#003f5c",
+                        "surface-bright": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "secondary": "#006a61",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary-container": "#84cdff",
+                        "tertiary-container": "#00577e",
+                        "secondary-fixed": "#89f5e7",
+                        "on-tertiary-fixed-variant": "#004c6e",
+                        "on-secondary-fixed-variant": "#005049",
+                        "tertiary-fixed-dim": "#89ceff",
+                        "surface-container-low": "#eff4ff",
+                        "on-secondary-container": "#006f66",
+                        "surface-variant": "#d3e4fe",
+                        "on-tertiary-fixed": "#001e2f",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary-fixed": "#c9e6ff",
+                        "inverse-surface": "#213145",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#464554",
+                        "secondary-fixed-dim": "#6bd8cb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .editorial-shadow { box-shadow: 0px 12px 32px rgba(11, 28, 48, 0.04); }
+        .hidden { display: none !important; }
+    </style>
 </head>
-<body>
+<body class="bg-background text-on-background min-h-screen">
 
-<!-- =============================================
-     PANTALLA DE LOGIN
-     ============================================= -->
-<div id="login-screen" class="login-screen">
-    <div class="login-card">
-        <div class="login-logo">
-            <div class="login-logo__icon">🏠</div>
-            <h1 class="login-logo__title">RentShare</h1>
-            <p class="login-logo__subtitle">Gestión inteligente de gastos compartidos</p>
-        </div>
-
-        <!-- Hint de usuarios de prueba -->
-        <div class="login-hint">
-            <strong>👤 Usuarios de prueba:</strong>
-            <code>carlos@ejemplo.com</code> / <code>123456</code><br>
-            <code>maria@ejemplo.com</code> / <code>123456</code>
-        </div>
-
-        <div id="login-error" role="alert" aria-live="polite"></div>
-
-        <!-- FORMULARIO DE LOGIN -->
-        <form id="login-form">
-            <div class="form-group" style="margin-bottom: 1rem;">
-                <label for="login-email">Correo electrónico</label>
-                <input type="email" id="login-email" placeholder="usuario@rentshare.com" required>
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen" class="min-h-screen flex flex-col">
+        <main class="flex-grow flex items-center justify-center px-6 py-12 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
+                <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+                <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary-container/20 blur-[120px]"></div>
             </div>
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label for="login-password">Contraseña</label>
-                <input type="password" id="login-password" placeholder="••••••••" required>
+            <div class="w-full max-w-[440px]">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-black tracking-tighter text-primary mb-2">RentShare</h1>
+                    <p class="text-on-surface-variant font-medium tracking-tight">Financial harmony for modern living.</p>
+                </div>
+                <div class="bg-surface-container-lowest editorial-shadow rounded-[32px] p-8 md:p-10">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-on-surface tracking-tight mb-2">Welcome Back</h2>
+                        <p class="text-on-surface-variant text-sm">Please enter your details to sign in.</p>
+                        <div id="login-error" class="text-error text-xs mt-2 font-bold"></div>
+                    </div>
+                    <form id="login-form" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant ml-1">Email Address</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
+                                <input id="login-email" class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-2xl text-on-surface focus:ring-2 focus:ring-primary/20 transition-all" placeholder="name@example.com" type="email" required/>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant ml-1">Password</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">lock</span>
+                                <input id="login-password" class="w-full pl-12 pr-12 py-4 bg-surface-container-low border-none rounded-2xl text-on-surface focus:ring-2 focus:ring-primary/20 transition-all" placeholder="••••••••" type="password" required/>
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                            <button type="submit" class="w-full py-4 px-6 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-2xl transition-transform active:scale-95 duration-200 shadow-lg">
+                                Sign In
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <button type="submit" id="login-btn" class="btn btn--primary" style="width:100%; justify-content:center;">
-                🔑 Iniciar sesión
-            </button>
-            <p style="text-align:center; margin-top:15px; font-size:14px;">¿No tienes cuenta? <a href="#" id="toggle-register">Regístrate</a></p>
-        </form>
-
-        <!-- FORMULARIO DE REGISTRO (oculto) -->
-        <form id="register-form" class="hidden" style="display: none;">
-            <div class="form-group" style="margin-bottom: 1rem;">
-                <label for="reg-nombre">Nombre Completo</label>
-                <input type="text" id="reg-nombre" placeholder="Juan Pérez" required>
-            </div>
-            <div class="form-group" style="margin-bottom: 1rem;">
-                <label for="reg-email">Correo electrónico</label>
-                <input type="email" id="reg-email" placeholder="juan@ejemplo.com" required>
-            </div>
-            <div class="form-group" style="margin-bottom: 1rem;">
-                <label for="reg-password">Contraseña</label>
-                <input type="password" id="reg-password" placeholder="••••••••" minlength="6" required>
-            </div>
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label for="reg-invite">Código Inivitación (Opcional)</label>
-                <input type="text" id="reg-invite" placeholder="INVITE123 (Vacío para grupo nuevo)">
-            </div>
-            <button type="submit" id="register-btn" class="btn btn--accent" style="width:100%; justify-content:center;">
-                📝 Registrarse
-            </button>
-            <p style="text-align:center; margin-top:15px; font-size:14px;">¿Ya tienes cuenta? <a href="#" id="toggle-login">Inicia Sesión</a></p>
-        </form>
+        </main>
     </div>
-</div>
 
-<!-- =============================================
-     APLICACIÓN PRINCIPAL (oculta hasta login)
-     ============================================= -->
-<div id="app" class="app-container" style="display:none;">
-
-    <!-- NAVBAR -->
-    <nav class="navbar" role="navigation" aria-label="Navegación principal">
-        <a href="#" class="navbar__brand" aria-label="RentShare inicio">
-            <div class="navbar__logo" aria-hidden="true">🏠</div>
-            <span class="navbar__title">RentShare</span>
-        </a>
-
-        <div class="navbar__actions">
-            <div id="box-invite-code" class="invite-badge" style="cursor: pointer; background: var(--bg-800); border: 1px dashed var(--accent); padding: 5px 10px; border-radius: 8px; margin-right: 15px;" 
-                 onclick="UI.handleInviteCodeActions()"
-                 title="Click para gestionar tu casa (Generar o Unirse)">
-                <span class="text-sm">Código: <strong id="invite-code-display" class="text-accent"></strong></span>
+    <!-- PANTALLA PRINCIPAL (DASHBOARD) -->
+    <div id="app" class="hidden">
+        <header class="bg-white/80 backdrop-blur-3xl sticky top-0 z-50 border-b border-outline-variant/10">
+            <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+                <div class="text-2xl font-black tracking-tighter text-primary">RentShare</div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-display" class="text-sm font-medium text-on-surface-variant"></span>
+                    <button id="logout-btn" class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-all">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                </div>
             </div>
-            <div class="user-chip">
-                <div class="user-avatar" id="user-avatar" aria-label="Avatar del usuario">U</div>
-                <span class="user-name" id="user-name">Usuario</span>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Screen: Group List -->
+            <div id="groups-screen">
+                <section class="mb-12">
+                    <div class="bg-gradient-to-br from-primary to-primary-container p-8 md:p-12 rounded-[2rem] text-white overflow-hidden relative">
+                        <div class="relative z-10">
+                            <p class="text-on-primary-container font-medium tracking-widest uppercase text-xs mb-4">Overview</p>
+                            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-2">My Groups</h1>
+                            <p class="text-indigo-200 text-lg">Manage your shared living expenses</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-bold tracking-tight">Active Groups</h2>
+                        <button id="show-create-group" class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                            <span class="material-symbols-outlined">add</span> Create Group
+                        </button>
+                    </div>
+
+                    <!-- Modal crear grupo (simple) -->
+                    <div id="create-group-modal" class="hidden mb-8 p-6 bg-surface-container-low rounded-3xl border border-primary/20">
+                        <form id="create-group-form" class="flex gap-4">
+                            <input type="text" id="group-name" class="flex-grow bg-white border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary/20" placeholder="Group Name" required/>
+                            <button type="submit" class="bg-primary text-white px-6 py-3 rounded-xl font-bold">Create</button>
+                        </form>
+                    </div>
+
+                    <div id="groups-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Generado por JS -->
+                    </div>
+                </section>
             </div>
-            <button class="btn btn--ghost btn--sm" style="margin-right:8px;"
-                    id="profile-btn"
-                    onclick="UI.toggleProfile()"
-                    aria-label="Mi Perfil">
-                ⚙️ Perfil
-            </button>
-            <button class="btn btn--ghost btn--sm"
-                    id="logout-btn"
-                    onclick="Auth.logout()"
-                    aria-label="Cerrar sesión">
-                🚪 Salir
-            </button>
-        </div>
-    </nav>
 
-    <!-- MAIN CONTENT -->
-    <main id="main-content">
-
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="page-header__info">
-                <h1>Dashboard de Gastos</h1>
-                <p class="subtitle">Grupo: <strong id="group-name-display" class="text-primary"></strong></p>
-            </div>
-            <button class="btn btn--accent"
-                    id="new-expense-btn"
-                    onclick="UI.toggleModal()"
-                    aria-label="Agregar nuevo gasto"
-                    aria-haspopup="dialog">
-                ✚ Nuevo Gasto
-            </button>
-        </div>
-
-        <!-- =============================================
-             NUEVO DASHBOARD: RESUMEN DEL MES
-             ============================================= -->
-        <section class="dashboard-hero" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            
-            <!-- Columna 1: Info Numérica -->
-            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <h2 style="margin-bottom: -0.5rem; font-size: 1.2rem; color: var(--text-400);">📅 Resumen de este mes</h2>
-                
-                <div class="stats-grid" style="display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%;" aria-label="Resumen de gastos">
-                    <div class="stat-card">
-                        <div class="stat-card__icon" aria-hidden="true">📊</div>
-                        <div class="stat-card__value" id="stat-total-grupal">$ 0</div>
-                        <div class="stat-card__label">Total Grupal del Mes</div>
+            <!-- Screen: Group Details & Expenses -->
+            <div id="expenses-screen" class="hidden">
+                <section class="mb-12">
+                    <div class="flex items-center gap-2 mb-6">
+                        <button id="back-to-groups" class="text-primary hover:bg-surface-container-high p-2 rounded-full transition-colors">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                        </button>
+                        <h1 id="current-group-name" class="text-[2.75rem] font-bold tracking-tight text-on-surface leading-tight">Group Name</h1>
                     </div>
                     
-                    <div class="stat-card" id="card-tu-balance">
-                        <div class="stat-card__icon" aria-hidden="true">⚖️</div>
-                        <div class="stat-card__value" id="stat-tu-balance">$ 0</div>
-                        <div class="stat-card__label" id="label-tu-balance">Cálculo de Deuda...</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 bg-gradient-to-br from-primary to-primary-container p-8 rounded-[2rem] text-white flex flex-col justify-between min-h-[200px]">
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-widest opacity-80">Total Expenses</span>
+                                <div id="group-total-amount" class="text-[3.5rem] font-bold tracking-tighter mt-1">$0.00</div>
+                            </div>
+                        </div>
+                        <div class="bg-surface-container-low p-8 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container-high transition-all" id="open-add-expense">
+                            <span class="material-symbols-outlined text-4xl text-primary mb-2">add_circle</span>
+                            <span class="font-bold">Add Expense</span>
+                        </div>
                     </div>
+                </section>
 
-                    <div class="stat-card" style="background: linear-gradient(135deg, var(--bg-800) 0%, var(--bg-900) 100%);">
-                        <div class="stat-card__label" style="margin-top: 5px;">💰 Has aportado: <strong id="stat-tu-aporte" class="text-success">$ 0</strong></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Columna 2: Gráfica de Análisis -->
-            <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <h3 style="margin-bottom: 1rem; font-size: 1rem; align-self: flex-start;">🍕 Gastos por Categoría</h3>
-                <div style="width: 220px; height: 220px;">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-                <div id="no-chart-data" style="position: absolute; text-align:center; color: var(--text-400); font-size: 0.9rem; display:none;">
-                    Sin gastos compartidos<br>para graficar.
-                </div>
-            </div>
-        </section>
-
-        <!-- Settlement Section -->
-        <section id="settlement-section" style="margin-bottom: 3rem; background: rgba(99, 102, 241, 0.1); border-radius:16px; padding: 1.5rem; border: 1px dashed var(--primary); display:none;">
-            <h3>🤝 Resumen de Liquidación</h3>
-            <ul id="deudas-list" style="margin-top: 15px; list-style-type: none; padding-left:0; display:flex; flex-direction:column; gap:10px;"></ul>
-        </section>
-
-        <!-- =============================================
-             ANÁLISIS AVANZADO: CHART.JS + D3.JS
-             ============================================= -->
-        <section id="advanced-analytics" style="margin-bottom: 3rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>📈 Análisis Inteligente</h2>
-                <button class="btn btn--outline btn--sm" onclick="AnalyticsJS.renderAll()" aria-label="Recargar gráficas">🔄 Visualizar Datos</button>
-            </div>
-
-            <!-- Gráficas D3 (Sankey + Heatmap) -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                
-                <!-- Sankey Diagram (D3) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">💸 Flujo de Dinero Completo (Sankey)</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-400); margin-bottom: 1rem;">Visualiza de forma interactiva quién pagó qué categorías.</p>
-                    <div id="d3-sankey-container" style="width: 100%; height: 350px; position:relative; overflow: hidden; display: flex; align-items:center; justify-content:center;">
-                        <span id="sankey-empty" style="color:var(--text-400); font-size:0.9rem;">Esperando datos de grupo...</span>
+                <!-- Formulario agregar gasto (oculto por defecto) -->
+                <div id="add-expense-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+                    <div class="bg-surface-container-low rounded-[32px] p-8 max-w-lg w-full">
+                        <h2 class="text-2xl font-bold mb-6">New Expense</h2>
+                        <form id="create-expense-form" class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="label-md uppercase tracking-widest text-on-surface-variant text-[10px] font-bold">Amount</label>
+                                <input id="expense-amount" class="w-full bg-white border-none rounded-xl py-4 px-4 text-2xl font-bold text-primary focus:ring-2 focus:ring-primary/20" type="number" step="0.01" placeholder="0.00" required/>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="label-md uppercase tracking-widest text-on-surface-variant text-[10px] font-bold">Description</label>
+                                <input id="expense-desc" class="w-full bg-white border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/20" type="text" placeholder="What was it for?" required/>
+                            </div>
+                            <div class="flex gap-4 pt-4">
+                                <button type="submit" class="flex-grow py-4 bg-primary text-white font-bold rounded-2xl">Save Expense</button>
+                                <button type="button" id="close-add-expense" class="px-6 py-4 text-on-surface-variant font-bold">Cancel</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Radar Chart (Chart.js) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">🎯 Perfil de Gastos por Usuario (Radar)</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-400); margin-bottom: 1rem;">Compara el volumen de inversión de cada persona en las distintas categorías.</p>
-                    <div style="width: 100%; height: 350px; position: relative;">
-                        <canvas id="radarChart"></canvas>
+                <section>
+                    <h2 class="text-xl font-bold text-on-surface mb-8">Recent Expenses</h2>
+                    <div id="expenses-list" class="space-y-4">
+                        <!-- Generado por JS -->
                     </div>
-                </div>
+                </section>
             </div>
-
-            <!-- Gráfica Histórica y Heatmap -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
-                
-                <!-- Line Chart Temporal (Chart.js) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">📈 Tendencia Histórica de Gastos</h3>
-                    <div style="width: 100%; height: 250px; position: relative;">
-                        <canvas id="trendChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Calendar Heatmap (D3) -->
-                <div style="background: var(--bg-800); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--bg-700);">
-                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">📅 Mapa de Calor: Frecuencia de Gastos</h3>
-                    <p style="font-size: 0.8rem; color: var(--text-400); margin-bottom: 1rem;">Los días más oscuros indican mayor cantidad de dinero gastado.</p>
-                    <div id="d3-heatmap-container" style="width: 100%; height: 250px; overflow-x: auto; position:relative;">
-                        <span id="heatmap-empty" style="color:var(--text-400); font-size:0.9rem; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">Esperando datos históricos...</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tabla de Gastos -->
-        <section class="table-section" aria-label="Lista de gastos">
-            <div class="table-header" style="flex-wrap: wrap; gap: 1rem;">
-                <h2 class="table-header__title">📊 Registro de Gastos</h2>
-                
-                <!-- FILTER TABS -->
-                <div class="filter-tabs" style="display: flex; background: var(--bg-900); padding: 5px; border-radius: 10px; border: 1px solid var(--bg-700);">
-                    <button class="tab-btn active" onclick="UI.setFilter('ALL')" data-filter="ALL" style="padding: 6px 15px; border-radius: 8px; border:none; background:transparent; color: var(--text-400); cursor:pointer; font-weight:600; transition:all 0.2s;">🏠 Todo</button>
-                    <button class="tab-btn" onclick="UI.setFilter('UNIFICADO')" data-filter="UNIFICADO" style="padding: 6px 15px; border-radius: 8px; border:none; background:transparent; color: var(--text-400); cursor:pointer; font-weight:600; transition:all 0.2s;">👥 Grupal</button>
-                    <button class="tab-btn" onclick="UI.setFilter('INDIVIDUAL')" data-filter="INDIVIDUAL" style="padding: 6px 15px; border-radius: 8px; border:none; background:transparent; color: var(--text-400); cursor:pointer; font-weight:600; transition:all 0.2s;">👤 Mío</button>
-                </div>
-
-                <div style="flex-grow:1;"></div>
-                <button class="btn btn--ghost btn--sm"
-                        id="refresh-btn"
-                        onclick="UI.loadExpenses()"
-                        aria-label="Recargar gastos">
-                    🔄 Actualizar
-                </button>
-            </div>
-
-            <div class="table-wrapper">
-                <table class="expenses-table" role="table" aria-label="Tabla de gastos compartidos">
-                    <thead>
-                        <tr>
-                            <th scope="col">Descripción</th>
-                            <th scope="col">Monto</th>
-                            <th scope="col">Categoría</th>
-                            <th scope="col">Tipo</th>
-                            <th scope="col">Pagó</th>
-                            <th scope="col">Fecha</th>
-                            <th scope="col" aria-label="Acciones">—</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expenses-tbody">
-                        <!-- Filas generadas por ui-render.js -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Estado vacío -->
-            <div id="empty-state" role="status" aria-live="polite">
-                <span class="empty-icon" aria-hidden="true">📭</span>
-                <p>No hay gastos registrados aún.</p>
-                <button class="btn btn--accent btn--sm" onclick="UI.toggleModal()">
-                    ✚ Agregar primer gasto
-                </button>
-            </div>
-        </section>
-
-    </main>
-</div>
-
-<!-- =============================================
-     MODAL: Nuevo Gasto
-     ============================================= -->
-<div class="modal-overlay"
-     id="expense-modal"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="modal-title"
-     onclick="if(event.target===this) UI.toggleModal()">
-    <div class="modal">
-        <div class="modal__header">
-            <h2 class="modal__title" id="modal-title">✚ Nuevo Gasto</h2>
-            <button class="modal__close"
-                    onclick="UI.toggleModal()"
-                    aria-label="Cerrar modal">✕</button>
-        </div>
-
-        <form id="expense-form" novalidate>
-            <div class="form-grid">
-                <!-- OCR Module -->
-                <div class="form-group form-group--full" style="background: rgba(139, 92, 246, 0.1); border: 1px dashed var(--accent); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <strong style="color: var(--accent); display: block; margin-bottom: 5px;">📸 Escaneo Inteligente (OCR)</strong>
-                        <span style="font-size: 0.75rem; color: #888;">Sube una foto del ticket para extraer los datos automáticamente.</span>
-                    </div>
-                    <label class="btn btn--accent btn--sm" style="cursor: pointer;">
-                        Escanear
-                        <input type="file" id="ocr-input" accept="image/*" style="display: none;" onchange="OCRApp.handleUpload(event)">
-                    </label>
-                </div>
-                <!-- Status OCR -->
-                <div id="ocr-status" class="form-group form-group--full" style="display: none; font-size: 0.8rem; color: var(--accent); align-items: center; gap: 8px;">
-                    <span class="loader-spinner" style="width:12px; height:12px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 1s linear infinite;"></span> Procesando imagen con Tesseract.js...
-                </div>
-
-
-                <!-- Descripción -->
-                <div class="form-group form-group--full">
-                    <label for="descripcion">Descripción *</label>
-                    <input type="text"
-                           id="descripcion"
-                           name="descripcion"
-                           placeholder="Ej: Arriendo de abril, Factura de luz..."
-                           minlength="3"
-                           maxlength="200"
-                           required>
-                </div>
-
-                <!-- Monto -->
-                <div class="form-group">
-                    <label for="monto">Monto (COP) *</label>
-                    <input type="number"
-                           id="monto"
-                           name="monto"
-                           placeholder="850000"
-                           min="0.01"
-                           step="0.01"
-                           required>
-                </div>
-
-                <!-- Fecha -->
-                <div class="form-group">
-                    <label for="fecha">Fecha *</label>
-                    <input type="date"
-                           id="fecha"
-                           name="fecha"
-                           required>
-                </div>
-
-                <!-- Categoría -->
-                <div class="form-group">
-                    <label for="categoria">Categoría *</label>
-                    <select id="categoria" name="categoria" required>
-                        <option value="">Seleccionar...</option>
-                        <option value="RENTA">🏠 Renta</option>
-                        <option value="SERVICIO">⚡ Servicio (Luz, Agua, Gas...)</option>
-                        <option value="MERCADO">🛒 Mercado</option>
-                        <option value="OTRO">📦 Otro</option>
-                    </select>
-                </div>
-
-                <!-- Tipo -->
-                <div class="form-group">
-                    <label for="tipo">Tipo *</label>
-                    <select id="tipo" name="tipo" required>
-                        <option value="">Seleccionar...</option>
-                        <option value="UNIFICADO">👥 Unificado (se divide)</option>
-                        <option value="INDIVIDUAL">👤 Individual (personal)</option>
-                    </select>
-                </div>
-
-                <!-- Pagado por -->
-                <div class="form-group form-group--full">
-                    <label for="pagado-por">Pagado por *</label>
-                    <select id="pagado-por" name="pagadoPorId" required>
-                        <!-- Opciones generadas por ui-render.js desde Auth -->
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="form-actions">
-                <button type="button"
-                        class="btn btn--ghost"
-                        onclick="UI.toggleModal()">
-                    Cancelar
-                </button>
-                <button type="submit"
-                        id="submit-expense-btn"
-                        class="btn btn--accent">
-                    💾 Guardar Gasto
-                </button>
-            </div>
-        </form>
+        </main>
     </div>
-</div>
 
-<!-- =============================================
-     MODAL: Mi Perfil (Avatar + Dirección + Celular)
-     ============================================= -->
-<div class="modal-overlay"
-     id="profile-modal"
-     role="dialog"
-     aria-modal="true"
-     onclick="if(event.target===this) UI.toggleProfile()">
-    <div class="modal" style="max-width: 450px;">
-        <div class="modal__header">
-            <h2 class="modal__title">⚙️ Configuración del Perfil</h2>
-            <button class="modal__close" onclick="UI.toggleProfile()">✕</button>
-        </div>
+    <!-- SCRIPTS -->
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        const UI = {
+            currentGroupId: null,
 
-        <form id="profile-form" novalidate>
-            <div class="form-grid">
-                <!-- Avatar Setup -->
-                <div class="form-group form-group--full" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
-                    <img id="profile-avatar-preview" src="" alt="Avatar" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); background: var(--bg-800);">
-                    <div style="text-align: center;">
-                        <label for="profile-avatar-input" class="btn btn--ghost btn--sm" style="cursor: pointer; display: inline-block;">📸 Cambiar Foto</label>
-                        <input type="file" id="profile-avatar-input" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="UI.previewAvatar(event)">
-                        <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">Máximo permitido: 500 KB (Evita borrar tu DB)</div>
-                    </div>
-                </div>
+            init() {
+                this.loadGroups();
+                this.setupListeners();
+                document.getElementById('user-display').textContent = localStorage.getItem('user_email');
+            },
 
-                <!-- Personal Info -->
-                <div class="form-group form-group--full">
-                    <label for="profile-nombre">Nombre Completo *</label>
-                    <input type="text" id="profile-nombre" required>
-                </div>
-                
-                <div class="form-group form-group--full">
-                    <label for="profile-celular">Número Celular</label>
-                    <input type="text" id="profile-celular" placeholder="Ej: 300 123 4567">
-                </div>
+            setupListeners() {
+                // Navegación
+                document.getElementById('back-to-groups').onclick = () => {
+                    document.getElementById('expenses-screen').classList.add('hidden');
+                    document.getElementById('groups-screen').classList.remove('hidden');
+                };
 
-                <div class="form-group form-group--full">
-                    <label for="profile-direccion">Dirección de Vivienda</label>
-                    <input type="text" id="profile-direccion" placeholder="Ej: Calle 123 #45-67, Apto 301">
-                </div>
+                document.getElementById('show-create-group').onclick = () => {
+                    document.getElementById('create-group-modal').classList.toggle('hidden');
+                };
 
-                <!-- Mudanza/Grupo -->
-                <div class="form-group form-group--full" style="border-top: 1px dashed var(--bg-700); padding-top: 15px; margin-top: 10px;">
-                    <label for="profile-inviteCode">
-                        Código de Grupo
-                        <span style="font-weight:normal; color:#888; display:block; font-size:0.8rem;">Modifica esto si te mudas y quieres unirte a otra casa. Todos los gastos que tenías en la casa antigua se quedarán allí.</span>
-                    </label>
-                    <input type="text" id="profile-inviteCode" required>
-                </div>
+                document.getElementById('open-add-expense').onclick = () => {
+                    document.getElementById('add-expense-modal').classList.remove('hidden');
+                };
 
-                <!-- Backup System -->
-                <div class="form-group form-group--full" style="border-top: 1px dashed var(--bg-700); padding-top: 15px; margin-top: 10px;">
-                    <label>Respaldo de Seguridad</label>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button type="button" class="btn btn--blue btn--sm" style="flex: 1;" onclick="UI.exportData()">📥 Exportar JSON</button>
-                        <button type="button" class="btn btn--ghost btn--sm" style="flex: 1;" onclick="document.getElementById('import-file').click()">📤 Importar JSON</button>
-                        <input type="file" id="import-file" style="display: none;" accept=".json" onchange="UI.importData(event)">
-                    </div>
-                    <p style="font-size: 0.7rem; color: #888; margin-top: 8px;">Guarda una copia de tus gastos y usuarios para restaurarlos en otro navegador.</p>
-                </div>
+                document.getElementById('close-add-expense').onclick = () => {
+                    document.getElementById('add-expense-modal').classList.add('hidden');
+                };
 
-                <!-- Danger Zone -->
-                    <button type="button" class="btn btn--secondary" style="background: rgba(231, 76, 60, 0.2); color: var(--danger); border: 2px solid var(--danger); width: 100%; justify-content: center; font-weight: bold; padding: 15px;" onclick="UI.nukeApp()">
-                        ♻️ REINICIAR APP (Borrar todo el rastro)
-                    </button>
-                    <p style="font-size: 0.65rem; color: #888; margin-top: 10px; text-align: center;">Usa esto si quieres borrar todos tus datos y usuarios del navegador para empezar de cero.</p>
-                </div>
-            </div>
+                document.getElementById('logout-btn').onclick = () => Auth.logout();
 
-            <div class="form-actions">
-                <button type="button" class="btn btn--ghost" onclick="UI.toggleProfile()">Cancelar</button>
-                <button type="submit" id="submit-profile-btn" class="btn btn--accent">💾 Guardar Perfil</button>
-            </div>
-        </form>
-    </div>
-</div>
+                // Formularios
+                document.getElementById('create-group-form').onsubmit = async (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('group-name').value;
+                    try {
+                        await GroupAPI.create({ nombre: name });
+                        document.getElementById('group-name').value = '';
+                        document.getElementById('create-group-modal').classList.add('hidden');
+                        this.loadGroups();
+                    } catch (err) { alert(err.message); }
+                };
 
-<!-- =============================================
-     MODAL: Gestión de Casa (Generar/Unirse)
-     ============================================= -->
-<div class="modal-overlay"
-     id="group-modal"
-     role="dialog"
-     aria-modal="true"
-     onclick="if(event.target===this) UI.toggleGroupModal()">
-    <div class="modal" style="max-width: 400px; text-align: center;">
-        <div class="modal__header">
-            <h2 class="modal__title">🏢 Gestión de Vivienda</h2>
-            <button class="modal__close" onclick="UI.toggleGroupModal()">✕</button>
-        </div>
+                document.getElementById('create-expense-form').onsubmit = async (e) => {
+                    e.preventDefault();
+                    const desc = document.getElementById('expense-desc').value;
+                    const amount = document.getElementById('expense-amount').value;
+                    try {
+                        await ExpenseAPI.create({
+                            descripcion: desc,
+                            monto: parseFloat(amount),
+                            groupId: this.currentGroupId,
+                            fecha: new Date().toISOString().split('T')[0],
+                            categoria: 'GENERAL'
+                        });
+                        document.getElementById('expense-desc').value = '';
+                        document.getElementById('expense-amount').value = '';
+                        document.getElementById('add-expense-modal').classList.add('hidden');
+                        this.loadExpenses(this.currentGroupId);
+                    } catch (err) { alert(err.message); }
+                };
+            },
 
-        <div style="padding: 10px 0;">
-            <div id="group-status-badge" style="margin-bottom: 20px; padding: 15px; border-radius: 12px; background: var(--bg-900); border: 1px solid var(--bg-700);">
-                <div style="font-size: 0.75rem; color: #888; margin-bottom: 5px;">ESTADO ACTUAL</div>
-                <div id="group-status-text" style="font-weight: bold; font-size: 1.1rem; color: var(--accent);">Sin Grupo Activo</div>
-            </div>
+            async loadGroups() {
+                try {
+                    const groups = await GroupAPI.getAll();
+                    const list = document.getElementById('groups-list');
+                    list.innerHTML = groups.map(g => `
+                        <div class="bg-surface-container-lowest p-6 rounded-[1.5rem] editorial-shadow border border-outline-variant/10 cursor-pointer hover:bg-surface-variant/30 transition-all flex flex-col justify-between h-[200px]" onclick="UI.showGroup('${g.id}', '${g.nombre}')">
+                            <div>
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+                                    <span class="material-symbols-outlined text-primary">home</span>
+                                </div>
+                                <h3 class="text-xl font-bold mb-1">${g.nombre}</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Active</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (err) { console.error(err); }
+            },
 
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <!-- Acción: Generar -->
-                <button class="btn btn--primary" style="width: 100%; justify-content: center;" onclick="UI.handleGenerateGroup()">
-                    🔑 Generar Nueva Casa
-                </button>
+            async showGroup(id, name) {
+                this.currentGroupId = id;
+                document.getElementById('current-group-name').textContent = name;
+                document.getElementById('groups-screen').classList.add('hidden');
+                document.getElementById('expenses-screen').classList.remove('hidden');
+                this.loadExpenses(id);
+            },
 
-                <div style="border-top: 1px solid var(--bg-700); margin: 10px 0; padding-top: 15px;">
-                    <label style="display: block; text-align: left; font-size: 0.85rem; margin-bottom: 8px; color: #888;">¿TIENES UN CÓDIGO?</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="join-group-input" placeholder="Ej: ABC123" style="flex: 1; text-transform: uppercase;">
-                        <button class="btn btn--accent" onclick="UI.handleJoinGroup()">Unirme</button>
-                    </div>
-                </div>
+            async loadExpenses(groupId) {
+                try {
+                    const expenses = await ExpenseAPI.getAllByGroup(groupId);
+                    const list = document.getElementById('expenses-list');
+                    const total = expenses.reduce((sum, e) => sum + e.monto, 0);
+                    
+                    document.getElementById('group-total-amount').textContent = `$${total.toLocaleString()}`;
+                    
+                    list.innerHTML = expenses.map(e => `
+                        <div class="group bg-surface-container-lowest p-6 rounded-[1.5rem] flex items-center justify-between transition-all hover:bg-surface-variant/30 editorial-shadow">
+                            <div class="flex items-center gap-6">
+                                <div class="w-14 h-14 bg-surface-container-high rounded-2xl flex items-center justify-center text-primary">
+                                    <span class="material-symbols-outlined text-3xl">receipt</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-on-surface text-lg">${e.descripcion}</h4>
+                                    <p class="text-sm text-on-surface-variant">${new Date(e.expenseDate || e.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-on-surface">$${e.monto.toLocaleString()}</div>
+                                <span class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">General</span>
+                            </div>
+                        </div>
+                    `).join('') || '<p class="text-center py-8 text-on-surface-variant">No expenses yet.</p>';
+                } catch (err) { console.error(err); }
+            }
+        };
 
-                <div id="copy-group-box" style="display: none; border-top: 1px solid var(--bg-700); padding-top: 15px;">
-                    <button class="btn btn--ghost" style="width: 100%; justify-content: center;" onclick="UI.handleCopyGroup()">
-                        📋 Copiar Código Actual
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Toast container -->
-<div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
-
-<!-- Supabase SDK (Clave para la sincronización en línea) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- =============================================
-     SCRIPTS (orden importante)
-     ============================================= -->
-<script src="assets/js/api-client.js?v=30"></script>
-<script src="assets/js/auth.js?v=30"></script>
-<script src="assets/js/ui-render.js?v=30"></script>
-<script src="assets/js/websocket.js?v=30"></script>
-<script src="assets/js/analytics.js?v=30"></script>
-<script src="assets/js/ocr.js?v=30"></script>
-<!-- El inicio y la lógica de autenticación corren delegados en Auth.requireAuth() dentro de auth.js -->
-
+        if (Auth.isLoggedIn()) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            UI.init();
+        }
+    </script>
 </body>
 </html>

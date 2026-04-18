@@ -36,7 +36,10 @@ public class ExpenseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil no encontrado"));
     }
 
-    public List<Expense> getAllExpenses() {
+    public List<Expense> getAllExpenses(UUID groupId) {
+        if (groupId != null) {
+            return expenseRepository.findByGroupId(groupId);
+        }
         return expenseRepository.findAll();
     }
 
@@ -49,37 +52,40 @@ public class ExpenseService {
     public Expense createExpense(ExpenseRequestDTO dto) {
         Profile currentUser = getAuthenticatedUser();
         
-        BigDecimal participantsTotal = dto.getParticipants().stream()
-                .map(ExpenseRequestDTO.ParticipantDTO::getAmountOwed)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (participantsTotal.compareTo(dto.getAmount()) != 0) {
-            throw new IllegalArgumentException("La suma de deudas no coincide con el total del gasto");
-        }
-
         Expense expense = new Expense();
         expense.setPaidBy(currentUser);
         expense.setGroup(groupRepository.findById(dto.getGroupId())
                 .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado")));
+        
         if (dto.getCategoryId() != null) {
             expense.setCategory(categoryRepository.findById(dto.getCategoryId()).orElse(null));
         }
+        
         expense.setDescription(dto.getDescription());
         expense.setAmount(dto.getAmount());
-        expense.setExpenseDate(dto.getExpenseDate());
-        expense.setSplitType(dto.getSplitType());
+        expense.setExpenseDate(dto.getExpenseDate() != null ? dto.getExpenseDate().atStartOfDay(java.time.ZoneId.systemDefault()).toOffsetDateTime().toZonedDateTime() : ZonedDateTime.now());
+        expense.setSplitType(dto.getSplitType() != null ? dto.getSplitType() : "EQUAL");
         expense.setCreatedAt(ZonedDateTime.now());
         expense.setUpdatedAt(ZonedDateTime.now());
 
         Expense savedExpense = expenseRepository.save(expense);
 
-        for (ExpenseRequestDTO.ParticipantDTO p : dto.getParticipants()) {
+        // Si no hay participantes, al menos agregamos al que pagó
+        if (dto.getParticipants() == null || dto.getParticipants().isEmpty()) {
             ExpenseParticipant participant = new ExpenseParticipant();
             participant.setExpense(savedExpense);
-            participant.setProfile(profileRepository.findById(p.getProfileId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado " + p.getProfileId())));
-            participant.setAmountOwed(p.getAmountOwed());
+            participant.setProfile(currentUser);
+            participant.setAmountOwed(dto.getAmount());
             participantRepository.save(participant);
+        } else {
+            for (ExpenseRequestDTO.ParticipantDTO p : dto.getParticipants()) {
+                ExpenseParticipant participant = new ExpenseParticipant();
+                participant.setExpense(savedExpense);
+                participant.setProfile(profileRepository.findById(p.getProfileId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado " + p.getProfileId())));
+                participant.setAmountOwed(p.getAmountOwed());
+                participantRepository.save(participant);
+            }
         }
 
         return savedExpense;

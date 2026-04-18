@@ -19,8 +19,8 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        return ResponseEntity.ok(expenseService.getAllExpenses());
+    public ResponseEntity<List<Expense>> getAllExpenses(@RequestParam(required = false) UUID groupId) {
+        return ResponseEntity.ok(expenseService.getAllExpenses(groupId));
     }
 
     @GetMapping("/{id}")
