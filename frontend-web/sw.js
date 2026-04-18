@@ -1,16 +1,16 @@
-const CACHE_NAME = 'rentshare-v1';
-const DYNAMIC_CACHE = 'rentshare-dynamic-v1';
+const CACHE_NAME = 'rentshare-v2';
+const DYNAMIC_CACHE = 'rentshare-dynamic-v2';
 
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/assets/css/styles.css',
-    '/assets/js/api-client.js',
-    '/assets/js/auth.js',
-    '/assets/js/ui-render.js',
-    '/assets/js/websocket.js',
-    '/assets/js/offline-sync.js', // Se creará en el siguiente paso
-    '/assets/offline.html',
+    './',
+    './index.html',
+    './assets/css/styles.css',
+    './assets/js/api-client.js',
+    './assets/js/auth.js',
+    './assets/js/ui-render.js',
+    './assets/js/websocket.js',
+    './assets/js/offline-sync.js',
+    './manifest.json',
     'https://cdn.jsdelivr.net/npm/chart.js',
     'https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js'
@@ -21,7 +21,7 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[Service Worker] Cacheando App Shell');
+                console.log('[Service Worker] Cacheando App Shell (Rutas Relativas)');
                 return cache.addAll(ASSETS_TO_CACHE);
             })
     );
@@ -46,18 +46,22 @@ self.addEventListener('fetch', event => {
     const req = event.request;
     const url = new URL(req.url);
 
-    // Estrategia Network-First para llamadas a la API
-    if (url.pathname.startsWith('/api')) {
+    // Identificar llamadas a la API (backend externo o subpath /api)
+    const isApiCall = url.hostname.includes('railway.app') || url.pathname.includes('/api/');
+
+    if (isApiCall) {
+        // Estrategia Network-First para llamadas a la API
         event.respondWith(
             fetch(req).then(networkRes => {
-                return caches.open(DYNAMIC_CACHE).then(cache => {
-                    // Guardamos una copia en el cache dinámico
-                    if (req.method === 'GET') {
+                // No cacheamos POST/PUT/DELETE, solo GET
+                if (req.method === 'GET' && networkRes.ok) {
+                    return caches.open(DYNAMIC_CACHE).then(cache => {
                         cache.put(req, networkRes.clone());
-                    }
-                    return networkRes;
-                });
-            }).catch(async err => {
+                        return networkRes;
+                    });
+                }
+                return networkRes;
+            }).catch(async () => {
                 // Si la red falla, buscamos en el cache dinámico
                 const cachedRes = await caches.match(req);
                 return cachedRes || new Response(JSON.stringify({ error: "Offline" }), {
@@ -73,16 +77,16 @@ self.addEventListener('fetch', event => {
             caches.match(req).then(cachedRes => {
                 return cachedRes || fetch(req).then(networkRes => {
                     return caches.open(DYNAMIC_CACHE).then(cache => {
-                        // Omitir cache de chrome-extensions, etc.
-                        if (req.url.startsWith('http') && req.method === 'GET') {
+                        // Solo cachear peticiones exitosas de assets
+                        if (networkRes.ok && req.method === 'GET' && req.url.startsWith('http')) {
                             cache.put(req, networkRes.clone());
                         }
                         return networkRes;
                     });
                 }).catch(() => {
                     // Si falla el fetch de un asset y estamos offline
-                    if (req.headers.get('accept').includes('text/html')) {
-                        return caches.match('/assets/offline.html');
+                    if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
+                        return caches.match('./index.html');
                     }
                 });
             })
@@ -90,19 +94,13 @@ self.addEventListener('fetch', event => {
     }
 });
 
-// Sincronización en Background (Background Sync API)
+// Notificar a la UI para sincronización
 self.addEventListener('sync', event => {
     if (event.tag === 'sync-expenses') {
-        console.log('[Service Worker] Background Sync ejecutándose');
-        event.waitUntil(syncExpenses());
+        event.waitUntil(
+            self.clients.matchAll().then(clients => {
+                clients.forEach(client => client.postMessage({ type: 'SYNC_NOW' }));
+            })
+        );
     }
 });
-
-async function syncExpenses() {
-    // La lógica de sincronización (IndexedDB a Backend) 
-    // se maneja compartiendo IndexedDB o delegándola a la UI.
-    // Un simple broadcast para notificar a la UI que puede sincronizar
-    self.clients.matchAll().then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'SYNC_NOW' }));
-    });
-}
