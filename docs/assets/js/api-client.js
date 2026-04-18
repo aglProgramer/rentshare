@@ -1,4 +1,4 @@
-const API_BASE = 'https://backend-rentshare-production.up.railway.app/api';
+const API_BASE = 'http://localhost:8080/api';
 
 const apiClient = {
     getToken() {
