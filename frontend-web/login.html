@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RentShare - Iniciar Sesión</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
@@ -9,24 +10,106 @@
   <main class="login-container">
     <h1>🏠 RentShare</h1>
     <p>Comparte gastos, vive tranquilo</p>
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Correo electrónico" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
-      <button type="submit" class="btn-primary">Iniciar Sesión</button>
-    </form>
-    <p class="hint">🔑 Demo: carlos@rentshare.com / 123456</p>
+    <div id="auth-error" style="display:none; color:#ef4444; background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; margin-bottom:10px; text-align:center;"></div>
+
+    <div id="authForms">
+      <form id="loginForm" class="active-form">
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button type="submit" id="loginBtn" class="btn-primary">Iniciar Sesión</button>
+        <p class="toggle-auth">¿No tienes cuenta? <a href="#" id="showRegister">Regístrate</a></p>
+      </form>
+
+      <form id="registerForm" style="display: none;">
+        <input type="text" id="regName" placeholder="Nombre completo" required>
+        <input type="email" id="regEmail" placeholder="Correo electrónico" required>
+        <input type="password" id="regPassword" placeholder="Contraseña (mínimo 6 caracteres)" minlength="6" required>
+        <button type="submit" id="regBtn" class="btn-primary">Registrarse</button>
+        <p class="toggle-auth">¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia Sesión</a></p>
+      </form>
+    </div>
   </main>
 
-  <script type="module">
-    import { Auth } from './assets/js/auth.js';
+  <script src="assets/js/api-client.js"></script>
+  <script>
+    const errorEl = document.getElementById('auth-error');
+
+    // Toggle forms
+    document.getElementById('showRegister').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+      errorEl.style.display = 'none';
+    });
+    document.getElementById('showLogin').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+      errorEl.style.display = 'none';
+    });
+
+    // Check if already logged in
+    if (localStorage.getItem('rentshare_token') && localStorage.getItem('user_id')) {
+      window.location.href = 'index.html';
+    }
+
+    // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Iniciando sesión...';
+      errorEl.style.display = 'none';
+
       try {
-        await Auth.login(email, password);
+        const res = await AuthAPI.login(
+          document.getElementById('email').value,
+          document.getElementById('password').value
+        );
+        apiClient.setToken(res.token);
+        localStorage.setItem('user_id', res.userId);
+        localStorage.setItem('user_name', res.nombre || 'Usuario');
+        window.location.href = 'index.html';
       } catch (err) {
-        // Error already handled by Auth.login showing toast
+        errorEl.textContent = '❌ ' + (err.message || 'Error al iniciar sesión');
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Iniciar Sesión';
+      }
+    });
+
+    // Register
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('regBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Registrando...';
+      errorEl.style.display = 'none';
+
+      try {
+        const res = await AuthAPI.register(
+          document.getElementById('regEmail').value,
+          document.getElementById('regPassword').value,
+          document.getElementById('regName').value
+        );
+        if (res.token) {
+          apiClient.setToken(res.token);
+          localStorage.setItem('user_id', res.userId);
+          localStorage.setItem('user_name', res.nombre || document.getElementById('regName').value);
+          window.location.href = 'index.html';
+        } else {
+          errorEl.textContent = '📧 Se envió un correo de confirmación. Revisa tu bandeja.';
+          errorEl.style.color = '#10b981';
+          errorEl.style.background = 'rgba(16,185,129,0.1)';
+          errorEl.style.display = 'block';
+        }
+      } catch (err) {
+        errorEl.textContent = '❌ ' + (err.message || 'Error al registrarse');
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Registrarse';
       }
     });
   </script>

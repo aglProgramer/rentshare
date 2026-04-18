@@ -1,8 +1,8 @@
 package com.rentshare.repository;
 
-import com.rentshare.model.Expense;
+import com.rentshare.model.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
-public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
+public interface GroupRepository extends JpaRepository<Group, UUID> {
 }

@@ -10,24 +10,28 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "groups")
+@Table(name = "profiles")
 @Getter
 @Setter
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Group {
+public class Profile {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, length = 100)
-    private String name;
+    private String nombre;
 
-    private String description;
+    @Column(length = 20)
+    private String celular;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
-    private Profile createdBy;
+    private String direccion;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "invite_code", length = 50)
+    private String inviteCode;
 
     @Column(name = "created_at")
     private ZonedDateTime createdAt;

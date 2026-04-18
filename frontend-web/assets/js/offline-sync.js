@@ -92,7 +92,10 @@ const SyncManager = {
                 };
                 if (item.body) options.body = JSON.stringify(item.body);
 
-                const res = await fetch(`http://localhost:8080/api${item.endpoint}`, options);
+                const syncBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                    ? 'http://localhost:8080/api'
+                    : 'https://backend-rentshare-production.up.railway.app/api';
+                const res = await fetch(`${syncBase}${item.endpoint}`, options);
                 
                 if (res.ok) {
                     await this.removeFromQueue(item.id);

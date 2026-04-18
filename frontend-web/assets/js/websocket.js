@@ -10,7 +10,10 @@ const WS = {
 
     connect() {
         console.log("🔌 Intentando conectar a WebSocket...");
-        const socket = new SockJS('http://localhost:8080/ws-rentshare');
+        const wsBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+            ? 'http://localhost:8080' 
+            : 'https://backend-rentshare-production.up.railway.app';
+        const socket = new SockJS(wsBase + '/ws-rentshare');
         this.stompClient = Stomp.over(socket);
         
         // Desactiva logs de STOMP en consola para un look más limpio (opcional)

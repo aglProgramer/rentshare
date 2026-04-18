@@ -34,19 +34,14 @@ const ChartManager = {
         // Agrupar por categoría
         const categories = {};
         expenses.forEach(e => {
-            const cat = e.categoria || 'OTRO';
-            categories[cat] = (categories[cat] || 0) + parseFloat(e.monto);
+            const catName = (e.category && e.category.name) ? e.category.name : (e.categoria || 'Varios');
+            categories[catName] = (categories[catName] || 0) + parseFloat(e.amount || e.monto || 0);
         });
 
-        const labels = Object.keys(categories).map(k => Labels.categoria[k]?.text || k);
+        const labels = Object.keys(categories);
         const data = Object.values(categories);
-        const colors = Object.keys(categories).map(k => {
-            // Generar colores basados en las variables CSS o fijos según categoría
-            if (k === 'RENTA') return '#6366f1'; // primary
-            if (k === 'SERVICIO') return '#f59e0b'; // warning
-            if (k === 'MERCADO') return '#10b981'; // success
-            return '#8b5cf6'; // accent
-        });
+        const colorPool = ['#6366f1', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4'];
+        const colors = labels.map((_, i) => colorPool[i % colorPool.length]);
 
         if (this.instance) {
             this.instance.destroy();
@@ -232,35 +227,40 @@ const ExpenseTable = {
         this.emptyState.style.display = 'none';
 
         this.tableBody.innerHTML = expenses.map(expense => {
-            const cat   = Labels.categoria[expense.categoria] || Labels.categoria.OTRO;
-            const tipo  = Labels.tipo[expense.tipo]           || Labels.tipo.INDIVIDUAL;
-            
-            const badgeTypeClass = expense.tipo === 'INDIVIDUAL' ? 'badge-tipo-ind' : 'badge-tipo-uni';
+            // Compatibilidad con backend nuevo (entity) y viejo (DTO)
+            const catName = (expense.category && expense.category.name) ? expense.category.name : (expense.categoria || 'Varios');
+            const catObj = Labels.categoria[expense.categoria] || { text: catName, icon: '📦', class: 'badge--otro' };
+            const splitType = expense.splitType || expense.tipo || 'equal';
+            const tipoObj = Labels.tipo[expense.tipo] || { text: splitType, icon: splitType === 'equal' ? '👥' : '👤', class: 'badge--unificado' };
+            const paidByName = (expense.paidBy && expense.paidBy.nombre) ? expense.paidBy.nombre : (expense.pagado_por_nombre || '—');
+            const desc = expense.description || expense.descripcion || '';
+            const amt = expense.amount || expense.monto || 0;
+            const date = expense.expenseDate || expense.fecha || '';
             
             return `
             <tr class="expense-row" data-id="${expense.id}">
                 <td>
                     <div class="expense-desc">
-                        <span class="expense-desc__icon">${cat.icon}</span>
-                        <span class="expense-desc__text">${expense.descripcion}</span>
+                        <span class="expense-desc__icon">${catObj.icon}</span>
+                        <span class="expense-desc__text">${desc}</span>
                     </div>
                 </td>
                 <td>
-                    <span class="amount">${Format.currency(expense.monto)}</span>
+                    <span class="amount">${Format.currency(amt)}</span>
                 </td>
                 <td>
-                    <span class="badge ${cat.class}">${cat.text}</span>
+                    <span class="badge ${catObj.class}">${catObj.text}</span>
                 </td>
                 <td>
-                    <span class="badge ${tipo.class}">${tipo.icon} ${tipo.text}</span>
+                    <span class="badge ${tipoObj.class}">${tipoObj.icon} ${tipoObj.text}</span>
                 </td>
                 <td>
                     <div class="user-chip">
-                        <span class="user-chip__avatar">${expense.pagado_por_nombre?.charAt(0) || '?'}</span>
-                        <span class="user-chip__name">${expense.pagado_por_nombre || '—'}</span>
+                        <span class="user-chip__avatar">${paidByName.charAt(0) || '?'}</span>
+                        <span class="user-chip__name">${paidByName}</span>
                     </div>
                 </td>
-                <td class="date-cell">${Format.date(expense.fecha)}</td>
+                <td class="date-cell">${Format.date(date)}</td>
                 <td>
                     <button class="btn-icon btn-edit" data-id="${expense.id}" title="Editar gasto">✏️</button>
                     <button class="btn-delete" data-id="${expense.id}" title="Eliminar gasto">🗑️</button>
@@ -273,7 +273,7 @@ const ExpenseTable = {
 
     /** Actualiza el panel de totales y estadísticas */
     updateTotals(expenses) {
-        const total = expenses.reduce((sum, e) => sum + parseFloat(e.monto || 0), 0);
+        const total = expenses.reduce((sum, e) => sum + parseFloat(e.amount || e.monto || 0), 0);
 
         if (this.totalEl) {
             this.totalEl.textContent = Format.currency(total);
@@ -288,12 +288,12 @@ const ExpenseTable = {
         updateStat('stat-total-count', expenses.length);
         updateStat('stat-shared-amount',
             Format.currency(
-                expenses.filter(e => e.tipo === 'UNIFICADO')
-                        .reduce((s, e) => s + parseFloat(e.monto), 0)
+                expenses.filter(e => (e.splitType || e.tipo) === 'equal' || (e.splitType || e.tipo) === 'UNIFICADO')
+                        .reduce((s, e) => s + parseFloat(e.amount || e.monto || 0), 0)
             )
         );
         updateStat('stat-individual-count',
-            expenses.filter(e => e.tipo === 'INDIVIDUAL').length
+            expenses.filter(e => (e.splitType || e.tipo) === 'INDIVIDUAL' || (e.splitType || e.tipo) === 'custom').length
         );
 
         // Actualizar Gráfico
@@ -456,7 +456,12 @@ const UI = {
             
             // Aplicar filtro de pestaña
             if (this.currentFilter !== 'ALL') {
-                expenses = expenses.filter(e => e.tipo === this.currentFilter);
+                expenses = expenses.filter(e => {
+                    const st = e.splitType || e.tipo || '';
+                    if (this.currentFilter === 'UNIFICADO') return st === 'equal' || st === 'UNIFICADO';
+                    if (this.currentFilter === 'INDIVIDUAL') return st === 'custom' || st === 'INDIVIDUAL';
+                    return true;
+                });
             }
 
             ExpenseTable.render(expenses);
@@ -515,12 +520,18 @@ const UI = {
                 throw { status: 400, message: "❌ No puedes crear un gasto 'Unificado' si no tienes un grupo activo. Únete a una casa arriba a la derecha." };
             }
 
+            const monto = parseFloat(document.getElementById('monto').value);
+
             const data = {
-                descripcion: document.getElementById('descripcion').value.trim(),
-                monto:       parseFloat(document.getElementById('monto').value),
-                fecha:       document.getElementById('fecha').value,
-                categoria:   document.getElementById('categoria').value,
-                tipo:        tipo
+                description: document.getElementById('descripcion').value.trim(),
+                amount:      monto,
+                expenseDate: document.getElementById('fecha').value,
+                splitType:   tipo === 'UNIFICADO' ? 'equal' : 'custom',
+                groupId:     localStorage.getItem('current_group_id') || null,
+                categoryId:  null,
+                participants: [
+                    { profileId: user.id, amountOwed: monto }
+                ]
             };
 
             if (this.currentEditId) {
@@ -528,7 +539,7 @@ const UI = {
                 Toast.success(`✅ Gasto actualizado exitosamente`);
             } else {
                 const created = await ExpenseAPI.create(data);
-                Toast.success(`✅ Gasto "${created.descripcion}" registrado exitosamente`);
+                Toast.success(`✅ Gasto "${created.description || data.description}" registrado exitosamente`);
             }
 
             form.reset();
@@ -594,15 +605,19 @@ const UI = {
             this.currentEditId = id;
             
             document.getElementById('modal-title').textContent = '✏️ Editar Gasto';
-            document.getElementById('descripcion').value = expense.descripcion;
-            document.getElementById('monto').value = Math.abs(expense.monto);
+            document.getElementById('descripcion').value = expense.description || expense.descripcion || '';
+            document.getElementById('monto').value = Math.abs(expense.amount || expense.monto || 0);
             
-            // Format date for inputs (YYYY-MM-DD): The API already returns it formatted if it's LocalDate without time.
-            document.getElementById('fecha').value = expense.fecha;
+            // Format date for inputs (YYYY-MM-DD)
+            document.getElementById('fecha').value = expense.expenseDate || expense.fecha || '';
             
-            document.getElementById('categoria').value = expense.categoria; 
-            document.getElementById('tipo').value = expense.tipo;
-            document.getElementById('pagado-por').value = expense.pagadoPorId;
+            // Category and type may be objects or strings
+            const catValue = expense.categoria || '';
+            document.getElementById('categoria').value = catValue;
+            const tipoValue = expense.splitType === 'equal' ? 'UNIFICADO' : (expense.tipo || 'INDIVIDUAL');
+            document.getElementById('tipo').value = tipoValue;
+            const paidById = (expense.paidBy && expense.paidBy.id) ? expense.paidBy.id : (expense.pagadoPorId || '');
+            document.getElementById('pagado-por').value = paidById;
             
             const btn = document.getElementById('submit-expense-btn');
             if (btn) btn.innerHTML = '🔄 Actualizar Gasto';
@@ -712,21 +727,25 @@ const UI = {
         }
     },
 
-    exportData() {
-        const data = {
-            users: LocalDB.users,
-            expenses: LocalDB.expenses,
-            exportedAt: new Date().toISOString(),
-            app: 'RentShare'
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `rentshare_backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        Toast.success('Archivo de respaldo generado con éxito 📥');
+    async exportData() {
+        try {
+            const expenses = await ExpenseAPI.getAll();
+            const data = {
+                expenses: expenses,
+                exportedAt: new Date().toISOString(),
+                app: 'RentShare'
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rentshare_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            Toast.success('Archivo de respaldo generado con éxito 📥');
+        } catch (err) {
+            Toast.error('Error al exportar: ' + err.message);
+        }
     },
 
     importData(event) {
@@ -740,10 +759,8 @@ const UI = {
                 if (data.app !== 'RentShare') throw new Error('El archivo no es un respaldo válido de RentShare');
 
                 if (confirm('⚠️ Al importar se sobrescribirán tus datos actuales. ¿Deseas continuar?')) {
-                    LocalDB.users = data.users || [];
-                    LocalDB.expenses = data.expenses || [];
-                    Toast.success('Datos restaurados correctamente ✨');
-                    setTimeout(() => window.location.reload(), 1000);
+                    Toast.info('Importación de datos disponible solo para respaldo local.');
+                    Toast.success('Datos leídos correctamente ✨');
                 }
             } catch (err) {
                 Toast.error('Error al importar: ' + err.message);
@@ -836,7 +853,10 @@ const UI = {
 
     nukeApp() {
         if (confirm('⚠️ ATENCIÓN: Esto borrará ABSOLUTAMENTE TODO de este navegador y reiniciará la app. ¿Estás seguro?')) {
-            LocalDB.nuke();
+            localStorage.clear();
+            sessionStorage.clear();
+            Toast.success('Datos locales borrados. Redirigiendo...');
+            setTimeout(() => window.location.reload(), 1000);
         }
     }
 };
