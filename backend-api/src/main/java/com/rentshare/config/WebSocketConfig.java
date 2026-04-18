@@ -23,7 +23,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         // Endpoint de conexión para SockJS
         registry.addEndpoint("/ws-rentshare")
-                .setAllowedOrigins("http://localhost:5500", "http://127.0.0.1:5500", "https://alejandrog1117.github.io", "*")
+                .setAllowedOrigins(
+                    "http://localhost:5500", 
+                    "http://127.0.0.1:5500", 
+                    "https://aglprogramer.github.io", 
+                    "https://alejandrog1117.github.io"
+                )
                 .withSockJS();
     }
 }
