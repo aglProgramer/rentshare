@@ -256,6 +256,18 @@
     <script src="assets/js/api-client.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
+        // Lógica de navegación Auth (Siempre disponible)
+        document.getElementById('go-to-register').onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('register-screen').classList.remove('hidden');
+        };
+        document.getElementById('go-to-login').onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('register-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        };
+
         const UI = {
             currentGroupId: null,
             init() {
@@ -264,15 +276,7 @@
                 document.getElementById('user-display').textContent = localStorage.getItem('user_email');
             },
             setupListeners() {
-                // Toggles de pantalla
-                document.getElementById('go-to-register').onclick = () => {
-                   document.getElementById('login-screen').classList.add('hidden');
-                   document.getElementById('register-screen').classList.remove('hidden');
-                };
-                document.getElementById('go-to-login').onclick = () => {
-                   document.getElementById('register-screen').classList.add('hidden');
-                   document.getElementById('login-screen').classList.remove('hidden');
-                };
+                // Toggles de pantalla App
                 document.getElementById('back-to-groups').onclick = () => {
                     document.getElementById('expenses-screen').classList.add('hidden');
                     document.getElementById('groups-screen').classList.remove('hidden');
@@ -288,7 +292,7 @@
                 };
                 document.getElementById('logout-btn').onclick = () => Auth.logout();
 
-                // Formularios
+                // Formularios App
                 document.getElementById('create-group-form').onsubmit = async (e) => {
                     e.preventDefault();
                     try {
