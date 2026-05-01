@@ -4,8 +4,8 @@
  */
 
 // LOCAL: "http://localhost:8080/api/v1"
-// PROD: "https://tu-backend.onrender.com/api/v1"
-const API_URL = "http://localhost:8080/api/v1";
+// PROD: "https://rentshare.onrender.com/api/v1"
+const API_URL = "https://rentshare.onrender.com/api/v1";
 
 const api = {
     /**
