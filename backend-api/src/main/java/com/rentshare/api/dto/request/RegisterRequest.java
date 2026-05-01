@@ -18,4 +18,7 @@ public class RegisterRequest {
     @NotBlank(message = "Password es obligatorio")
     @Size(min = 6, message = "Password debe tener al menos 6 caracteres")
     private String password;
+
+    @NotBlank(message = "Captcha es obligatorio")
+    private String captchaToken;
 }

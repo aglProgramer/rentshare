@@ -19,6 +19,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CaptchaService captchaService;
 
     public Page<UsuarioResponse> listarTodos(Pageable pageable) {
         log.info("Fetching paginated users: {}", pageable);
@@ -30,6 +31,10 @@ public class UsuarioService {
     public UsuarioResponse registrar(RegisterRequest request) {
         log.info("Registering new user with email: {}", request.getEmail());
         
+        if (!captchaService.verify(request.getCaptchaToken())) {
+            throw new RuntimeException("Captcha inválido. Por favor intenta de nuevo.");
+        }
+
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }

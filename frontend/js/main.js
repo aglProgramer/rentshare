@@ -48,16 +48,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const userData = {
                 nombre: e.target.regNombre.value,
                 email: e.target.regEmail.value,
-                password: e.target.regPassword.value
+                password: e.target.regPassword.value,
+                captchaToken: grecaptcha.getResponse()
             };
+
+            if (!userData.captchaToken) {
+                ui.showStatus('Por favor, completa el captcha', 'error');
+                return;
+            }
 
             try {
                 ui.showLoading(true);
                 await api.register(userData);
                 ui.showStatus('Cuenta creada! Por favor inicia sesión.');
                 e.target.reset();
+                grecaptcha.reset();
             } catch (error) {
                 ui.showStatus(error.message, 'error');
+                grecaptcha.reset();
             } finally {
                 ui.showLoading(false);
             }
