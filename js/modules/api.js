@@ -1,75 +1,54 @@
-/**
- * API Module
- * Handles all network requests with JWT support.
- */
-
 // LOCAL: "http://localhost:8080/api/v1"
 // PROD: "https://rentshare.onrender.com/api/v1"
 const API_URL = "https://rentshare.onrender.com/api/v1";
 
 const api = {
-    /**
-     * Get headers with Authorization if token exists
-     */
     getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json'
-        };
+        const h = { 'Content-Type': 'application/json' };
         const token = localStorage.getItem('rentshare_token');
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-        return headers;
+        if (token) h['Authorization'] = `Bearer ${token}`;
+        return h;
     },
 
-    /**
-     * Base request wrapper
-     */
     async request(endpoint, options = {}) {
-        const url = `${API_URL}${endpoint}`;
-        const config = {
+        const response = await fetch(`${API_URL}${endpoint}`, {
             ...options,
             headers: this.getHeaders()
-        };
+        });
 
-        try {
-            const response = await fetch(url, config);
-            
-            if (response.status === 401 || response.status === 403) {
-                // Token expired or invalid
-                localStorage.removeItem('rentshare_token');
-                localStorage.removeItem('rentshare_user');
-                window.location.reload();
-                throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
-            }
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Error en la petición');
-            
-            return data;
-        } catch (error) {
-            console.error('API Error:', error);
-            throw error;
+        if (response.status === 401 || response.status === 403) {
+            localStorage.clear();
+            window.location.reload();
+            throw new Error('Sesión expirada.');
         }
+
+        const data = response.status === 204 ? null : await response.json();
+        if (!response.ok) throw new Error(data?.message || 'Error en la petición');
+        return data;
     },
 
-    /**
-     * Auth Endpoints
-     */
-    login: (credentials) => api.request('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(credentials)
-    }),
+    // AUTH
+    login: (body) => api.request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+    register: (body) => api.request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
 
-    register: (userData) => api.request('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(userData)
-    }),
+    // USUARIOS
+    getUsers: (page = 0, size = 10) => api.request(`/usuarios?page=${page}&size=${size}`),
 
-    /**
-     * User Endpoints
-     */
-    getUsers: (page = 0, size = 10) => api.request(`/usuarios?page=${page}&size=${size}`)
+    // GRUPOS
+    crearGrupo: (body) => api.request('/grupos', { method: 'POST', body: JSON.stringify(body) }),
+    misGrupos: () => api.request('/grupos/mis'),
+    miembros: (grupoId) => api.request(`/grupos/${grupoId}/miembros`),
+    generarInvitacion: (grupoId) => api.request(`/grupos/${grupoId}/invitacion`, { method: 'POST' }),
+    solicitarUnion: (codigo) => api.request('/grupos/unirse', { method: 'POST', body: JSON.stringify({ codigo }) }),
+    solicitudesPendientes: (grupoId) => api.request(`/grupos/${grupoId}/solicitudes`),
+    responderSolicitud: (invId, aceptar) => api.request(`/grupos/solicitudes/${invId}/responder`, { method: 'POST', body: JSON.stringify({ aceptar }) }),
+    balance: (grupoId) => api.request(`/grupos/${grupoId}/balance`),
+
+    // GASTOS
+    gastos: (grupoId, categoria = '', page = 0) => api.request(`/gastos?grupoId=${grupoId}&categoria=${categoria}&page=${page}&size=20&sort=fechaGasto,desc`),
+    crearGasto: (body) => api.request('/gastos', { method: 'POST', body: JSON.stringify(body) }),
+    eliminarGasto: (gastoId) => api.request(`/gastos/${gastoId}`, { method: 'DELETE' }),
+    marcarPagado: (gastoId) => api.request(`/gastos/${gastoId}/pagar`, { method: 'PATCH' }),
 };
 
 export default api;

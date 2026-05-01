@@ -3,95 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RentShare Pro | Enterprise Community Platform</title>
-    <meta name="description" content="Gestión profesional de alquileres comunitarios con seguridad JWT y escalabilidad.">
-    <!-- Google Fonts -->
+    <title>RentShare | Gestión de Gastos Compartidos</title>
+    <meta name="description" content="Gestiona los gastos de renta con tus compañeros de forma fácil y transparente.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Google reCAPTCHA -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <nav>
-        <div class="logo">RentShare <span style="font-size: 0.8rem; font-weight: 400; opacity: 0.7;">PRO</span></div>
-        <div id="navActions">
-            <button id="logoutBtn" class="btn" style="display: none; color: var(--error); border: 1px solid var(--error);">Logout</button>
+    <!-- NAVBAR -->
+    <nav id="navbar" style="display:none;">
+        <div class="logo">RentShare</div>
+        <div class="nav-center" id="breadcrumb"></div>
+        <div class="nav-actions">
+            <span id="navUserName" class="nav-user"></span>
+            <button id="logoutBtn" class="btn btn-ghost">Salir</button>
         </div>
     </nav>
 
-    <div class="container">
-        
-        <!-- Auth Section -->
-        <section id="authSection" class="grid" style="margin-top: 2rem;">
-            <div class="card">
-                <h2>Iniciar Sesión</h2>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="loginEmail" required placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" name="loginPassword" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Entrar</button>
-                </form>
+    <!-- ====================================================
+         PANTALLA 1: AUTH (Login / Register)
+    ==================================================== -->
+    <section id="authSection" class="auth-layout">
+        <div class="auth-brand">
+            <div class="logo" style="font-size:2rem; margin-bottom:0.5rem;">RentShare</div>
+            <p style="color:var(--text-muted)">Controla los gastos de tu renta con tu grupo.</p>
+        </div>
+        <div class="auth-tabs">
+            <button class="tab-btn active" id="tabLoginBtn">Iniciar Sesión</button>
+            <button class="tab-btn" id="tabRegisterBtn">Registrarse</button>
+        </div>
+
+        <!-- Login -->
+        <div id="loginPanel" class="card auth-card">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="loginEmail" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+            </form>
+        </div>
+
+        <!-- Register -->
+        <div id="registerPanel" class="card auth-card" style="display:none;">
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" name="regNombre" required placeholder="Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="regEmail" required placeholder="juan@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="regPassword" required placeholder="Mínimo 6 caracteres">
+                </div>
+                <div class="g-recaptcha" data-sitekey="6LdJEdMsAAAAAG5eKPxMPgmu4jzcGzqFOsr2vkNp" style="margin-bottom:1rem;transform:scale(0.9);transform-origin:0;"></div>
+                <button type="submit" class="btn btn-secondary btn-block">Crear Cuenta</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ====================================================
+         PANTALLA 2: DASHBOARD (Mis Grupos)
+    ==================================================== -->
+    <section id="dashboardSection" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h1 id="dashGreeting">Mis Grupos</h1>
+                    <p style="color:var(--text-muted)">Selecciona un grupo para ver sus gastos.</p>
+                </div>
+                <button class="btn btn-primary" id="btnNuevoGrupo">+ Nuevo Grupo</button>
             </div>
 
-            <div class="card">
-                <h2>Registrarse</h2>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label>Nombre Completo</label>
-                        <input type="text" name="regNombre" required placeholder="Juan Pérez">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="regEmail" required placeholder="juan@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" name="regPassword" required placeholder="Mín. 6 caracteres">
-                    </div>
-                    <!-- RECAPTCHA WIDGET -->
-                    <div class="g-recaptcha" data-sitekey="6LdJEdMsAAAAAG5eKPxMPgmu4jzcGzqFOsr2vkNp" style="margin-bottom: 1.5rem;"></div>
-                    
-                    <button type="submit" class="btn btn-block" style="background: var(--glass-border); color: white;">Crear Cuenta</button>
+            <!-- Stats rápidas -->
+            <div class="stats-row" id="statsRow"></div>
+
+            <!-- Lista de grupos -->
+            <div id="gruposList" class="grupos-grid"></div>
+
+            <!-- Unirse a grupo -->
+            <div class="card" style="margin-top:2rem;">
+                <h3>Unirse a un Grupo</h3>
+                <p style="color:var(--text-muted);margin-bottom:1rem;font-size:0.9rem;">Ingresa el código de invitación que te compartió el administrador.</p>
+                <form id="unirseForm" style="display:flex;gap:1rem;">
+                    <input type="text" id="codigoInvitacion" placeholder="Código de invitación" style="flex:1;">
+                    <button type="submit" class="btn btn-primary">Solicitar Unión</button>
                 </form>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Dashboard Section -->
-        <section id="dashboardSection" style="display: none;">
-            <header class="header-section">
-                <h1 id="userDisplayName">Panel de Administración</h1>
-                <p>Gestión de usuarios y métricas de la plataforma.</p>
-            </header>
+    <!-- ====================================================
+         PANTALLA 3: VISTA DE GRUPO (Gastos + Balance)
+    ==================================================== -->
+    <section id="grupoSection" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h1 id="grupoNombre">Grupo</h1>
+                    <span id="grupoRolBadge" class="badge"></span>
+                </div>
+                <div style="display:flex;gap:0.75rem;">
+                    <button class="btn btn-ghost" id="btnVerBalance">📊 Balance</button>
+                    <button class="btn btn-ghost" id="btnSolicitudes" style="display:none;">🔔 Solicitudes</button>
+                    <button class="btn btn-ghost" id="btnGenInvitacion" style="display:none;">🔗 Generar Invitación</button>
+                    <button class="btn btn-primary" id="btnNuevoGasto">+ Nuevo Gasto</button>
+                </div>
+            </div>
 
-            <main class="grid">
-                <section class="card" style="grid-column: 1 / -1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h2>Usuarios Registrados (Paginado)</h2>
-                        <button id="refreshBtn" class="btn btn-primary">Actualizar</button>
+            <!-- Tabs: Gastos / Miembros -->
+            <div class="tabs">
+                <button class="tab-btn active" id="tabGastos">Gastos</button>
+                <button class="tab-btn" id="tabMiembros">Miembros</button>
+            </div>
+
+            <!-- Filtros de gastos -->
+            <div id="filtrosGastos" class="filtros-row">
+                <button class="filtro-btn active" data-cat="">Todos</button>
+                <button class="filtro-btn" data-cat="RENTA">🏠 Renta</button>
+                <button class="filtro-btn" data-cat="SERVICIOS">💡 Servicios</button>
+                <button class="filtro-btn" data-cat="MERCADO">🛒 Mercado</button>
+                <button class="filtro-btn" data-cat="LIMPIEZA">🧹 Limpieza</button>
+                <button class="filtro-btn" data-cat="INTERNET">📡 Internet</button>
+                <button class="filtro-btn" data-cat="OTRO">📌 Otro</button>
+            </div>
+
+            <!-- Lista gastos -->
+            <div id="gastosList"></div>
+
+            <!-- Lista miembros -->
+            <div id="miembrosList" style="display:none;"></div>
+        </div>
+    </section>
+
+    <!-- ====================================================
+         MODAL: Crear/Editar Gasto
+    ==================================================== -->
+    <div id="modalGasto" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Nuevo Gasto</h3>
+                <button class="btn-close" id="closeModalGasto">✕</button>
+            </div>
+            <form id="gastoForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="gTitulo" required placeholder="Ej: Renta Abril">
                     </div>
-                    <div id="loading" style="text-align: center; color: var(--text-muted); display: none;">Cargando...</div>
-                    <ul id="userList" class="user-list">
-                        <!-- Inyectado por JS -->
-                    </ul>
-                </section>
-            </main>
-        </section>
+                    <div class="form-group">
+                        <label>Monto Total ($)</label>
+                        <input type="number" id="gMonto" required min="0.01" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="gCategoria">
+                            <option value="RENTA">🏠 Renta</option>
+                            <option value="SERVICIOS">💡 Servicios</option>
+                            <option value="MERCADO">🛒 Mercado</option>
+                            <option value="LIMPIEZA">🧹 Limpieza</option>
+                            <option value="INTERNET">📡 Internet</option>
+                            <option value="OTRO">📌 Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="gTipo">
+                            <option value="COMPARTIDO">Compartido</option>
+                            <option value="INDIVIDUAL">Individual</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label>Fecha del Gasto</label>
+                        <input type="date" id="gFecha" required>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label>Descripción (opcional)</label>
+                        <textarea id="gDescripcion" placeholder="Detalles adicionales..." rows="2"></textarea>
+                    </div>
+                </div>
 
+                <!-- Divisiones -->
+                <div style="margin-top:1.5rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                        <h4>¿Quién participa?</h4>
+                        <button type="button" class="btn btn-ghost" id="btnDividirIgual" style="font-size:0.85rem;">
+                            ÷ Dividir en partes iguales
+                        </button>
+                    </div>
+                    <div id="divisionesContainer"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top:1.5rem;">Guardar Gasto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Balance -->
+    <div id="modalBalance" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Balance del Grupo</h3>
+                <button class="btn-close" id="closeModalBalance">✕</button>
+            </div>
+            <div id="balanceContent"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: Nuevo Grupo -->
+    <div id="modalGrupo" class="modal-overlay" style="display:none;">
+        <div class="modal-card" style="max-width:450px;">
+            <div class="modal-header">
+                <h3>Crear Nuevo Grupo</h3>
+                <button class="btn-close" id="closeModalGrupo">✕</button>
+            </div>
+            <form id="grupoForm">
+                <div class="form-group">
+                    <label>Nombre del Grupo</label>
+                    <input type="text" id="gNombre" required placeholder="Ej: Apartamento 201">
+                </div>
+                <div class="form-group">
+                    <label>Descripción (opcional)</label>
+                    <input type="text" id="gDescGrupo" placeholder="Dirección, piso, etc.">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Crear Grupo</button>
+            </form>
+        </div>
     </div>
 
     <!-- Toast -->
-    <div id="status"></div>
+    <div id="status" class="toast"></div>
+    <div id="loading-overlay" style="display:none;" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
 
-    <!-- Scripts -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
