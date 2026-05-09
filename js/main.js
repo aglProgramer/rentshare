@@ -40,15 +40,21 @@ function initAuth() {
         document.getElementById('tabLoginBtn').classList.add('active');
         document.getElementById('tabRegisterBtn').classList.remove('active');
         // Reiniciar captcha al cambiar a login
-        if (window.grecaptcha) grecaptcha.reset();
+        if (window.grecaptcha) {
+            grecaptcha.reset(0);
+            grecaptcha.reset(1);
+        }
     });
     document.getElementById('tabRegisterBtn').addEventListener('click', () => {
         document.getElementById('loginPanel').style.display = 'none';
         document.getElementById('registerPanel').style.display = 'block';
         document.getElementById('tabLoginBtn').classList.remove('active');
         document.getElementById('tabRegisterBtn').classList.add('active');
-        // Reiniciar captcha al cambiar a registro
-        if (window.grecaptcha) grecaptcha.reset();
+        // Reiniciar captchas al cambiar
+        if (window.grecaptcha) {
+            grecaptcha.reset(0);
+            grecaptcha.reset(1);
+        }
     });
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -59,7 +65,7 @@ function initAuth() {
                 ui.toast('Error: Captcha no está disponible', 'error');
                 return;
             }
-            const captcha = grecaptcha.getResponse();
+            const captcha = grecaptcha.getResponse(0); // Login es el primero
             if (!captcha) {
                 ui.toast('Por favor completa el captcha', 'error');
                 return;
@@ -79,7 +85,7 @@ function initAuth() {
         } catch (err) {
             ui.toast(err.message, 'error');
             // Reiniciar captcha en error
-            if (window.grecaptcha) grecaptcha.reset();
+            if (window.grecaptcha) grecaptcha.reset(0);
         } finally {
             ui.loading(false);
         }
@@ -93,7 +99,7 @@ function initAuth() {
                 ui.toast('Error: Captcha no está disponible', 'error');
                 return;
             }
-            const captcha = grecaptcha.getResponse();
+            const captcha = grecaptcha.getResponse(1); // Registro es el segundo
             if (!captcha) {
                 ui.toast('Por favor completa el captcha', 'error');
                 return;
@@ -108,11 +114,11 @@ function initAuth() {
             });
             ui.toast('Cuenta creada. Ahora inicia sesión.');
             e.target.reset();
-            grecaptcha.reset();
+            grecaptcha.reset(1);
             document.getElementById('tabLoginBtn').click();
         } catch (err) {
             ui.toast(err.message, 'error');
-            if (window.grecaptcha) grecaptcha.reset();
+            if (window.grecaptcha) grecaptcha.reset(1);
         } finally {
             ui.loading(false);
         }
