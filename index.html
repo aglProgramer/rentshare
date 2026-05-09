@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RentShare | Gestión de Gastos Compartidos</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Seguridad -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/; connect-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="description" content="Gestiona los gastos de renta con tus compañeros de forma fácil y transparente.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <title>RentShare | Gestión de Gastos Compartidos</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -41,12 +45,13 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="loginEmail" required placeholder="tu@email.com">
+                    <input type="email" name="loginEmail" required placeholder="tu@email.com" autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" name="loginPassword" required placeholder="••••••••">
+                    <input type="password" name="loginPassword" required placeholder="••••••••" autocomplete="current-password">
                 </div>
+                <div class="g-recaptcha" data-sitekey="6LdJEdMsAAAAAG5eKPxMPgmu4jzcGzqFOsr2vkNp" style="margin-bottom:1rem;transform:scale(0.9);transform-origin:0;"></div>
                 <button type="submit" class="btn btn-primary btn-block">Entrar</button>
             </form>
         </div>
@@ -56,15 +61,15 @@
             <form id="registerForm">
                 <div class="form-group">
                     <label>Nombre Completo</label>
-                    <input type="text" name="regNombre" required placeholder="Juan Pérez">
+                    <input type="text" name="regNombre" required placeholder="Juan Pérez" autocomplete="name">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="regEmail" required placeholder="juan@email.com">
+                    <input type="email" name="regEmail" required placeholder="juan@email.com" autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" name="regPassword" required placeholder="Mínimo 6 caracteres">
+                    <input type="password" name="regPassword" required placeholder="Mínimo 6 caracteres" autocomplete="new-password">
                 </div>
                 <div class="g-recaptcha" data-sitekey="6LdJEdMsAAAAAG5eKPxMPgmu4jzcGzqFOsr2vkNp" style="margin-bottom:1rem;transform:scale(0.9);transform-origin:0;"></div>
                 <button type="submit" class="btn btn-secondary btn-block">Crear Cuenta</button>
