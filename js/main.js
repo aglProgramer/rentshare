@@ -132,7 +132,8 @@ function initDashboard() {
     // Clic en grupo
     document.getElementById('gruposList').addEventListener('click', (e) => {
         const card = e.target.closest('.grupo-card');
-        if (!card) return;
+        if (!card || !card.dataset.id || card.dataset.id === 'undefined') return;
+        
         currentGrupo = { id: card.dataset.id, nombre: card.dataset.nombre, rolActual: card.dataset.rol };
         ui.showGrupo(currentGrupo);
         document.getElementById('breadcrumb').onclick = () => { ui.showDashboard(); loadDashboard(); };

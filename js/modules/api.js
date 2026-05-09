@@ -11,6 +11,16 @@ const api = {
     },
 
     async request(endpoint, options = {}) {
+        // Evitar enviar "undefined" en la URL o el body
+        if (endpoint.includes('undefined')) {
+            console.error('Petición abortada: Se detectó "undefined" en la URL:', endpoint);
+            throw new Error('Error interno: ID no definido.');
+        }
+        if (options.body && options.body.includes('"undefined"')) {
+            console.error('Petición abortada: Se detectó "undefined" en el body:', options.body);
+            throw new Error('Error interno: Datos incompletos.');
+        }
+
         const response = await fetch(`${API_URL}${endpoint}`, {
             ...options,
             headers: this.getHeaders()
