@@ -176,6 +176,10 @@ async function loadDashboard() {
 
 // ─── GRUPO ───────────────────────────────────────────────────
 function initGrupo() {
+    document.getElementById('tabMiembros').addEventListener('click', async () => {
+        hideAllTabs();
+        document.getElementById('miembrosList').style.display = 'block';
+        document.getElementById('tabMiembros').classList.add('active');
         if (currentGrupo) {
             const miembros = await api.miembros(currentGrupo.id);
             ui.renderMiembros(miembros);
