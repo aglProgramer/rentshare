@@ -109,6 +109,34 @@ public class GastoService {
         return toResponse(gastoRepository.save(gasto));
     }
 
+    public com.rentshare.api.dto.response.StatsResponse obtenerStats(UUID grupoId) {
+        List<Gasto> gastos = gastoRepository.findAll().stream()
+                .filter(g -> g.getGrupo().getId().equals(grupoId))
+                .collect(Collectors.toList());
+
+        java.math.BigDecimal total = gastos.stream()
+                .map(Gasto::getMonto)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.util.Map<String, java.math.BigDecimal> porCat = gastos.stream()
+                .collect(Collectors.groupingBy(
+                        Gasto::getCategoria,
+                        Collectors.reducing(java.math.BigDecimal.ZERO, Gasto::getMonto, java.math.BigDecimal::add)
+                ));
+
+        java.util.Map<String, java.math.BigDecimal> porUsuario = gastos.stream()
+                .collect(Collectors.groupingBy(
+                        g -> g.getPagadoPor().getNombre(),
+                        Collectors.reducing(java.math.BigDecimal.ZERO, Gasto::getMonto, java.math.BigDecimal::add)
+                ));
+
+        return com.rentshare.api.dto.response.StatsResponse.builder()
+                .totalGastado(total)
+                .gastosPorCategoria(porCat)
+                .gastosPorUsuario(porUsuario)
+                .build();
+    }
+
     private GastoResponse toResponse(Gasto g) {
         List<GastoResponse.DivisionResponse> divs = g.getDivisiones() == null ? List.of() :
                 g.getDivisiones().stream().map(d -> GastoResponse.DivisionResponse.builder()

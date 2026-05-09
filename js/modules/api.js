@@ -49,6 +49,21 @@ const api = {
     crearGasto: (body) => api.request('/gastos', { method: 'POST', body: JSON.stringify(body) }),
     eliminarGasto: (gastoId) => api.request(`/gastos/${gastoId}`, { method: 'DELETE' }),
     marcarPagado: (gastoId) => api.request(`/gastos/${gastoId}/pagar`, { method: 'PATCH' }),
+
+    // TAREAS
+    tareas: (grupoId) => api.request(`/tareas?grupoId=${grupoId}`),
+    crearTarea: (body) => api.request('/tareas', { method: 'POST', body: JSON.stringify(body) }),
+    cambiarEstadoTarea: (tareaId, estado) => api.request(`/tareas/${tareaId}/estado?estado=${estado}`, { method: 'PATCH' }),
+    eliminarTarea: (tareaId) => api.request(`/tareas/${tareaId}`, { method: 'DELETE' }),
+
+    // INVENTARIO
+    inventario: (grupoId) => api.request(`/inventario?grupoId=${grupoId}`),
+    guardarItem: (body) => api.request('/inventario', { method: 'POST', body: JSON.stringify(body) }),
+    actualizarStock: (itemId, cantidad) => api.request(`/inventario/${itemId}/cantidad?cantidad=${cantidad}`, { method: 'PATCH' }),
+    eliminarItem: (itemId) => api.request(`/inventario/${itemId}`, { method: 'DELETE' }),
+
+    // REPORTES
+    stats: (grupoId) => api.request(`/reportes/stats?grupoId=${grupoId}`),
 };
 
 export default api;

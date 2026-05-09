@@ -456,6 +456,34 @@ textarea { resize: vertical; min-height: 70px; }
 .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
 .empty-state h3 { color: var(--text); margin-bottom: 0.5rem; }
 
+/* ============ NEW GRIDS ============ */
+.tareas-grid, .inventario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.tarea-card {
+    border-left: 4px solid var(--warning);
+}
+
+.tarea-card .badge-success {
+    border-left: none;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+canvas {
+    max-width: 100%;
+    margin-top: 1rem;
+}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 768px) {
     .form-grid { grid-template-columns: 1fr; }

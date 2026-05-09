@@ -13,8 +13,14 @@ import java.util.UUID;
 
 @Repository
 public interface TareaRepository extends JpaRepository<Tarea, UUID> {
+    // Métodos remotos
     Page<Tarea> findByGrupo(Grupo grupo, Pageable pageable);
     List<Tarea> findByGrupoAndEstado(Grupo grupo, String estado);
     List<Tarea> findByGrupoAndFechaVencimientoBefore(Grupo grupo, LocalDateTime fecha);
     Page<Tarea> findByGrupoAndEsRecurrenteTrue(Grupo grupo, Pageable pageable);
+
+    // Métodos nuevos
+    List<Tarea> findByGrupoId(UUID grupoId);
+    Page<Tarea> findByGrupoId(UUID grupoId, Pageable pageable);
+    List<Tarea> findByAsignadoAIdAndEstadoNot(UUID usuarioId, String estado);
 }

@@ -198,6 +198,117 @@ const ui = {
             }
         });
         return result;
+    },
+
+    // ====== TAREAS ======
+    renderTareas(tareas) {
+        const el = document.getElementById('tareasGrid');
+        if (!tareas.length) {
+            el.innerHTML = '<div class="empty-state"><h3>No hay tareas</h3><p>Todo está al día.</p></div>';
+            return;
+        }
+        el.innerHTML = tareas.map(t => {
+            const date = t.fechaVencimiento ? new Date(t.fechaVencimiento).toLocaleString() : 'Sin fecha';
+            const statusCls = t.estado === 'COMPLETADA' ? 'success' : 'warning';
+            return `
+            <div class="card tarea-card" data-id="${t.id}">
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                    <span class="badge badge-${statusCls}">${t.estado}</span>
+                    <button class="btn-close" onclick="window._eliminarTarea('${t.id}')">✕</button>
+                </div>
+                <h4>${t.titulo}</h4>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin:0.5rem 0;">${t.descripcion || 'Sin descripción'}</p>
+                <div style="font-size:0.8rem;border-top:1px solid var(--border);padding-top:0.5rem;margin-top:0.5rem;">
+                    <div>📅 ${date}</div>
+                    <div style="margin-top:0.25rem;">👤 ${t.asignadoANombre}</div>
+                </div>
+                ${t.estado !== 'COMPLETADA' ? `
+                <button class="btn btn-primary btn-block" style="margin-top:1rem;font-size:0.8rem;" onclick="window._completarTarea('${t.id}')">Marcar Completada</button>
+                ` : ''}
+            </div>`;
+        }).join('');
+    },
+
+    // ====== INVENTARIO ======
+    renderInventario(items) {
+        const el = document.getElementById('inventarioList');
+        if (!items.length) {
+            el.innerHTML = '<div class="empty-state"><h3>Inventario vacío</h3><p>Agrega productos que falten.</p></div>';
+            return;
+        }
+        el.innerHTML = items.map(i => {
+            const bajo = i.cantidad <= i.stockMinimo;
+            return `
+            <div class="card inventario-item" data-id="${i.id}">
+                <div style="display:flex;justify-content:space-between;">
+                    <h4>${i.nombre}</h4>
+                    <button class="btn-close" onclick="window._eliminarItem('${i.id}')">✕</button>
+                </div>
+                <div style="margin-top:1rem;display:flex;align-items:center;gap:1rem;">
+                    <div class="stat-value" style="font-size:1.8rem;color:${bajo ? 'var(--error)' : 'var(--success)'}">${i.cantidad}</div>
+                    <div style="flex:1;">
+                        <div style="font-size:0.8rem;color:var(--text-muted)">${i.unidad || 'unidades'}</div>
+                        ${bajo ? '<span class="badge badge-admin" style="font-size:0.6rem;">¡STOCK BAJO!</span>' : ''}
+                    </div>
+                </div>
+                <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+                    <button class="btn btn-ghost" style="flex:1;padding:0.25rem;" onclick="window._updateStock('${i.id}', ${Number(i.cantidad)-1})">-1</button>
+                    <button class="btn btn-ghost" style="flex:1;padding:0.25rem;" onclick="window._updateStock('${i.id}', ${Number(i.cantidad)+1})">+1</button>
+                </div>
+            </div>`;
+        }).join('');
+    },
+
+    // ====== REPORTES ======
+    renderReportes(stats) {
+        document.getElementById('statsReportes').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-value">$${Number(stats.totalGastado).toLocaleString()}</div>
+                <div class="stat-label">Total Gastado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${Object.keys(stats.gastosPorCategoria).length}</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+        `;
+
+        // Render Charts
+        const ctxCat = document.getElementById('chartCategorias').getContext('2d');
+        const ctxUsr = document.getElementById('chartUsuarios').getContext('2d');
+
+        if (ui._chartCat) ui._chartCat.destroy();
+        if (ui._chartUsr) ui._chartUsr.destroy();
+
+        ui._chartCat = new Chart(ctxCat, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(stats.gastosPorCategoria),
+                datasets: [{
+                    data: Object.values(stats.gastosPorCategoria),
+                    backgroundColor: ['#6366f1', '#f59e0b', '#22c55e', '#06b6d4', '#8b5cf6', '#94a3b8']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#f1f5f9' } } } }
+        });
+
+        ui._chartUsr = new Chart(ctxUsr, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(stats.gastosPorUsuario),
+                datasets: [{
+                    label: 'Gastos por Usuario',
+                    data: Object.values(stats.gastosPorUsuario),
+                    backgroundColor: '#6366f1'
+                }]
+            },
+            options: { 
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                }
+            }
+        });
     }
 };
 

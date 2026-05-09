@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initAuth();
     initDashboard();
     initGrupo();
+    initTareas();
+    initInventario();
+    initReportes();
     initModales();
 });
 
@@ -173,25 +176,40 @@ async function loadDashboard() {
 
 // ─── GRUPO ───────────────────────────────────────────────────
 function initGrupo() {
-    // Tabs gastos/miembros
-    document.getElementById('tabGastos').addEventListener('click', () => {
-        document.getElementById('gastosList').style.display = 'block';
-        document.getElementById('filtrosGastos').style.display = 'flex';
-        document.getElementById('miembrosList').style.display = 'none';
-        document.getElementById('tabGastos').classList.add('active');
-        document.getElementById('tabMiembros').classList.remove('active');
-    });
-    document.getElementById('tabMiembros').addEventListener('click', async () => {
-        document.getElementById('gastosList').style.display = 'none';
-        document.getElementById('filtrosGastos').style.display = 'none';
-        document.getElementById('miembrosList').style.display = 'block';
-        document.getElementById('tabMiembros').classList.add('active');
-        document.getElementById('tabGastos').classList.remove('active');
         if (currentGrupo) {
             const miembros = await api.miembros(currentGrupo.id);
             ui.renderMiembros(miembros);
         }
     });
+
+    document.getElementById('tabTareas').addEventListener('click', () => {
+        hideAllTabs();
+        document.getElementById('tareasList').style.display = 'block';
+        document.getElementById('tabTareas').classList.add('active');
+        if (currentGrupo) loadTareas(currentGrupo.id);
+    });
+
+    document.getElementById('tabInventario').addEventListener('click', () => {
+        hideAllTabs();
+        document.getElementById('inventarioSection').style.display = 'block';
+        document.getElementById('tabInventario').classList.add('active');
+        if (currentGrupo) loadInventario(currentGrupo.id);
+    });
+
+    document.getElementById('tabReportes').addEventListener('click', () => {
+        hideAllTabs();
+        document.getElementById('reportesSection').style.display = 'block';
+        document.getElementById('tabReportes').classList.add('active');
+        if (currentGrupo) loadReportes(currentGrupo.id);
+    });
+
+    function hideAllTabs() {
+        ['gastosList', 'filtrosGastos', 'miembrosList', 'tareasList', 'inventarioSection', 'reportesSection'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        document.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    }
 
     // Filtros categoría
     document.getElementById('filtrosGastos').addEventListener('click', (e) => {
@@ -319,6 +337,109 @@ async function loadGastos(grupoId, categoria) {
     }
 }
 
+// ─── TAREAS ──────────────────────────────────────────────────
+function initTareas() {
+    document.getElementById('btnNuevaTarea').onclick = async () => {
+        const miembros = await api.miembros(currentGrupo.id);
+        const sel = document.getElementById('tAsignadoA');
+        sel.innerHTML = '<option value="">Sin asignar</option>' + 
+            miembros.map(m => `<option value="${m.usuarioId}">${m.nombre}</option>`).join('');
+        document.getElementById('modalTarea').style.display = 'flex';
+    };
+
+    document.getElementById('tareaForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const body = {
+            grupoId: currentGrupo.id,
+            titulo: document.getElementById('tTitulo').value,
+            descripcion: document.getElementById('tDescripcion').value,
+            fechaVencimiento: document.getElementById('tVencimiento').value || null,
+            asignadoAId: document.getElementById('tAsignadoA').value || null
+        };
+        try {
+            ui.loading(true);
+            await api.crearTarea(body);
+            ui.toast('Tarea creada ✅');
+            document.getElementById('modalTarea').style.display = 'none';
+            e.target.reset();
+            loadTareas(currentGrupo.id);
+        } catch (err) {
+            ui.toast(err.message, 'error');
+        } finally {
+            ui.loading(false);
+        }
+    };
+}
+
+async function loadTareas(grupoId) {
+    try {
+        ui.loading(true);
+        const res = await api.tareas(grupoId);
+        ui.renderTareas(res);
+    } catch (err) {
+        ui.toast(err.message, 'error');
+    } finally {
+        ui.loading(false);
+    }
+}
+
+// ─── INVENTARIO ──────────────────────────────────────────────
+function initInventario() {
+    document.getElementById('btnNuevoItem').onclick = () => {
+        document.getElementById('modalInventario').style.display = 'flex';
+    };
+
+    document.getElementById('inventarioForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const body = {
+            grupoId: currentGrupo.id,
+            nombre: document.getElementById('iNombre').value,
+            cantidad: parseFloat(document.getElementById('iCantidad').value),
+            unidad: document.getElementById('iUnidad').value,
+            stockMinimo: parseFloat(document.getElementById('iStockMinimo').value)
+        };
+        try {
+            ui.loading(true);
+            await api.guardarItem(body);
+            ui.toast('Item guardado ✅');
+            document.getElementById('modalInventario').style.display = 'none';
+            e.target.reset();
+            loadInventario(currentGrupo.id);
+        } catch (err) {
+            ui.toast(err.message, 'error');
+        } finally {
+            ui.loading(false);
+        }
+    };
+}
+
+async function loadInventario(grupoId) {
+    try {
+        ui.loading(true);
+        const res = await api.inventario(grupoId);
+        ui.renderInventario(res);
+    } catch (err) {
+        ui.toast(err.message, 'error');
+    } finally {
+        ui.loading(false);
+    }
+}
+
+// ─── REPORTES ───────────────────────────────────────────────
+function initReportes() {}
+
+async function loadReportes(grupoId) {
+    try {
+        ui.loading(true);
+        const res = await api.stats(grupoId);
+        ui.renderReportes(res);
+    } catch (err) {
+        ui.toast(err.message, 'error');
+    } finally {
+        ui.loading(false);
+    }
+}
+
 // ─── MODALES ─────────────────────────────────────────────────
 function initModales() {
     // Cerrar modales
@@ -328,10 +449,15 @@ function initModales() {
         document.getElementById('modalBalance').style.display = 'none';
     document.getElementById('closeModalGrupo').onclick = () =>
         document.getElementById('modalGrupo').style.display = 'none';
+    document.getElementById('closeModalTarea').onclick = () =>
+        document.getElementById('modalTarea').style.display = 'none';
+    document.getElementById('closeModalInventario').onclick = () =>
+        document.getElementById('modalInventario').style.display = 'none';
 
     // Cerrar al clic fuera
-    ['modalGasto', 'modalBalance', 'modalGrupo'].forEach(id => {
-        document.getElementById(id).addEventListener('click', (e) => {
+    ['modalGasto', 'modalBalance', 'modalGrupo', 'modalTarea', 'modalInventario'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', (e) => {
             if (e.target.id === id) e.target.style.display = 'none';
         });
     });
@@ -414,4 +540,36 @@ window._pagarDivision = async (gastoId) => {
     } finally {
         ui.loading(false);
     }
+};
+
+// TAREAS ACTIONS
+window._eliminarTarea = async (id) => {
+    if (!confirm('¿Eliminar tarea?')) return;
+    try {
+        await api.eliminarTarea(id);
+        loadTareas(currentGrupo.id);
+    } catch (err) { ui.toast(err.message, 'error'); }
+};
+
+window._completarTarea = async (id) => {
+    try {
+        await api.cambiarEstadoTarea(id, 'COMPLETADA');
+        loadTareas(currentGrupo.id);
+    } catch (err) { ui.toast(err.message, 'error'); }
+};
+
+// INVENTARIO ACTIONS
+window._eliminarItem = async (id) => {
+    if (!confirm('¿Eliminar item?')) return;
+    try {
+        await api.eliminarItem(id);
+        loadInventario(currentGrupo.id);
+    } catch (err) { ui.toast(err.message, 'error'); }
+};
+
+window._updateStock = async (id, val) => {
+    try {
+        await api.actualizarStock(id, val);
+        loadInventario(currentGrupo.id);
+    } catch (err) { ui.toast(err.message, 'error'); }
 };
