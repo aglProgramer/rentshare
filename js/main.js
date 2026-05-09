@@ -177,6 +177,14 @@ async function loadDashboard() {
 
 // ─── GRUPO ───────────────────────────────────────────────────
 function initGrupo() {
+    document.getElementById('tabGastos').addEventListener('click', () => {
+        hideAllTabs();
+        document.getElementById('gastosList').style.display = 'block';
+        document.getElementById('filtrosGastos').style.display = 'flex';
+        document.getElementById('tabGastos').classList.add('active');
+        if (currentGrupo) loadGastos(currentGrupo.id, currentCat);
+    });
+
     document.getElementById('tabMiembros').addEventListener('click', async () => {
         hideAllTabs();
         document.getElementById('miembrosList').style.display = 'block';
