@@ -39,6 +39,12 @@ public class Tarea {
     @JoinColumn(name = "creado_por")
     private Usuario creadoPor;
 
+    @Column(name = "es_recurrente")
+    private Boolean esRecurrente = false;
+
+    @Column(length = 20)
+    private String frecuencia; // DIARIA, SEMANAL, MENSUAL
+
     @CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
