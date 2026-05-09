@@ -34,44 +34,48 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── AUTH ────────────────────────────────────────────────────
 function initAuth() {
     // Tabs login/register
+    // Helper para reCAPTCHA Enterprise
+    async function getCaptchaToken(action) {
+        if (!window.grecaptcha || !grecaptcha.enterprise) {
+            console.error('reCAPTCHA Enterprise not loaded');
+            return null;
+        }
+        return new Promise((resolve) => {
+            grecaptcha.enterprise.ready(async () => {
+                try {
+                    const token = await grecaptcha.enterprise.execute('6Lfrd-EsAAAAADV0hu4mT3ztOeJk8fZfmdO838JW', { action });
+                    resolve(token);
+                } catch (e) {
+                    console.error('reCAPTCHA execution failed', e);
+                    resolve(null);
+                }
+            });
+        });
+    }
+
     document.getElementById('tabLoginBtn').addEventListener('click', () => {
         document.getElementById('loginPanel').style.display = 'block';
         document.getElementById('registerPanel').style.display = 'none';
         document.getElementById('tabLoginBtn').classList.add('active');
         document.getElementById('tabRegisterBtn').classList.remove('active');
-        // Reiniciar captcha al cambiar a login
-        if (window.grecaptcha) {
-            grecaptcha.reset(0);
-            grecaptcha.reset(1);
-        }
     });
     document.getElementById('tabRegisterBtn').addEventListener('click', () => {
         document.getElementById('loginPanel').style.display = 'none';
         document.getElementById('registerPanel').style.display = 'block';
         document.getElementById('tabLoginBtn').classList.remove('active');
         document.getElementById('tabRegisterBtn').classList.add('active');
-        // Reiniciar captchas al cambiar
-        if (window.grecaptcha) {
-            grecaptcha.reset(0);
-            grecaptcha.reset(1);
-        }
     });
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
-            // Validar captcha
-            if (!window.grecaptcha) {
-                ui.toast('Error: Captcha no está disponible', 'error');
-                return;
-            }
-            const captcha = grecaptcha.getResponse(0); // Login es el primero
+            ui.loading(true);
+            const captcha = await getCaptchaToken('LOGIN');
             if (!captcha) {
-                ui.toast('Por favor completa el captcha', 'error');
+                ui.toast('Error de verificación (Captcha)', 'error');
                 return;
             }
 
-            ui.loading(true);
             const res = await api.login({
                 email: e.target.loginEmail.value,
                 password: e.target.loginPassword.value,
@@ -84,8 +88,6 @@ function initAuth() {
             loadDashboard();
         } catch (err) {
             ui.toast(err.message, 'error');
-            // Reiniciar captcha en error
-            if (window.grecaptcha) grecaptcha.reset(0);
         } finally {
             ui.loading(false);
         }
@@ -94,18 +96,13 @@ function initAuth() {
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
-            // Validar captcha
-            if (!window.grecaptcha) {
-                ui.toast('Error: Captcha no está disponible', 'error');
-                return;
-            }
-            const captcha = grecaptcha.getResponse(1); // Registro es el segundo
+            ui.loading(true);
+            const captcha = await getCaptchaToken('REGISTER');
             if (!captcha) {
-                ui.toast('Por favor completa el captcha', 'error');
+                ui.toast('Error de verificación (Captcha)', 'error');
                 return;
             }
 
-            ui.loading(true);
             await api.register({
                 nombre: e.target.regNombre.value,
                 email: e.target.regEmail.value,
@@ -114,11 +111,9 @@ function initAuth() {
             });
             ui.toast('Cuenta creada. Ahora inicia sesión.');
             e.target.reset();
-            grecaptcha.reset(1);
             document.getElementById('tabLoginBtn').click();
         } catch (err) {
             ui.toast(err.message, 'error');
-            if (window.grecaptcha) grecaptcha.reset(1);
         } finally {
             ui.loading(false);
         }
