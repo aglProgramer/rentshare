@@ -181,8 +181,10 @@ function initGrupo() {
         document.getElementById('miembrosList').style.display = 'block';
         document.getElementById('tabMiembros').classList.add('active');
         if (currentGrupo) {
-            const miembros = await api.miembros(currentGrupo.id);
-            ui.renderMiembros(miembros);
+            try {
+                const miembros = await api.miembros(currentGrupo.id);
+                ui.renderMiembros(miembros);
+            } catch (err) { ui.toast(err.message, 'error'); }
         }
     });
 
