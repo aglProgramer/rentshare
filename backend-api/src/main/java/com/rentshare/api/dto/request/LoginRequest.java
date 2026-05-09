@@ -12,4 +12,7 @@ public class LoginRequest {
 
     @NotBlank(message = "Password es obligatorio")
     private String password;
+
+    @NotBlank(message = "Captcha es obligatorio")
+    private String captchaToken;
 }
