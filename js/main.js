@@ -36,21 +36,37 @@ function initAuth() {
         document.getElementById('registerPanel').style.display = 'none';
         document.getElementById('tabLoginBtn').classList.add('active');
         document.getElementById('tabRegisterBtn').classList.remove('active');
+        // Reiniciar captcha al cambiar a login
+        if (window.grecaptcha) grecaptcha.reset();
     });
     document.getElementById('tabRegisterBtn').addEventListener('click', () => {
         document.getElementById('loginPanel').style.display = 'none';
         document.getElementById('registerPanel').style.display = 'block';
         document.getElementById('tabLoginBtn').classList.remove('active');
         document.getElementById('tabRegisterBtn').classList.add('active');
+        // Reiniciar captcha al cambiar a registro
+        if (window.grecaptcha) grecaptcha.reset();
     });
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
+            // Validar captcha
+            if (!window.grecaptcha) {
+                ui.toast('Error: Captcha no está disponible', 'error');
+                return;
+            }
+            const captcha = grecaptcha.getResponse();
+            if (!captcha) {
+                ui.toast('Por favor completa el captcha', 'error');
+                return;
+            }
+
             ui.loading(true);
             const res = await api.login({
                 email: e.target.loginEmail.value,
-                password: e.target.loginPassword.value
+                password: e.target.loginPassword.value,
+                captchaToken: captcha
             });
             localStorage.setItem('rentshare_token', res.token);
             localStorage.setItem('rentshare_user', JSON.stringify(res.usuario));
@@ -59,6 +75,8 @@ function initAuth() {
             loadDashboard();
         } catch (err) {
             ui.toast(err.message, 'error');
+            // Reiniciar captcha en error
+            if (window.grecaptcha) grecaptcha.reset();
         } finally {
             ui.loading(false);
         }
@@ -66,9 +84,18 @@ function initAuth() {
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const captcha = grecaptcha.getResponse();
-        if (!captcha) { ui.toast('Completa el captcha', 'error'); return; }
         try {
+            // Validar captcha
+            if (!window.grecaptcha) {
+                ui.toast('Error: Captcha no está disponible', 'error');
+                return;
+            }
+            const captcha = grecaptcha.getResponse();
+            if (!captcha) {
+                ui.toast('Por favor completa el captcha', 'error');
+                return;
+            }
+
             ui.loading(true);
             await api.register({
                 nombre: e.target.regNombre.value,
@@ -82,7 +109,7 @@ function initAuth() {
             document.getElementById('tabLoginBtn').click();
         } catch (err) {
             ui.toast(err.message, 'error');
-            grecaptcha.reset();
+            if (window.grecaptcha) grecaptcha.reset();
         } finally {
             ui.loading(false);
         }
