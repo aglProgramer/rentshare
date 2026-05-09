@@ -31,7 +31,7 @@ public class UsuarioService {
     public UsuarioResponse registrar(RegisterRequest request) {
         log.info("Registering new user with email: {}", request.getEmail());
         
-        if (!captchaService.verify(request.getCaptchaToken())) {
+        if (!captchaService.verify(request.getCaptchaToken(), "REGISTER")) {
             throw new RuntimeException("Captcha inválido. Por favor intenta de nuevo.");
         }
 

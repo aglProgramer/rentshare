@@ -46,7 +46,7 @@ public class AuthController {
         log.info("Login attempt for email: {}", request.getEmail());
         
         // Validar captcha antes de autenticar
-        if (!captchaService.verify(request.getCaptchaToken())) {
+        if (!captchaService.verify(request.getCaptchaToken(), "LOGIN")) {
             log.warn("Invalid captcha for login attempt: {}", request.getEmail());
             throw new RuntimeException("Captcha inválido. Por favor intenta de nuevo.");
         }
