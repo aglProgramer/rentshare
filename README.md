@@ -284,10 +284,11 @@ GET  /api/v1/inventario
 ## 🚀 Roadmap
 
 **Próximas Funcionalidades:**
-- [ ] Docker
 - [ ] CI/CD con GitHub Actions
+- [ ] Mejora de inventario nevera/estanteria interactiva
 - [ ] Exportación PDF
 - [ ] Notificaciones en tiempo real
+- [ ] Mensajeria entre usuarios
 - [ ] Aplicación móvil
 - [ ] Pagos integrados
 
@@ -302,6 +303,4 @@ GET  /api/v1/inventario
 - ✅ API REST versionada
 
 ---
-
-**Autor:** [@aglProgramer](https://github.com/aglProgramer)  
 **Repositorio:** [rentshare](https://github.com/aglProgramer/rentshare)
