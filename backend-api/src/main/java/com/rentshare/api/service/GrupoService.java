@@ -27,6 +27,8 @@ public class GrupoService {
     private final InvitacionGrupoRepository invitacionGrupoRepository;
     private final UsuarioRepository usuarioRepository;
     private final GastoRepository gastoRepository;
+    private final TareaRepository tareaRepository;
+    private final ItemInventarioRepository itemInventarioRepository;
 
     @Transactional
     public GrupoResponse crear(CrearGrupoRequest req, UUID creadorId) {
