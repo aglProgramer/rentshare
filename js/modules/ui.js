@@ -11,9 +11,8 @@ const ui = {
     toast(msg, type = 'success') {
         const t = document.getElementById('status');
         t.innerText = msg;
+        t.className = `toast fixed bottom-24 lg:bottom-8 right-4 lg:right-8 z-[1000] rounded-xl font-semibold text-sm px-4 py-3 shadow-xl border ${type}`;
         t.style.display = 'block';
-        t.style.background = type === 'success' ? '#16a34a' : type === 'warning' ? '#d97706' : '#dc2626';
-        t.style.color = 'white';
         clearTimeout(ui._toastTimer);
         ui._toastTimer = setTimeout(() => t.style.display = 'none', 4000);
     },
@@ -24,10 +23,15 @@ const ui = {
 
     // ====== AUTH ======
     showAuth() {
-        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('authSection').style.display = 'flex';
         document.getElementById('dashboardSection').style.display = 'none';
         document.getElementById('grupoSection').style.display = 'none';
         document.getElementById('navbar').style.display = 'none';
+        document.getElementById('sidebar').style.setProperty('display', 'none', 'important');
+        const bn = document.getElementById('bottomNav');
+        if (bn) bn.style.setProperty('display', 'none', 'important');
+        const fab = document.getElementById('fabNuevoGasto');
+        if (fab) fab.style.display = 'none';
     },
 
     showDashboard() {
@@ -35,10 +39,41 @@ const ui = {
         document.getElementById('dashboardSection').style.display = 'block';
         document.getElementById('grupoSection').style.display = 'none';
         document.getElementById('navbar').style.display = 'flex';
+        // Sidebar visible
+        const sidebar = document.getElementById('sidebar');
+        sidebar.style.removeProperty('display');
+        const bn = document.getElementById('bottomNav');
+        if (bn) { bn.style.removeProperty('display'); bn.style.display = 'flex'; }
+        const fab = document.getElementById('fabNuevoGasto');
+        if (fab) fab.style.display = 'none';
+        // Balance button hidden on dashboard
+        const balBtn = document.getElementById('btnVerBalance');
+        if (balBtn) balBtn.style.display = 'none';
+        // Breadcrumb
         document.getElementById('breadcrumb').innerText = '';
+        // User info
         const u = JSON.parse(localStorage.getItem('rentshare_user') || '{}');
         document.getElementById('dashGreeting').innerText = `Hola, ${u.nombre || ''}`;
-        document.getElementById('navUserName').innerText = u.email || '';
+        document.getElementById('navUserName').innerText = u.nombre || u.email || '';
+        // Sidebar user info
+        if (u.nombre) {
+            const init = u.nombre[0]?.toUpperCase() || 'A';
+            ['sidebarAvatar','navAvatar'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = init;
+            });
+            const sn = document.getElementById('sidebarUserName');
+            if (sn) sn.textContent = u.nombre;
+            const se = document.getElementById('sidebarUserEmail');
+            if (se) se.textContent = u.email || '';
+        }
+        // Sidebar active: dashboard
+        document.querySelectorAll('.sidebar-nav-item').forEach(a => {
+            a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
+            a.classList.add('text-on-surface-variant','font-medium');
+        });
+        const sd = document.getElementById('sidebarDashboard');
+        if (sd) { sd.classList.add('active','bg-primary-container','text-on-primary-container','font-bold'); sd.classList.remove('text-on-surface-variant','font-medium'); }
     },
 
     showGrupo(grupo) {
@@ -46,9 +81,24 @@ const ui = {
         document.getElementById('dashboardSection').style.display = 'none';
         document.getElementById('grupoSection').style.display = 'block';
         document.getElementById('navbar').style.display = 'flex';
+        // Sidebar
+        const sidebar = document.getElementById('sidebar');
+        sidebar.style.removeProperty('display');
+        const bn = document.getElementById('bottomNav');
+        if (bn) { bn.style.removeProperty('display'); bn.style.display = 'flex'; }
+        // FAB
+        const fab = document.getElementById('fabNuevoGasto');
+        if (fab) fab.style.display = 'flex';
+        // Balance button visible
+        const balBtn = document.getElementById('btnVerBalance');
+        if (balBtn) balBtn.style.display = 'inline-flex';
+        // Group info
         document.getElementById('grupoNombre').innerText = grupo.nombre;
         document.getElementById('breadcrumb').innerText = `← Mis Grupos / ${grupo.nombre}`;
         document.getElementById('breadcrumb').style.cursor = 'pointer';
+        // Sidebar group name
+        const sgn = document.getElementById('sidebarGrupoName');
+        if (sgn) sgn.textContent = grupo.nombre;
 
         const badge = document.getElementById('grupoRolBadge');
         badge.innerText = grupo.rolActual;
@@ -57,6 +107,14 @@ const ui = {
         const esAdmin = grupo.rolActual === 'ADMIN';
         document.getElementById('btnGenInvitacion').style.display = esAdmin ? 'inline-flex' : 'none';
         document.getElementById('btnSolicitudes').style.display = esAdmin ? 'inline-flex' : 'none';
+
+        // Sidebar active: gastos
+        document.querySelectorAll('.sidebar-nav-item').forEach(a => {
+            a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
+            a.classList.add('text-on-surface-variant','font-medium');
+        });
+        const sg = document.getElementById('sidebarGastos');
+        if (sg) { sg.classList.add('active','bg-primary-container','text-on-primary-container','font-bold'); sg.classList.remove('text-on-surface-variant','font-medium'); }
     },
 
     // ====== DASHBOARD ======

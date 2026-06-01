@@ -9,6 +9,7 @@ let currentUser = null;
 let currentGrupo = null;
 let currentMiembros = [];
 let currentCat = '';
+let currentGastos = [];
 
 // ─── Init ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -181,8 +182,9 @@ function initGrupo() {
     document.getElementById('tabGastos').addEventListener('click', () => {
         hideAllTabs();
         document.getElementById('gastosList').style.display = 'block';
-        document.getElementById('filtrosGastos').style.display = 'flex';
+        document.getElementById('gastosHeaderContainer').style.display = 'flex';
         document.getElementById('tabGastos').classList.add('active');
+        syncSidebarTab('tabGastos');
         if (currentGrupo) loadGastos(currentGrupo.id, currentCat);
     });
 
@@ -190,6 +192,7 @@ function initGrupo() {
         hideAllTabs();
         document.getElementById('miembrosList').style.display = 'block';
         document.getElementById('tabMiembros').classList.add('active');
+        syncSidebarTab('tabMiembros');
         if (currentGrupo) {
             try {
                 const miembros = await api.miembros(currentGrupo.id);
@@ -202,6 +205,7 @@ function initGrupo() {
         hideAllTabs();
         document.getElementById('tareasList').style.display = 'block';
         document.getElementById('tabTareas').classList.add('active');
+        syncSidebarTab('tabTareas');
         if (currentGrupo) loadTareas(currentGrupo.id);
     });
 
@@ -209,6 +213,7 @@ function initGrupo() {
         hideAllTabs();
         document.getElementById('inventarioSection').style.display = 'block';
         document.getElementById('tabInventario').classList.add('active');
+        syncSidebarTab('tabInventario');
         if (currentGrupo) loadInventario(currentGrupo.id);
     });
 
@@ -216,11 +221,12 @@ function initGrupo() {
         hideAllTabs();
         document.getElementById('reportesSection').style.display = 'block';
         document.getElementById('tabReportes').classList.add('active');
+        syncSidebarTab('tabReportes');
         if (currentGrupo) loadReportes(currentGrupo.id);
     });
 
     function hideAllTabs() {
-        ['gastosList', 'filtrosGastos', 'miembrosList', 'tareasList', 'inventarioSection', 'reportesSection'].forEach(id => {
+        ['gastosList', 'gastosHeaderContainer', 'miembrosList', 'tareasList', 'inventarioSection', 'reportesSection'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
@@ -235,6 +241,11 @@ function initGrupo() {
         btn.classList.add('active');
         currentCat = btn.dataset.cat;
         if (currentGrupo) loadGastos(currentGrupo.id, currentCat);
+    });
+
+    // Buscador de gastos
+    document.getElementById('searchGastos')?.addEventListener('input', () => {
+        filterAndRenderGastos();
     });
 
     // Balance
@@ -345,12 +356,24 @@ async function loadGastos(grupoId, categoria) {
     try {
         ui.loading(true);
         const page = await api.gastos(grupoId, categoria);
-        ui.renderGastos(page.content || [], currentUser?.id);
+        currentGastos = page.content || [];
+        filterAndRenderGastos();
     } catch (err) {
         ui.toast(err.message, 'error');
     } finally {
         ui.loading(false);
     }
+}
+
+function filterAndRenderGastos() {
+    const searchVal = document.getElementById('searchGastos')?.value.toLowerCase().trim() || '';
+    const filtered = currentGastos.filter(g => 
+        g.titulo.toLowerCase().includes(searchVal) ||
+        (g.descripcion && g.descripcion.toLowerCase().includes(searchVal)) ||
+        g.categoria.toLowerCase().includes(searchVal) ||
+        g.pagadoPorNombre.toLowerCase().includes(searchVal)
+    );
+    ui.renderGastos(filtered, currentUser?.id);
 }
 
 // ─── TAREAS ──────────────────────────────────────────────────
@@ -589,3 +612,24 @@ window._updateStock = async (id, val) => {
         loadInventario(currentGrupo.id);
     } catch (err) { ui.toast(err.message, 'error'); }
 };
+
+function syncSidebarTab(tabId) {
+    const tabToSidebar = {
+        'tabGastos': 'sidebarGastos',
+        'tabTareas': 'sidebarTareas',
+        'tabInventario': 'sidebarInventario',
+        'tabReportes': 'sidebarReportes',
+        'tabMiembros': 'sidebarMiembros',
+    };
+    const sid = tabToSidebar[tabId];
+    if (!sid) return;
+    document.querySelectorAll('.sidebar-nav-item').forEach(a => {
+        a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
+        a.classList.add('text-on-surface-variant','font-medium');
+    });
+    const el = document.getElementById(sid);
+    if (el) {
+        el.classList.add('active','bg-primary-container','text-on-primary-container','font-bold');
+        el.classList.remove('text-on-surface-variant','font-medium');
+    }
+}
