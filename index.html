@@ -513,7 +513,7 @@
      MODAL: Crear/Editar Gasto
 ============================================================ -->
 <div id="modalGasto" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card bg-surface-container-lowest dark:bg-dark-surface border border-outline-variant rounded-2xl p-md w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl" style="animation:rsSlideUp 0.25s ease;">
+  <div class="modal-card w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
     <div class="modal-header flex justify-between items-center mb-md">
       <h3 class="font-bold text-lg text-on-surface">Nuevo Gasto</h3>
       <button id="closeModalGasto" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
@@ -574,7 +574,7 @@
 
 <!-- MODAL: Balance -->
 <div id="modalBalance" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card bg-surface-container-lowest border border-outline-variant rounded-2xl p-md w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl" style="animation:rsSlideUp 0.25s ease;">
+  <div class="modal-card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
     <div class="modal-header flex justify-between items-center mb-md">
       <div class="flex items-center gap-sm">
         <span class="material-symbols-outlined text-primary text-2xl">account_balance_wallet</span>
@@ -590,7 +590,7 @@
 
 <!-- MODAL: Nuevo Grupo -->
 <div id="modalGrupo" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card bg-surface-container-lowest border border-outline-variant rounded-2xl p-md w-full max-w-md shadow-2xl" style="animation:rsSlideUp 0.25s ease;">
+  <div class="modal-card w-full max-w-md shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
     <div class="modal-header flex justify-between items-center mb-md">
       <div class="flex items-center gap-sm">
         <span class="material-symbols-outlined text-primary text-2xl">home_work</span>
@@ -616,7 +616,7 @@
 
 <!-- MODAL: Nueva Tarea -->
 <div id="modalTarea" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card bg-surface-container-lowest border border-outline-variant rounded-2xl p-md w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl" style="animation:rsSlideUp 0.25s ease;">
+  <div class="modal-card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
     <div class="modal-header flex justify-between items-center mb-md">
       <div class="flex items-center gap-sm">
         <span class="material-symbols-outlined text-secondary text-2xl">checklist</span>
@@ -654,7 +654,7 @@
 
 <!-- MODAL: Nuevo Item Inventario -->
 <div id="modalInventario" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card bg-surface-container-lowest border border-outline-variant rounded-2xl p-md w-full max-w-sm shadow-2xl" style="animation:rsSlideUp 0.25s ease;">
+  <div class="modal-card w-full max-w-sm shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
     <div class="modal-header flex justify-between items-center mb-md">
       <div class="flex items-center gap-sm">
         <span class="material-symbols-outlined text-tertiary text-2xl">inventory_2</span>
@@ -709,7 +709,7 @@
   function applyTheme(theme) {
     if (theme === 'dark') {
       html.classList.add('dark');
-      document.body.style.backgroundColor = '#0a0f1e';
+      document.body.style.backgroundColor = '';
       themeIcon.textContent = 'light_mode';
     } else {
       html.classList.remove('dark');
