@@ -615,17 +615,37 @@ async function loadReportes(grupoId) {
 
 // ─── MODALES ─────────────────────────────────────────────────
 function initModales() {
+    const bindClick = (id, handler) => {
+        const el = document.getElementById(id);
+        if (el) el.onclick = handler;
+    };
+
+    const bindSubmit = (id, handler) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('submit', handler);
+    };
+
     // Cerrar modales
-    document.getElementById('closeModalGasto').onclick = () =>
-        document.getElementById('modalGasto').style.display = 'none';
-    document.getElementById('closeModalBalance').onclick = () =>
-        document.getElementById('modalBalance').style.display = 'none';
-    document.getElementById('closeModalGrupo').onclick = () =>
-        document.getElementById('modalGrupo').style.display = 'none';
-    document.getElementById('closeModalTarea').onclick = () =>
-        document.getElementById('modalTarea').style.display = 'none';
-    document.getElementById('closeModalInventario').onclick = () =>
-        document.getElementById('modalInventario').style.display = 'none';
+    bindClick('closeModalGasto', () => {
+        const modal = document.getElementById('modalGasto');
+        if (modal) modal.style.display = 'none';
+    });
+    bindClick('closeModalBalance', () => {
+        const modal = document.getElementById('modalBalance');
+        if (modal) modal.style.display = 'none';
+    });
+    bindClick('closeModalGrupo', () => {
+        const modal = document.getElementById('modalGrupo');
+        if (modal) modal.style.display = 'none';
+    });
+    bindClick('closeModalTarea', () => {
+        const modal = document.getElementById('modalTarea');
+        if (modal) modal.style.display = 'none';
+    });
+    bindClick('closeModalInventario', () => {
+        const modal = document.getElementById('modalInventario');
+        if (modal) modal.style.display = 'none';
+    });
 
     // Cerrar al clic fuera
     ['modalGasto', 'modalBalance', 'modalGrupo', 'modalTarea', 'modalInventario'].forEach(id => {
@@ -636,7 +656,7 @@ function initModales() {
     });
 
     // Crear Gasto
-    document.getElementById('gastoForm').addEventListener('submit', async (e) => {
+    bindSubmit('gastoForm', async (e) => {
         e.preventDefault();
         const divisiones = ui.getDivisiones();
         if (!divisiones.length) { ui.toast('Selecciona al menos un participante.', 'error'); return; }
@@ -667,17 +687,19 @@ function initModales() {
     });
 
     // Crear Grupo
-    document.getElementById('grupoForm').addEventListener('submit', async (e) => {
+    bindSubmit('grupoForm', async (e) => {
         e.preventDefault();
         try {
             ui.loading(true);
             await api.crearGrupo({
-                nombre: document.getElementById('gNombre').value,
-                descripcion: document.getElementById('gDescGrupo').value
+                nombre: document.getElementById('gNombre')?.value || '',
+                descripcion: document.getElementById('gDescGrupo')?.value || ''
             });
             ui.toast('Grupo creado ✅');
-            document.getElementById('modalGrupo').style.display = 'none';
-            document.getElementById('grupoForm').reset();
+            const modal = document.getElementById('modalGrupo');
+            if (modal) modal.style.display = 'none';
+            const form = document.getElementById('grupoForm');
+            if (form) form.reset();
             loadDashboard();
         } catch (err) {
             ui.toast(err.message, 'error');
