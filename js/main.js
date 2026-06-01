@@ -49,6 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
         initInventario();
         initReportes();
         initModalesIfPresent();
+
+        // Si la URL contiene ?grupoId=..., cargar ese grupo automáticamente
+        (async () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const gid = params.get('grupoId');
+                if (gid) {
+                    // buscar en misGrupos para obtener nombre y rol
+                    const grupos = await api.misGrupos();
+                    const g = (grupos || []).find(x => String(x.id) === String(gid));
+                    if (g) {
+                        currentGrupo = { id: g.id, nombre: g.nombre, rolActual: g.rolActual };
+                        ui.showGrupo(currentGrupo);
+                        loadGrupo(currentGrupo.id);
+                    }
+                }
+            } catch (e) {
+                console.warn('No se pudo cargar grupo desde query param', e);
+            }
+        })();
     }
 });
 
@@ -110,8 +130,19 @@ function initAuth() {
             localStorage.setItem('rentshare_token', res.token);
             localStorage.setItem('rentshare_user', JSON.stringify(res.usuario));
             currentUser = res.usuario;
-            // Redirigir a la página de dashboard separada
-            window.location.href = 'paginas/dashboard.html';
+            // Intentar redirigir al primer grupo si existe, sino al dashboard
+            try {
+                const grupos = await api.misGrupos();
+                if (Array.isArray(grupos) && grupos.length) {
+                    const first = grupos[0];
+                    window.location.href = `paginas/grupo.html?grupoId=${first.id}`;
+                } else {
+                    window.location.href = 'paginas/dashboard.html';
+                }
+            } catch (e) {
+                console.warn('No se pudo obtener grupos tras login, yendo al dashboard', e);
+                window.location.href = 'paginas/dashboard.html';
+            }
         } catch (err) {
             ui.toast(err.message, 'error');
         } finally {
