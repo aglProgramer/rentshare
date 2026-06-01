@@ -300,9 +300,12 @@ input[type="checkbox"] {
    TABS (Grupo)
    ══════════════════════════════════════════════════ */
 .tabs {
-  border-bottom: 1px solid var(--color-outline-variant);
-  padding-bottom: 0;
-  gap: 0.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline);
+  border-radius: 16px;
+  padding: .4rem;
+  gap: .4rem;
+  margin-bottom: 1.5rem;
 }
 
 .tab-btn {
@@ -327,9 +330,11 @@ input[type="checkbox"] {
 }
 
 .tab-btn.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  background: var(--gradient-primary);
+  color: white;
+  border-bottom-color: transparent;
   font-weight: 700;
+  border-radius: 12px;
 }
 
 /* ══════════════════════════════════════════════════
@@ -454,7 +459,10 @@ input[type="checkbox"] {
 }
 
 #groupSummary .stat-card {
-  min-height: 120px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* ══════════════════════════════════════════════════
@@ -526,6 +534,7 @@ input[type="checkbox"] {
 .gasto-item {
   background: var(--color-surface);
   border: 1px solid var(--color-outline-variant);
+  border-left: 4px solid var(--color-primary);
   border-radius: 1rem;
   padding: 1rem 1.25rem;
   margin-bottom: 0.6rem;
