@@ -94,7 +94,7 @@ graph LR
 ```
 
 ### 🔹 Backend (API REST)
-* **Framework:** Spring Boot (Java 17).
+* **Framework:** Spring Boot (Java 21).
 * **Seguridad y Autenticación:** Spring Security con validación de tokens **JWT (JSON Web Tokens)** sin estado. La contraseña se encripta mediante hash seguro.
 * **Integración Anti-Bot:** Implementación de **Google reCAPTCHA Enterprise** en el controlador de registro e inicio de sesión.
 * **Persistencia:** Spring Data JPA con Hibernate para el mapeo objeto-relacional (ORM).
