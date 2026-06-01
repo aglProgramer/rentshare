@@ -206,6 +206,15 @@ function initDashboard() {
             }
         });
     }
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.clear();
+
+            window.location.href = '../index.html';
+        });
+    }
 
     // Clic en grupo y acciones sobre grupos
     const gruposList = document.getElementById('gruposList');
@@ -320,20 +329,20 @@ async function loadDashboard() {
 
 // ─── GRUPO ───────────────────────────────────────────────────
 function initGrupo() {
-    document.getElementById('tabGastos').addEventListener('click', () => {
+    document.getElementById('sidebarGastos').addEventListener('click', () => {
         hideAllTabs();
         document.getElementById('gastosList').style.display = 'block';
         document.getElementById('gastosHeaderContainer').style.display = 'flex';
-        document.getElementById('tabGastos').classList.add('active');
-        syncSidebarTab('tabGastos');
+        document.getElementById('sidebarGastos').classList.add('active');
+        syncSidebarTab('sidebarGastos');
         if (currentGrupo) loadGastos(currentGrupo.id, currentCat);
     });
 
-    document.getElementById('tabMiembros').addEventListener('click', async () => {
+    document.getElementById('sidebarMiembros').addEventListener('click', async () => {
         hideAllTabs();
         document.getElementById('miembrosList').style.display = 'block';
-        document.getElementById('tabMiembros').classList.add('active');
-        syncSidebarTab('tabMiembros');
+        document.getElementById('sidebarMiembros').classList.add('active');
+        syncSidebarTab('sidebarMiembros');
         if (currentGrupo) {
             try {
                 const miembros = await api.miembros(currentGrupo.id);
@@ -342,27 +351,27 @@ function initGrupo() {
         }
     });
 
-    document.getElementById('tabTareas').addEventListener('click', () => {
+    document.getElementById('sidebarTareas').addEventListener('click', () => {
         hideAllTabs();
         document.getElementById('tareasList').style.display = 'block';
-        document.getElementById('tabTareas').classList.add('active');
-        syncSidebarTab('tabTareas');
+        document.getElementById('sidebarTareas').classList.add('active');
+        syncSidebarTab('sidebarTareas');
         if (currentGrupo) loadTareas(currentGrupo.id);
     });
 
-    document.getElementById('tabInventario').addEventListener('click', () => {
+    document.getElementById('sidebarInventario').addEventListener('click', () => {
         hideAllTabs();
         document.getElementById('inventarioSection').style.display = 'block';
-        document.getElementById('tabInventario').classList.add('active');
-        syncSidebarTab('tabInventario');
+        document.getElementById('sidebarInventario').classList.add('active');
+        syncSidebarTab('sidebarInventario');
         if (currentGrupo) loadInventario(currentGrupo.id);
     });
 
-    document.getElementById('tabReportes').addEventListener('click', () => {
+    document.getElementById('sidebarReportes').addEventListener('click', () => {
         hideAllTabs();
         document.getElementById('reportesSection').style.display = 'block';
-        document.getElementById('tabReportes').classList.add('active');
-        syncSidebarTab('tabReportes');
+        document.getElementById('sidebarReportes').classList.add('active');
+        syncSidebarTab('sidebarReportes');
         if (currentGrupo) loadReportes(currentGrupo.id);
     });
 
