@@ -97,15 +97,16 @@ function initAuth() {
             ui.loading(true);
             const captcha = await getCaptchaToken('LOGIN');
             if (!captcha) {
-                ui.toast('Error de verificación (Captcha)', 'error');
-                return;
+                console.warn('Captcha no disponible — procediendo sin token (cliente).');
             }
 
-            const res = await api.login({
+            const loginBody = {
                 email: e.target.loginEmail.value,
                 password: e.target.loginPassword.value,
-                captchaToken: captcha
-            });
+            };
+            if (captcha) loginBody.captchaToken = captcha;
+
+            const res = await api.login(loginBody);
             localStorage.setItem('rentshare_token', res.token);
             localStorage.setItem('rentshare_user', JSON.stringify(res.usuario));
             currentUser = res.usuario;
@@ -124,16 +125,17 @@ function initAuth() {
             ui.loading(true);
             const captcha = await getCaptchaToken('REGISTER');
             if (!captcha) {
-                ui.toast('Error de verificación (Captcha)', 'error');
-                return;
+                console.warn('Captcha no disponible — procediendo sin token (cliente).');
             }
 
-            await api.register({
+            const regBody = {
                 nombre: e.target.regNombre.value,
                 email: e.target.regEmail.value,
-                password: e.target.regPassword.value,
-                captchaToken: captcha
-            });
+                password: e.target.regPassword.value
+            };
+            if (captcha) regBody.captchaToken = captcha;
+
+            await api.register(regBody);
             ui.toast('Cuenta creada. Ahora inicia sesión.');
             e.target.reset();
             document.getElementById('tabLoginBtn').click();
