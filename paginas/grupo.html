@@ -13,18 +13,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css" />
-  <script id="tailwind-config">window.tailwind = window.tailwind || {}; window.tailwind.config = { darkMode: "class" }</script>
+  <script
+    id="tailwind-config">window.tailwind = window.tailwind || {}; window.tailwind.config = { darkMode: "class" }</script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
 
 <body class="bg-background text-on-background min-h-screen relative z-0">
-  
+
   <!-- Ambient Background -->
   <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
     <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]"></div>
     <div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-secondary/10 blur-[120px]"></div>
   </div>
-  
+
   <!-- Sidebar -->
   <aside id="sidebar"
     class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low shadow-sm z-50 p-md gap-xs"
@@ -237,20 +238,95 @@
     style="bottom:5.5rem;right:1rem;display:none;"><span class="material-symbols-outlined text-3xl">add</span></button>
 
   <div id="modalGasto"
-    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
-    style="display:none;"></div>
-  <div id="modalBalance"
-    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
-    style="display:none;"></div>
-  <div id="modalGrupo"
-    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
-    style="display:none;"></div>
-  <div id="modalTarea"
-    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
-    style="display:none;"></div>
-  <div id="modalInventario"
-    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
-    style="display:none;"></div>
+    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-4"
+    style="display:none;">
+    <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+      <h2>Nuevo Gasto</h2>
+
+      <form id="gastoForm">
+        <input id="gTitulo" placeholder="Título" class="w-full border p-2 mb-2">
+
+        <textarea id="gDescripcion" placeholder="Descripción" class="w-full border p-2 mb-2"></textarea>
+
+        <input id="gMonto" type="number" step="0.01" placeholder="Monto" class="w-full border p-2 mb-2">
+
+        <select id="gCategoria" class="w-full border p-2 mb-2">
+          <option value="RENTA">Renta</option>
+          <option value="SERVICIOS">Servicios</option>
+          <option value="MERCADO">Mercado</option>
+          <option value="LIMPIEZA">Limpieza</option>
+          <option value="INTERNET">Internet</option>
+          <option value="OTRO">Otro</option>
+        </select>
+
+        <select id="gTipo" class="w-full border p-2 mb-2">
+          <option value="COMPARTIDO">Compartido</option>
+        </select>
+
+        <input id="gFecha" type="date" class="w-full border p-2 mb-2">
+
+        <div id="divisionesContainer"></div>
+
+        <button type="button" id="btnDividirIgual">
+          Dividir Igual
+        </button>
+
+        <button type="submit">
+          Guardar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalBalance" style="display:none;"></div>
+
+  <div id="modalGrupo" style="display:none;"></div>
+
+  <div id="modalTarea" class="modal-overlay fixed inset-0 bg-black/70 flex items-center justify-center"
+    style="display:none;">
+    <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+
+      <form id="tareaForm">
+
+        <input id="tTitulo" placeholder="Título" class="w-full border p-2 mb-2">
+
+        <textarea id="tDescripcion" placeholder="Descripción" class="w-full border p-2 mb-2"></textarea>
+
+        <input id="tVencimiento" type="date" class="w-full border p-2 mb-2">
+
+        <select id="tAsignadoA" class="w-full border p-2 mb-2"></select>
+
+        <button type="submit">
+          Guardar
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <div id="modalInventario" class="modal-overlay fixed inset-0 bg-black/70 flex items-center justify-center"
+    style="display:none;">
+    <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+
+      <form id="inventarioForm">
+
+        <input id="iNombre" placeholder="Nombre" class="w-full border p-2 mb-2">
+
+        <input id="iCantidad" type="number" step="0.01" placeholder="Cantidad" class="w-full border p-2 mb-2">
+
+        <input id="iUnidad" placeholder="Unidad" class="w-full border p-2 mb-2">
+
+        <input id="iStockMinimo" type="number" step="0.01" placeholder="Stock mínimo" class="w-full border p-2 mb-2">
+
+        <button type="submit">
+          Guardar
+        </button>
+
+      </form>
+
+    </div>
+  </div>
 
   <div id="status"
     class="toast fixed bottom-24 lg:bottom-8 right-4 lg:right-8 z-[1000] rounded-xl font-semibold text-sm px-4 py-3 shadow-xl border hidden"
