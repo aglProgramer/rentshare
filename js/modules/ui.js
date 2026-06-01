@@ -35,13 +35,13 @@ const ui = {
     },
 
     showDashboard() {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
-        document.getElementById('grupoSection').style.display = 'none';
-        document.getElementById('navbar').style.display = 'flex';
+        document.getElementById('authSection')?.style.setProperty('display', 'none');
+        document.getElementById('dashboardSection')?.style.setProperty('display', 'block');
+        document.getElementById('grupoSection')?.style.setProperty('display', 'none');
+        document.getElementById('navbar')?.style.setProperty('display', 'flex');
         // Sidebar visible
         const sidebar = document.getElementById('sidebar');
-        sidebar.style.removeProperty('display');
+        if (sidebar) sidebar.style.removeProperty('display');
 
         // Hide group-specific sidebar items
         ['sidebarGastos', 'sidebarTareas', 'sidebarInventario', 'sidebarReportes', 'sidebarMiembros'].forEach(id => {
@@ -73,11 +73,11 @@ const ui = {
         const balBtn = document.getElementById('btnVerBalance');
         if (balBtn) balBtn.style.display = 'none';
         // Breadcrumb
-        document.getElementById('breadcrumb').innerText = '';
+        document.getElementById('breadcrumb')?.innerText = '';
         // User info
         const u = JSON.parse(localStorage.getItem('rentshare_user') || '{}');
-        document.getElementById('dashGreeting').innerText = `Hola, ${u.nombre || ''}`;
-        document.getElementById('navUserName').innerText = u.nombre || u.email || '';
+        document.getElementById('dashGreeting')?.innerText = `Hola, ${u.nombre || ''}`;
+        document.getElementById('navUserName')?.innerText = u.nombre || u.email || '';
         // Sidebar user info
         if (u.nombre) {
             const init = u.nombre[0]?.toUpperCase() || 'A';
