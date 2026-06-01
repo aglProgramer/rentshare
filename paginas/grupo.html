@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RentShare — Grupo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <script id="tailwind-config">window.tailwind = window.tailwind || {}; window.tailwind.config = { darkMode: "class" }</script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+</head>
+
+<body class="bg-background text-on-background min-h-screen relative z-0">
+  
+  <!-- Ambient Background -->
+  <div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
+    <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]"></div>
+    <div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-secondary/10 blur-[120px]"></div>
+  </div>
+  
+  <!-- Sidebar -->
+  <aside id="sidebar"
+    class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low shadow-sm z-50 p-md gap-xs"
+    style="display:none !important;">
+    <div class="flex items-center gap-sm px-xs mb-lg pt-xs">
+      <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-on-primary-container text-xl">home_work</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg text-primary leading-none tracking-tight">RentShare</h1>
+        <p id="sidebarGrupoName" class="text-xs text-on-surface-variant mt-0.5">Mis Grupos</p>
+      </div>
+    </div>
+    <nav id="sidebarNav" class="flex-1 flex flex-col gap-xs">
+      <a id="sidebarDashboard" href="#"
+        class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-semibold text-sm transition-all hover:translate-x-0.5">
+        <span class="material-symbols-outlined text-xl">dashboard</span>
+        <span>Mis Grupos</span>
+      </a>
+      <a id="sidebarGastos" href="#"
+        class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
+        <span class="material-symbols-outlined text-xl">receipt_long</span>
+        <span>Gastos</span>
+      </a>
+      <a id="sidebarTareas" href="#"
+        class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
+        <span class="material-symbols-outlined text-xl">checklist</span>
+        <span>Tareas</span>
+      </a>
+      <a id="sidebarInventario" href="#"
+        class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
+        <span class="material-symbols-outlined text-xl">inventory_2</span>
+        <span>Inventario</span>
+      </a>
+      <a id="sidebarReportes" href="#"
+        class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
+        <span class="material-symbols-outlined text-xl">bar_chart</span>
+        <span>Reportes</span>
+      </a>
+      <a id="sidebarMiembros" href="#"
+        class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
+        <span class="material-symbols-outlined text-xl">group</span>
+        <span>Miembros</span>
+      </a>
+    </nav>
+    <div class="mt-auto pt-md flex flex-col gap-sm">
+      <div class="flex items-center gap-sm px-sm py-sm rounded-xl bg-surface-container">
+        <div id="sidebarAvatar"
+          class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          A</div>
+        <div class="flex-1 min-w-0">
+          <p id="sidebarUserName" class="text-sm font-semibold truncate">Usuario</p>
+          <p id="sidebarUserEmail" class="text-xs text-on-surface-variant truncate"></p>
+        </div>
+      </div>
+      <button id="logoutBtn"
+        class="w-full flex items-center justify-center gap-xs py-sm text-sm font-semibold text-on-surface-variant hover:bg-surface-container-highest rounded-xl transition-colors">
+        <span class="material-symbols-outlined text-xl">logout</span>
+        Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- Navbar -->
+  <nav id="navbar"
+    class="lg:ml-64 fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant shadow-sm"
+    style="display:none;">
+    <div class="flex items-center gap-sm">
+      <h1 class="font-bold text-lg text-primary lg:hidden">RentShare</h1>
+      <span id="breadcrumb"
+        class="text-sm text-on-surface-variant hidden sm:block cursor-pointer hover:text-primary transition-colors"></span>
+    </div>
+    <div class="flex items-center gap-sm" id="nav-actions">
+      <button id="btnVerBalance"
+        class="inline-flex items-center gap-xs px-sm py-1.5 rounded-lg text-sm font-semibold text-primary hover:bg-primary-fixed transition-colors"
+        style="display:none;"><span
+          class="material-symbols-outlined text-base">account_balance_wallet</span>Balance</button>
+      <button id="btnSolicitudes"
+        class="inline-flex items-center gap-xs px-sm py-1.5 rounded-lg text-sm font-semibold text-on-surface-variant hover:bg-surface-container border border-outline-variant transition-colors"
+        style="display:none;"><span class="material-symbols-outlined text-base">notifications</span>Solicitudes</button>
+      <button id="btnGenInvitacion"
+        class="inline-flex items-center gap-xs px-sm py-1.5 rounded-lg text-sm font-semibold text-on-surface-variant hover:bg-surface-container border border-outline-variant transition-colors"
+        style="display:none;"><span class="material-symbols-outlined text-base">link</span>Invitar</button>
+      <button id="themeToggle"
+        class="p-2 rounded-full hover:bg-surface-container-highest transition-colors text-on-surface-variant"
+        title="Cambiar modo"><span class="material-symbols-outlined text-xl" id="themeIcon">dark_mode</span></button>
+      <div class="flex items-center gap-xs">
+        <div id="navAvatar"
+          class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm">
+          A</div><span id="navUserName" class="text-sm font-medium text-on-surface-variant hidden md:block"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- GRUPO SECTION -->
+  <section id="grupoSection" class="lg:ml-64 pt-16 min-h-screen rs-section">
+    <div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-md">
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <div>
+            <h1 id="grupoNombre" class="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Grupo</h1>
+            <span id="grupoRolBadge" class="badge"></span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="btnNuevoGasto" class="btn btn-primary"
+              style="display:inline-flex;align-items:center;gap:0.5rem;"><span
+                class="material-symbols-outlined text-base">add</span>Nuevo Gasto</button>
+            <button id="btnLeaveGroup" class="btn btn-ghost">Salir del grupo</button>
+            <button id="btnDeleteGroup" class="btn btn-danger" style="display:none;">Eliminar grupo</button>
+          </div>
+        </div>
+      </header>
+      <div id="groupSummary" class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg"></div>
+
+      <div class="tabs flex gap-0 border-b border-outline-variant mb-md overflow-x-auto">
+        <button class="tab-btn active" id="tabGastos"><span
+            class="material-symbols-outlined text-base align-middle mr-1">receipt_long</span>Gastos</button>
+        <button class="tab-btn" id="tabTareas"><span
+            class="material-symbols-outlined text-base align-middle mr-1">checklist</span>Tareas</button>
+        <button class="tab-btn" id="tabInventario"><span
+            class="material-symbols-outlined text-base align-middle mr-1">inventory_2</span>Inventario</button>
+        <button class="tab-btn" id="tabReportes"><span
+            class="material-symbols-outlined text-base align-middle mr-1">bar_chart</span>Reportes</button>
+        <button class="tab-btn" id="tabMiembros"><span
+            class="material-symbols-outlined text-base align-middle mr-1">group</span>Miembros</button>
+      </div>
+
+      <div id="gastosHeaderContainer"
+        class="flex flex-col md:flex-row gap-sm mb-md justify-between items-stretch md:items-center">
+        <div class="relative flex-1 max-w-md">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-lg">search</span>
+          <input type="text" id="searchGastos" placeholder="Buscar gastos por título, pagador..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+            style="border: 1.5px solid var(--color-outline); background: var(--color-surface); color: var(--color-on-surface);" />
+        </div>
+        <div id="filtrosGastos" class="filtros-row flex flex-wrap gap-xs">
+          <button class="filtro-btn active" data-cat="">Todos</button>
+          <button class="filtro-btn" data-cat="RENTA"><span
+              class="material-symbols-outlined text-sm align-middle mr-0.5">home</span>Renta</button>
+          <button class="filtro-btn" data-cat="SERVICIOS"><span
+              class="material-symbols-outlined text-sm align-middle mr-0.5">bolt</span>Servicios</button>
+          <button class="filtro-btn" data-cat="MERCADO"><span
+              class="material-symbols-outlined text-sm align-middle mr-0.5">shopping_cart</span>Mercado</button>
+          <button class="filtro-btn" data-cat="LIMPIEZA"><span
+              class="material-symbols-outlined text-sm align-middle mr-0.5">cleaning_services</span>Limpieza</button>
+          <button class="filtro-btn" data-cat="INTERNET"><span
+              class="material-symbols-outlined text-sm align-middle mr-0.5">wifi</span>Internet</button>
+          <button class="filtro-btn" data-cat="OTRO"><span
+              class="material-symbols-outlined text-sm align-middle mr-0.5">more_horiz</span>Otro</button>
+        </div>
+      </div>
+
+      <div id="gastosList"></div>
+      <div id="tareasList" style="display:none;">
+        <div class="flex justify-between items-center mb-md">
+          <h3 class="text-xl font-bold text-on-surface">Calendario de Tareas</h3><button id="btnNuevaTarea"
+            class="flex items-center gap-xs px-md py-sm bg-secondary text-on-secondary rounded-xl font-bold text-sm shadow-sm hover:shadow active:scale-95 transition-all"><span
+              class="material-symbols-outlined text-base">add</span> Nueva Tarea</button>
+        </div>
+        <div id="tareasGrid" class="tareas-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter"></div>
+      </div>
+
+      <div id="inventarioSection" style="display:none;">
+        <div class="flex justify-between items-center mb-md">
+          <h3 class="text-xl font-bold text-on-surface">Inventario Compartido</h3><button id="btnNuevoItem"
+            class="flex items-center gap-xs px-md py-sm bg-tertiary text-on-tertiary rounded-xl font-bold text-sm shadow-sm hover:shadow active:scale-95 transition-all"><span
+              class="material-symbols-outlined text-base">add</span> Agregar Item</button>
+        </div>
+        <div id="inventarioList" class="inventario-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter">
+        </div>
+      </div>
+
+      <div id="reportesSection" style="display:none;">
+        <div id="statsReportes" class="grid grid-cols-2 md:grid-cols-4 gap-gutter mb-md"></div>
+        <div class="charts-grid grid grid-cols-1 md:grid-cols-2 gap-md">
+          <div class="rs-card rounded-2xl p-md shadow-sm"
+            style="background:var(--color-surface);border:1px solid var(--color-outline-variant);">
+            <h3 class="font-bold text-on-surface mb-sm">Gastos por Categoría</h3><canvas id="chartCategorias"></canvas>
+          </div>
+          <div class="rs-card rounded-2xl p-md shadow-sm"
+            style="background:var(--color-surface);border:1px solid var(--color-outline-variant);">
+            <h3 class="font-bold text-on-surface mb-sm">Gastos por Usuario</h3><canvas id="chartUsuarios"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="miembrosList" style="display:none;"></div>
+
+    </div>
+  </section>
+
+  <nav id="bottomNav"
+    class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface shadow-[0_-4px_20px_rgba(63,81,181,0.08)] border-t border-outline-variant rounded-t-2xl"
+    style="display:none !important;">
+    <a id="bottomDashboard" href="#"
+      class="flex flex-col items-center justify-center px-4 py-1 rounded-full bg-primary-container text-on-primary-container transition-all"><span
+        class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span><span
+        class="text-xs font-semibold mt-0.5">Inicio</span></a>
+    <a id="bottomGastos" href="#" class="flex flex-col items-center justify-center text-on-surface-variant"><span
+        class="material-symbols-outlined">receipt_long</span><span class="text-xs font-medium mt-0.5">Gastos</span></a>
+    <a id="bottomTareas" href="#" class="flex flex-col items-center justify-center text-on-surface-variant"><span
+        class="material-symbols-outlined">task_alt</span><span class="text-xs font-medium mt-0.5">Tareas</span></a>
+    <a id="bottomInventario" href="#" class="flex flex-col items-center justify-center text-on-surface-variant"><span
+        class="material-symbols-outlined">inventory_2</span><span class="text-xs font-medium mt-0.5">Items</span></a>
+  </nav>
+
+  <button id="fabNuevoGasto"
+    class="lg:hidden fixed z-50 bg-primary text-on-primary w-14 h-14 rounded-full shadow-2xl flex items-center justify-center"
+    style="bottom:5.5rem;right:1rem;display:none;"><span class="material-symbols-outlined text-3xl">add</span></button>
+
+  <div id="modalGasto"
+    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
+    style="display:none;"></div>
+  <div id="modalBalance"
+    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
+    style="display:none;"></div>
+  <div id="modalGrupo"
+    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
+    style="display:none;"></div>
+  <div id="modalTarea"
+    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
+    style="display:none;"></div>
+  <div id="modalInventario"
+    class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile"
+    style="display:none;"></div>
+
+  <div id="status"
+    class="toast fixed bottom-24 lg:bottom-8 right-4 lg:right-8 z-[1000] rounded-xl font-semibold text-sm px-4 py-3 shadow-xl border hidden"
+    role="alert" aria-live="polite"></div>
+  <div id="loading-overlay"
+    class="loading-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999]"
+    style="display:none;">
+    <div class="spinner w-12 h-12 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin"></div>
+  </div>
+
+  <script>
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('rentshare_theme') || 'light';
+    function applyTheme(theme) { if (theme === 'dark') html.classList.add('dark'); else html.classList.remove('dark'); localStorage.setItem('rentshare_theme', theme); }
+    applyTheme(savedTheme);
+  </script>
+
+  <script type="module" src="../js/main.js"></script>
+</body>
+
+</html>
