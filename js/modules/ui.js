@@ -107,13 +107,17 @@ const ui = {
     },
 
     showGrupo(grupo) {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'none';
-        document.getElementById('grupoSection').style.display = 'block';
-        document.getElementById('navbar').style.display = 'flex';
+        const authSection = document.getElementById('authSection');
+        if (authSection) authSection.style.display = 'none';
+        const dashboardSection = document.getElementById('dashboardSection');
+        if (dashboardSection) dashboardSection.style.display = 'none';
+        const grupoSection = document.getElementById('grupoSection');
+        if (grupoSection) grupoSection.style.display = 'block';
+        const navbar = document.getElementById('navbar');
+        if (navbar) navbar.style.display = 'flex';
         // Sidebar
         const sidebar = document.getElementById('sidebar');
-        sidebar.style.removeProperty('display');
+        if (sidebar) sidebar.style.removeProperty('display');
 
         // Show group-specific sidebar items
         ['sidebarGastos', 'sidebarTareas', 'sidebarInventario', 'sidebarReportes', 'sidebarMiembros'].forEach(id => {
@@ -145,20 +149,28 @@ const ui = {
         const balBtn = document.getElementById('btnVerBalance');
         if (balBtn) balBtn.style.display = 'inline-flex';
         // Group info
-        document.getElementById('grupoNombre').innerText = grupo.nombre;
-        document.getElementById('breadcrumb').innerText = `← Mis Grupos / ${grupo.nombre}`;
-        document.getElementById('breadcrumb').style.cursor = 'pointer';
+        const grupoNombreEl = document.getElementById('grupoNombre');
+        if (grupoNombreEl) grupoNombreEl.innerText = grupo.nombre;
+        const breadcrumbEl = document.getElementById('breadcrumb');
+        if (breadcrumbEl) {
+            breadcrumbEl.innerText = `← Mis Grupos / ${grupo.nombre}`;
+            breadcrumbEl.style.cursor = 'pointer';
+        }
         // Sidebar group name
         const sgn = document.getElementById('sidebarGrupoName');
         if (sgn) sgn.textContent = grupo.nombre;
 
         const badge = document.getElementById('grupoRolBadge');
-        badge.innerText = grupo.rolActual;
-        badge.className = `badge badge-${grupo.rolActual === 'ADMIN' ? 'admin' : 'member'}`;
+        if (badge) {
+            badge.innerText = grupo.rolActual;
+            badge.className = `badge badge-${grupo.rolActual === 'ADMIN' ? 'admin' : 'member'}`;
+        }
 
         const esAdmin = grupo.rolActual === 'ADMIN';
-        document.getElementById('btnGenInvitacion').style.display = esAdmin ? 'inline-flex' : 'none';
-        document.getElementById('btnSolicitudes').style.display = esAdmin ? 'inline-flex' : 'none';
+        const btnGenInvitacion = document.getElementById('btnGenInvitacion');
+        if (btnGenInvitacion) btnGenInvitacion.style.display = esAdmin ? 'inline-flex' : 'none';
+        const btnSolicitudes = document.getElementById('btnSolicitudes');
+        if (btnSolicitudes) btnSolicitudes.style.display = esAdmin ? 'inline-flex' : 'none';
         const deleteBtn = document.getElementById('btnDeleteGroup');
         if (deleteBtn) deleteBtn.style.display = esAdmin ? 'inline-flex' : 'none';
 
