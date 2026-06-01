@@ -16,20 +16,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('rentshare_token');
     currentUser = JSON.parse(localStorage.getItem('rentshare_user') || 'null');
 
-    if (token && currentUser) {
-        ui.showDashboard();
-        loadDashboard();
-    } else {
-        ui.showAuth();
+    const hasAuth = !!document.getElementById('authSection');
+    const hasDashboard = !!document.getElementById('dashboardSection');
+    const hasGrupo = !!document.getElementById('grupoSection');
+
+    // Page-specific initialization
+    if (hasAuth) {
+        initAuth();
     }
 
-    initAuth();
-    initDashboard();
-    initGrupo();
-    initTareas();
-    initInventario();
-    initReportes();
-    initModales();
+    if (hasDashboard) {
+        // If not authenticated, redirect to login
+        if (!token || !currentUser) {
+            window.location.href = '../index.html';
+            return;
+        }
+        initDashboard();
+        initModalesIfPresent();
+        ui.showDashboard();
+        loadDashboard();
+    }
+
+    if (hasGrupo) {
+        if (!token || !currentUser) {
+            window.location.href = '../index.html';
+            return;
+        }
+        // dashboard init wires sidebar/bottomnav handlers
+        initDashboard();
+        initGrupo();
+        initTareas();
+        initInventario();
+        initReportes();
+        initModalesIfPresent();
+    }
+});
+
+function initModalesIfPresent() {
+    if (document.getElementById('modalGasto')) initModales();
 });
 
 // ─── AUTH ────────────────────────────────────────────────────
@@ -85,8 +109,8 @@ function initAuth() {
             localStorage.setItem('rentshare_token', res.token);
             localStorage.setItem('rentshare_user', JSON.stringify(res.usuario));
             currentUser = res.usuario;
-            ui.showDashboard();
-            loadDashboard();
+            // Redirigir a la página de dashboard separada
+            window.location.href = 'paginas/dashboard.html';
         } catch (err) {
             ui.toast(err.message, 'error');
         } finally {
@@ -124,7 +148,9 @@ function initAuth() {
         localStorage.clear();
         currentUser = null;
         currentGrupo = null;
-        ui.showAuth();
+        // Redirigir al index (login)
+        if (window.location.pathname.includes('/paginas/')) window.location.href = '../index.html';
+        else window.location.href = 'index.html';
     });
 }
 
@@ -134,7 +160,7 @@ function initDashboard() {
     document.getElementById('gruposList').addEventListener('click', (e) => {
         const card = e.target.closest('.grupo-card');
         if (!card || !card.dataset.id || card.dataset.id === 'undefined') return;
-        
+
         currentGrupo = { id: card.dataset.id, nombre: card.dataset.nombre, rolActual: card.dataset.rol };
         ui.showGrupo(currentGrupo);
         document.getElementById('breadcrumb').onclick = () => { ui.showDashboard(); loadDashboard(); };
@@ -269,8 +295,8 @@ function initGrupo() {
         try {
             ui.loading(true);
             const res = await api.generarInvitacion(currentGrupo.id);
-            navigator.clipboard.writeText(res.codigo).catch(() => {});
-            ui.toast(`Código copiado: ${res.codigo.substring(0,16)}...`, 'success');
+            navigator.clipboard.writeText(res.codigo).catch(() => { });
+            ui.toast(`Código copiado: ${res.codigo.substring(0, 16)}...`, 'success');
             alert(`Comparte este código de invitación:\n\n${res.codigo}\n\nVigencia: 24 horas`);
         } catch (err) {
             ui.toast(err.message, 'error');
@@ -370,7 +396,7 @@ async function loadGastos(grupoId, categoria) {
 
 function filterAndRenderGastos() {
     const searchVal = document.getElementById('searchGastos')?.value.toLowerCase().trim() || '';
-    const filtered = currentGastos.filter(g => 
+    const filtered = currentGastos.filter(g =>
         g.titulo.toLowerCase().includes(searchVal) ||
         (g.descripcion && g.descripcion.toLowerCase().includes(searchVal)) ||
         g.categoria.toLowerCase().includes(searchVal) ||
@@ -384,7 +410,7 @@ function initTareas() {
     document.getElementById('btnNuevaTarea').onclick = async () => {
         const miembros = await api.miembros(currentGrupo.id);
         const sel = document.getElementById('tAsignadoA');
-        sel.innerHTML = '<option value="">Sin asignar</option>' + 
+        sel.innerHTML = '<option value="">Sin asignar</option>' +
             miembros.map(m => `<option value="${m.usuarioId}">${m.nombre}</option>`).join('');
         document.getElementById('modalTarea').style.display = 'flex';
     };
@@ -468,7 +494,7 @@ async function loadInventario(grupoId) {
 }
 
 // ─── REPORTES ───────────────────────────────────────────────
-function initReportes() {}
+function initReportes() { }
 
 async function loadReportes(grupoId) {
     try {
@@ -627,12 +653,12 @@ function syncSidebarTab(tabId) {
     const sid = tabToSidebar[tabId];
     if (!sid) return;
     document.querySelectorAll('.sidebar-nav-item').forEach(a => {
-        a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
-        a.classList.add('text-on-surface-variant','font-medium');
+        a.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'font-bold');
+        a.classList.add('text-on-surface-variant', 'font-medium');
     });
     const el = document.getElementById(sid);
     if (el) {
-        el.classList.add('active','bg-primary-container','text-on-primary-container','font-bold');
-        el.classList.remove('text-on-surface-variant','font-medium');
+        el.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'font-bold');
+        el.classList.remove('text-on-surface-variant', 'font-medium');
     }
 }

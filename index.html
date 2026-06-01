@@ -4,13 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-  <!-- Seguridad -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/; connect-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/ https://cdn.jsdelivr.net https://rentshare.onrender.com https://cdn.tailwindcss.com">
-  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
   <meta name="description" content="Gestiona los gastos de renta con tus compañeros de forma fácil y transparente."/>
-  <title>RentShare | Gestión de Gastos Compartidos</title>
+  <title>RentShare — Iniciar sesión / Registrarse</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -19,799 +15,87 @@
   <!-- reCAPTCHA -->
   <script src="https://www.google.com/recaptcha/enterprise.js?render=6Lfrd-EsAAAAADV0hu4mT3ztOeJk8fZfmdO838JW"></script>
 
-  <!-- Tailwind CSS -->
   <script id="tailwind-config">
     window.tailwind = window.tailwind || {};
-    window.tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary":                  "var(--color-primary)",
-            "on-primary":               "var(--color-on-primary)",
-            "primary-container":        "var(--color-primary-container)",
-            "on-primary-container":     "var(--color-on-primary-container)",
-            "secondary":                "var(--color-secondary)",
-            "on-secondary":             "var(--color-on-secondary)",
-            "surface":                  "var(--color-surface)",
-            "surface-container-lowest": "var(--color-surface-low)",
-            "surface-container-low":    "var(--color-surface-low)",
-            "surface-container":        "var(--color-surface-container)",
-            "surface-container-high":   "var(--color-surface-high)",
-            "surface-container-highest":"var(--color-surface-high)",
-            "surface-variant":          "var(--color-surface-variant)",
-            "on-surface":               "var(--color-on-surface)",
-            "on-surface-variant":       "var(--color-on-surface-variant)",
-            "background":               "var(--color-background)",
-            "on-background":            "var(--color-on-background)",
-            "outline":                  "var(--color-outline)",
-            "outline-variant":          "var(--color-outline-variant)",
-            "error":                    "#ef4444",
-            "on-error":                 "#ffffff",
-          },
-          fontFamily: {
-            sans: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
-          },
-          spacing: {
-            "xs":  "4px",
-            "sm":  "12px",
-            "md":  "24px",
-            "lg":  "48px",
-            "xl":  "64px",
-            "gutter": "20px",
-            "margin-mobile":  "16px",
-            "margin-desktop": "40px",
-          },
-          borderRadius: {
-            DEFAULT: "0.25rem",
-            "sm":  "0.5rem",
-            "lg":  "0.75rem",
-            "xl":  "1rem",
-            "2xl": "1.25rem",
-            "full": "9999px",
-          },
-        }
-      }
-    }
+    window.tailwind.config = { darkMode: 'class' };
   </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Custom CSS (fallback + dark mode vars) -->
   <link rel="stylesheet" href="css/style.css"/>
-
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-      background: var(--color-background);
-      color: var(--color-on-surface);
-    }
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      user-select: none;
-    }
-    #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+    body { font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif; background:var(--color-background); color:var(--color-on-surface); }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400; user-select:none; }
   </style>
 </head>
-
 <body class="bg-background text-on-background min-h-screen">
 
-<!-- ============================================================
-     SIDEBAR (Desktop — Todas las pantallas autenticadas)
-============================================================ -->
-<aside id="sidebar" class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low shadow-sm z-50 p-md gap-xs"
-       style="display:none !important;">
-  <!-- Logo -->
-  <div class="flex items-center gap-sm px-xs mb-lg pt-xs">
-    <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center flex-shrink-0">
-      <span class="material-symbols-outlined text-on-primary-container text-xl">home_work</span>
-    </div>
-    <div>
-      <h1 class="font-bold text-lg text-primary leading-none tracking-tight">RentShare</h1>
-      <p id="sidebarGrupoName" class="text-xs text-on-surface-variant mt-0.5">Mis Grupos</p>
-    </div>
-  </div>
-
-  <!-- Nav links -->
-  <nav id="sidebarNav" class="flex-1 flex flex-col gap-xs">
-    <a id="sidebarDashboard" href="#" class="sidebar-nav-item active flex items-center gap-sm px-md py-sm rounded-xl font-semibold text-sm transition-all hover:translate-x-0.5 bg-primary-container text-on-primary-container">
-      <span class="material-symbols-outlined text-xl">dashboard</span>
-      <span>Mis Grupos</span>
-    </a>
-    <a id="sidebarGastos" href="#" class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
-      <span class="material-symbols-outlined text-xl">receipt_long</span>
-      <span>Gastos</span>
-    </a>
-    <a id="sidebarTareas" href="#" class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
-      <span class="material-symbols-outlined text-xl">checklist</span>
-      <span>Tareas</span>
-    </a>
-    <a id="sidebarInventario" href="#" class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
-      <span class="material-symbols-outlined text-xl">inventory_2</span>
-      <span>Inventario</span>
-    </a>
-    <a id="sidebarReportes" href="#" class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
-      <span class="material-symbols-outlined text-xl">bar_chart</span>
-      <span>Reportes</span>
-    </a>
-    <a id="sidebarMiembros" href="#" class="sidebar-nav-item flex items-center gap-sm px-md py-sm rounded-xl font-medium text-sm text-on-surface-variant hover:bg-surface-container-highest transition-all hover:translate-x-0.5">
-      <span class="material-symbols-outlined text-xl">group</span>
-      <span>Miembros</span>
-    </a>
-  </nav>
-
-  <!-- Sidebar footer -->
-  <div class="mt-auto pt-md flex flex-col gap-sm">
-    <div class="flex items-center gap-sm px-sm py-sm rounded-xl bg-surface-container">
-      <div id="sidebarAvatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">A</div>
-      <div class="flex-1 min-w-0">
-        <p id="sidebarUserName" class="text-sm font-semibold truncate">Usuario</p>
-        <p id="sidebarUserEmail" class="text-xs text-on-surface-variant truncate"></p>
-      </div>
-    </div>
-    <button id="logoutBtn" class="w-full flex items-center justify-center gap-xs py-sm text-sm font-semibold text-on-surface-variant hover:bg-surface-container-highest rounded-xl transition-colors">
-      <span class="material-symbols-outlined text-xl">logout</span>
-      Salir
-    </button>
-  </div>
-</aside>
-
-<!-- ============================================================
-     NAVBAR (Top bar — pantallas autenticadas)
-============================================================ -->
-<nav id="navbar" class="lg:ml-64 fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant shadow-sm"
-     style="display:none;">
-  <!-- Mobile logo + breadcrumb -->
-  <div class="flex items-center gap-sm">
-    <h1 class="font-bold text-lg text-primary lg:hidden">RentShare</h1>
-    <span id="breadcrumb" class="text-sm text-on-surface-variant hidden sm:block cursor-pointer hover:text-primary transition-colors"></span>
-  </div>
-  <!-- Right actions -->
-  <div class="flex items-center gap-sm" id="nav-actions">
-    <!-- Balance btn (grupo only) -->
-    <button id="btnVerBalance" class="inline-flex items-center gap-xs px-sm py-1.5 rounded-lg text-sm font-semibold text-primary hover:bg-primary-fixed transition-colors border border-primary-fixed" style="display:none;">
-      <span class="material-symbols-outlined text-base">account_balance_wallet</span>
-      Balance
-    </button>
-    <!-- Solicitudes (admin only) -->
-    <button id="btnSolicitudes" class="inline-flex items-center gap-xs px-sm py-1.5 rounded-lg text-sm font-semibold text-on-surface-variant hover:bg-surface-container border border-outline-variant transition-colors" style="display:none;">
-      <span class="material-symbols-outlined text-base">notifications</span>
-      Solicitudes
-    </button>
-    <!-- Invitación (admin only) -->
-    <button id="btnGenInvitacion" class="inline-flex items-center gap-xs px-sm py-1.5 rounded-lg text-sm font-semibold text-on-surface-variant hover:bg-surface-container border border-outline-variant transition-colors" style="display:none;">
-      <span class="material-symbols-outlined text-base">link</span>
-      Invitar
-    </button>
-    <!-- Dark mode toggle -->
-    <button id="themeToggle" class="p-2 rounded-full hover:bg-surface-container-highest transition-colors text-on-surface-variant" title="Cambiar modo">
-      <span class="material-symbols-outlined text-xl" id="themeIcon">dark_mode</span>
-    </button>
-    <!-- User avatar pill -->
-    <div class="flex items-center gap-xs">
-      <div id="navAvatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm">A</div>
-      <span id="navUserName" class="text-sm font-medium text-on-surface-variant hidden md:block"></span>
-    </div>
-  </div>
-</nav>
-
-<!-- ============================================================
-     PANTALLA 1: AUTH (Login / Registro)
-============================================================ -->
+<!-- AUTH (Login / Registro) - esta será la página principal (index) -->
 <section id="authSection" class="min-h-screen flex items-center justify-center p-margin-mobile relative overflow-hidden" style="background:var(--color-background);">
-  <!-- Background glows -->
   <div class="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-500/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
   <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-500/15 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
   <div class="w-full max-w-md relative z-10">
-    <!-- Brand -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 mb-4">
         <span class="material-symbols-outlined text-3xl text-indigo-400">home_work</span>
       </div>
-      <h1 class="text-3xl font-extrabold tracking-tight"
-          style="background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
-        RentShare
-      </h1>
+      <h1 class="text-3xl font-extrabold tracking-tight" style="background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">RentShare</h1>
       <p class="text-slate-400 mt-1 text-sm">Controla los gastos de tu renta con tu grupo.</p>
     </div>
 
-    <!-- Tabs -->
     <div class="auth-tabs flex gap-1 p-1 rounded-xl mb-4" style="background:rgba(15,23,42,0.7);border:1px solid rgba(99,102,241,0.15);">
       <button class="tab-btn active flex-1 py-2 rounded-lg text-sm font-semibold transition-all" id="tabLoginBtn">Iniciar Sesión</button>
       <button class="tab-btn flex-1 py-2 rounded-lg text-sm font-semibold transition-all text-slate-400" id="tabRegisterBtn">Registrarse</button>
     </div>
 
-    <!-- Login -->
     <div id="loginPanel" class="glass-card rounded-2xl p-8">
       <form id="loginForm" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Email</label>
           <input type="email" name="loginEmail" required placeholder="tu@email.com" autocomplete="email"
                  class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"
-                 onfocus="this.style.borderColor='rgba(99,102,241,0.7)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'"
-                 onblur="this.style.borderColor='rgba(99,102,241,0.2)';this.style.boxShadow='none'"/>
+                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Contraseña</label>
           <input type="password" name="loginPassword" required placeholder="••••••••" autocomplete="current-password"
                  class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"
-                 onfocus="this.style.borderColor='rgba(99,102,241,0.7)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'"
-                 onblur="this.style.borderColor='rgba(99,102,241,0.2)';this.style.boxShadow='none'"/>
+                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"/>
         </div>
-        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white text-sm mt-2 transition-all active:scale-95"
-                style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 4px 16px rgba(99,102,241,0.35);"
-                onmouseover="this.style.boxShadow='0 6px 24px rgba(99,102,241,0.5)'"
-                onmouseout="this.style.boxShadow='0 4px 16px rgba(99,102,241,0.35)'">
-          Entrar
-        </button>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white text-sm mt-2 transition-all active:scale-95" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Entrar</button>
       </form>
     </div>
 
-    <!-- Register -->
     <div id="registerPanel" class="glass-card rounded-2xl p-8" style="display:none;">
       <form id="registerForm" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Nombre Completo</label>
-          <input type="text" name="regNombre" required placeholder="Juan Pérez" autocomplete="name"
-                 class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"
-                 onfocus="this.style.borderColor='rgba(99,102,241,0.7)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'"
-                 onblur="this.style.borderColor='rgba(99,102,241,0.2)';this.style.boxShadow='none'"/>
+          <input type="text" name="regNombre" required placeholder="Juan Pérez" autocomplete="name" class="w-full px-4 py-3 rounded-xl text-sm text-white" style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Email</label>
-          <input type="email" name="regEmail" required placeholder="juan@email.com" autocomplete="email"
-                 class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"
-                 onfocus="this.style.borderColor='rgba(99,102,241,0.7)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'"
-                 onblur="this.style.borderColor='rgba(99,102,241,0.2)';this.style.boxShadow='none'"/>
+          <input type="email" name="regEmail" required placeholder="juan@email.com" autocomplete="email" class="w-full px-4 py-3 rounded-xl text-sm text-white" style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Contraseña</label>
-          <input type="password" name="regPassword" required placeholder="Mínimo 6 caracteres" autocomplete="new-password"
-                 class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
-                 style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"
-                 onfocus="this.style.borderColor='rgba(99,102,241,0.7)';this.style.boxShadow='0 0 0 3px rgba(99,102,241,0.15)'"
-                 onblur="this.style.borderColor='rgba(99,102,241,0.2)';this.style.boxShadow='none'"/>
+          <input type="password" name="regPassword" required placeholder="Mínimo 6 caracteres" autocomplete="new-password" class="w-full px-4 py-3 rounded-xl text-sm text-white" style="background:rgba(10,15,30,0.9);border:1px solid rgba(99,102,241,0.2);"/>
         </div>
-        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white text-sm mt-2 transition-all active:scale-95"
-                style="background:linear-gradient(135deg,#8b5cf6,#6366f1);box-shadow:0 4px 16px rgba(139,92,246,0.35);">
-          Crear Cuenta
-        </button>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white text-sm mt-2 transition-all active:scale-95" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);">Crear Cuenta</button>
       </form>
     </div>
   </div>
 </section>
 
-<!-- ============================================================
-     PANTALLA 2: DASHBOARD (Mis Grupos) — Bento Grid
-============================================================ -->
-<section id="dashboardSection" class="lg:ml-64 pt-16 min-h-screen rs-section" style="display:none;">
-  <div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-md">
-
-    <!-- Page header -->
-    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-lg gap-sm">
-      <div>
-        <h2 id="dashGreeting" class="text-3xl md:text-4xl font-extrabold text-primary tracking-tight">Mis Grupos</h2>
-        <p class="text-on-surface-variant mt-1 text-sm">Selecciona un grupo para ver sus gastos.</p>
-      </div>
-      <button id="btnNuevoGrupo" class="flex items-center gap-xs px-md py-sm bg-primary text-on-primary rounded-xl font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition-all">
-        <span class="material-symbols-outlined text-xl">add</span>
-        Nuevo Grupo
-      </button>
-    </header>
-
-    <!-- Stats row -->
-    <div id="statsRow" class="grid grid-cols-2 md:grid-cols-4 gap-gutter mb-lg"></div>
-
-    <!-- Groups bento grid -->
-    <div id="gruposList" class="grupos-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter mb-lg"></div>
-
-    <!-- Join group card -->
-    <div class="rs-card rounded-2xl p-md shadow-sm" style="background:var(--color-surface);border:1px solid var(--color-outline-variant);">
-      <div class="flex items-start gap-sm mb-md">
-        <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-primary">group_add</span>
-        </div>
-        <div>
-          <h3 class="font-bold text-on-surface">Unirse a un Grupo</h3>
-          <p class="text-on-surface-variant text-sm mt-0.5">Ingresa el código de invitación que te compartió el administrador.</p>
-        </div>
-      </div>
-      <form id="unirseForm" class="unirse-form-row flex gap-sm">
-      <input type="text" id="codigoInvitacion" placeholder="Código de invitación"
-             class="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-             style="border: 1.5px solid var(--color-outline); background: var(--color-surface); color: var(--color-on-surface);"
-             onfocus="this.style.borderColor='var(--color-primary)';this.style.boxShadow='0 0 0 3px var(--input-focus-shadow)'"
-             onblur="this.style.borderColor='var(--color-outline)';this.style.boxShadow='none'"/>
-        <button type="submit" class="px-md py-2.5 bg-primary text-on-primary rounded-xl font-bold text-sm hover:shadow-md active:scale-95 transition-all flex items-center gap-xs">
-          <span class="material-symbols-outlined text-base">send</span>
-          Solicitar
-        </button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================
-     PANTALLA 3: VISTA DE GRUPO
-============================================================ -->
-<section id="grupoSection" class="lg:ml-64 pt-16 min-h-screen rs-section" style="display:none;">
-  <div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-md">
-
-    <!-- Group header -->
-    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
-      <div class="flex items-center gap-sm flex-wrap">
-        <h1 id="grupoNombre" class="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Grupo</h1>
-        <span id="grupoRolBadge" class="badge"></span>
-      </div>
-      <div class="flex items-center gap-sm flex-wrap">
-        <button id="btnNuevoGasto" class="flex items-center gap-xs px-md py-sm bg-primary text-on-primary rounded-xl font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition-all">
-          <span class="material-symbols-outlined text-base">add</span>
-          Nuevo Gasto
-        </button>
-      </div>
-    </header>
-
-    <!-- Tabs -->
-    <div class="tabs flex gap-0 border-b border-outline-variant mb-md overflow-x-auto">
-      <button class="tab-btn active" id="tabGastos">
-        <span class="material-symbols-outlined text-base align-middle mr-1">receipt_long</span>Gastos
-      </button>
-      <button class="tab-btn" id="tabTareas">
-        <span class="material-symbols-outlined text-base align-middle mr-1">checklist</span>Tareas
-      </button>
-      <button class="tab-btn" id="tabInventario">
-        <span class="material-symbols-outlined text-base align-middle mr-1">inventory_2</span>Inventario
-      </button>
-      <button class="tab-btn" id="tabReportes">
-        <span class="material-symbols-outlined text-base align-middle mr-1">bar_chart</span>Reportes
-      </button>
-      <button class="tab-btn" id="tabMiembros">
-        <span class="material-symbols-outlined text-base align-middle mr-1">group</span>Miembros
-      </button>
-    </div>
-
-    <!-- Search & Filter Row (Gastos) -->
-    <div id="gastosHeaderContainer" class="flex flex-col md:flex-row gap-sm mb-md justify-between items-stretch md:items-center" style="display:none;">
-      <!-- Search input -->
-      <div class="relative flex-1 max-w-md">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 text-lg">search</span>
-        <input type="text" id="searchGastos" placeholder="Buscar gastos por título, pagador..."
-               class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-               style="border: 1.5px solid var(--color-outline); background: var(--color-surface); color: var(--color-on-surface);"
-               onfocus="this.style.borderColor='var(--color-primary)';this.style.boxShadow='0 0 0 3px var(--input-focus-shadow)'"
-               onblur="this.style.borderColor='var(--color-outline)';this.style.boxShadow='none'"/>
-      </div>
-
-      <!-- Filter pills (Gastos) -->
-      <div id="filtrosGastos" class="filtros-row flex flex-wrap gap-xs">
-        <button class="filtro-btn active" data-cat="">Todos</button>
-        <button class="filtro-btn" data-cat="RENTA">
-          <span class="material-symbols-outlined text-sm align-middle mr-0.5">home</span>Renta
-        </button>
-        <button class="filtro-btn" data-cat="SERVICIOS">
-          <span class="material-symbols-outlined text-sm align-middle mr-0.5">bolt</span>Servicios
-        </button>
-        <button class="filtro-btn" data-cat="MERCADO">
-          <span class="material-symbols-outlined text-sm align-middle mr-0.5">shopping_cart</span>Mercado
-        </button>
-        <button class="filtro-btn" data-cat="LIMPIEZA">
-          <span class="material-symbols-outlined text-sm align-middle mr-0.5">cleaning_services</span>Limpieza
-        </button>
-        <button class="filtro-btn" data-cat="INTERNET">
-          <span class="material-symbols-outlined text-sm align-middle mr-0.5">wifi</span>Internet
-        </button>
-        <button class="filtro-btn" data-cat="OTRO">
-          <span class="material-symbols-outlined text-sm align-middle mr-0.5">more_horiz</span>Otro
-        </button>
-      </div>
-    </div>
-
-    <!-- Gastos list -->
-    <div id="gastosList"></div>
-
-    <!-- Tareas -->
-    <div id="tareasList" style="display:none;">
-      <div class="flex justify-between items-center mb-md">
-        <h3 class="text-xl font-bold text-on-surface">Calendario de Tareas</h3>
-        <button id="btnNuevaTarea" class="flex items-center gap-xs px-md py-sm bg-secondary text-on-secondary rounded-xl font-bold text-sm shadow-sm hover:shadow active:scale-95 transition-all">
-          <span class="material-symbols-outlined text-base">add</span> Nueva Tarea
-        </button>
-      </div>
-      <div id="tareasGrid" class="tareas-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter"></div>
-    </div>
-
-    <!-- Inventario -->
-    <div id="inventarioSection" style="display:none;">
-      <div class="flex justify-between items-center mb-md">
-        <h3 class="text-xl font-bold text-on-surface">Inventario Compartido</h3>
-        <button id="btnNuevoItem" class="flex items-center gap-xs px-md py-sm bg-tertiary text-on-tertiary rounded-xl font-bold text-sm shadow-sm hover:shadow active:scale-95 transition-all">
-          <span class="material-symbols-outlined text-base">add</span> Agregar Item
-        </button>
-      </div>
-      <div id="inventarioList" class="inventario-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter"></div>
-    </div>
-
-    <!-- Reportes -->
-    <div id="reportesSection" style="display:none;">
-      <div id="statsReportes" class="grid grid-cols-2 md:grid-cols-4 gap-gutter mb-md"></div>
-      <div class="charts-grid grid grid-cols-1 md:grid-cols-2 gap-md">
-        <div class="rs-card rounded-2xl p-md shadow-sm" style="background:var(--color-surface);border:1px solid var(--color-outline-variant);">
-          <h3 class="font-bold text-on-surface mb-sm">Gastos por Categoría</h3>
-          <canvas id="chartCategorias"></canvas>
-        </div>
-        <div class="rs-card rounded-2xl p-md shadow-sm" style="background:var(--color-surface);border:1px solid var(--color-outline-variant);">
-          <h3 class="font-bold text-on-surface mb-sm">Gastos por Usuario</h3>
-          <canvas id="chartUsuarios"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Miembros -->
-    <div id="miembrosList" style="display:none;"></div>
-
-  </div>
-</section>
-
-<!-- ============================================================
-     BOTTOM NAV (Mobile Only — pantallas autenticadas)
-============================================================ -->
-<nav id="bottomNav" class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface shadow-[0_-4px_20px_rgba(63,81,181,0.08)] border-t border-outline-variant rounded-t-2xl"
-     style="display:none !important;">
-  <a id="bottomDashboard" href="#" class="flex flex-col items-center justify-center px-4 py-1 rounded-full bg-primary-container text-on-primary-container transition-all active:scale-90">
-    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
-    <span class="text-xs font-semibold mt-0.5">Inicio</span>
-  </a>
-  <a id="bottomGastos" href="#" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant active:scale-90 transition-all px-4 py-1 rounded-full">
-    <span class="material-symbols-outlined">receipt_long</span>
-    <span class="text-xs font-medium mt-0.5">Gastos</span>
-  </a>
-  <a id="bottomTareas" href="#" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant active:scale-90 transition-all px-4 py-1 rounded-full">
-    <span class="material-symbols-outlined">task_alt</span>
-    <span class="text-xs font-medium mt-0.5">Tareas</span>
-  </a>
-  <a id="bottomInventario" href="#" class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant active:scale-90 transition-all px-4 py-1 rounded-full">
-    <span class="material-symbols-outlined">inventory_2</span>
-    <span class="text-xs font-medium mt-0.5">Items</span>
-  </a>
-</nav>
-
-<!-- FAB (Mobile — Nuevo Gasto en Grupo) -->
-<button id="fabNuevoGasto" class="lg:hidden fixed z-50 bg-primary text-on-primary w-14 h-14 rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-all hover:shadow-primary/40"
-        style="bottom:5.5rem;right:1rem;display:none;">
-  <span class="material-symbols-outlined text-3xl">add</span>
-</button>
-
-<!-- ============================================================
-     MODAL: Crear/Editar Gasto
-============================================================ -->
-<div id="modalGasto" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
-    <div class="modal-header flex justify-between items-center mb-md">
-      <h3 class="font-bold text-lg text-on-surface">Nuevo Gasto</h3>
-      <button id="closeModalGasto" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
-        <span class="material-symbols-outlined text-xl">close</span>
-      </button>
-    </div>
-    <form id="gastoForm" class="space-y-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm form-grid">
-        <div class="form-group">
-          <label>Título</label>
-          <input type="text" id="gTitulo" required placeholder="Ej: Renta Abril"/>
-        </div>
-        <div class="form-group">
-          <label>Monto Total ($)</label>
-          <input type="number" id="gMonto" required min="0.01" step="0.01" placeholder="0.00"/>
-        </div>
-        <div class="form-group">
-          <label>Categoría</label>
-          <select id="gCategoria">
-            <option value="RENTA">🏠 Renta</option>
-            <option value="SERVICIOS">💡 Servicios</option>
-            <option value="MERCADO">🛒 Mercado</option>
-            <option value="LIMPIEZA">🧹 Limpieza</option>
-            <option value="INTERNET">📡 Internet</option>
-            <option value="OTRO">📌 Otro</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Tipo</label>
-          <select id="gTipo">
-            <option value="COMPARTIDO">Compartido</option>
-            <option value="INDIVIDUAL">Individual</option>
-          </select>
-        </div>
-        <div class="form-group sm:col-span-2">
-          <label>Fecha del Gasto</label>
-          <input type="date" id="gFecha" required/>
-        </div>
-        <div class="form-group sm:col-span-2">
-          <label>Descripción (opcional)</label>
-          <textarea id="gDescripcion" placeholder="Detalles adicionales..." rows="2"></textarea>
-        </div>
-      </div>
-      <!-- Divisiones -->
-      <div class="pt-2">
-        <div class="flex justify-between items-center mb-sm">
-          <h4 class="font-semibold text-on-surface text-sm">¿Quién participa?</h4>
-          <button type="button" id="btnDividirIgual" class="btn btn-ghost text-xs px-sm py-1">
-            ÷ Dividir igual
-          </button>
-        </div>
-        <div id="divisionesContainer"></div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block mt-2">Guardar Gasto</button>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: Balance -->
-<div id="modalBalance" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
-    <div class="modal-header flex justify-between items-center mb-md">
-      <div class="flex items-center gap-sm">
-        <span class="material-symbols-outlined text-primary text-2xl">account_balance_wallet</span>
-        <h3 class="font-bold text-lg text-on-surface">Balance del Grupo</h3>
-      </div>
-      <button id="closeModalBalance" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
-        <span class="material-symbols-outlined text-xl">close</span>
-      </button>
-    </div>
-    <div id="balanceContent"></div>
-  </div>
-</div>
-
-<!-- MODAL: Nuevo Grupo -->
-<div id="modalGrupo" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card w-full max-w-md shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
-    <div class="modal-header flex justify-between items-center mb-md">
-      <div class="flex items-center gap-sm">
-        <span class="material-symbols-outlined text-primary text-2xl">home_work</span>
-        <h3 class="font-bold text-lg text-on-surface">Crear Nuevo Grupo</h3>
-      </div>
-      <button id="closeModalGrupo" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
-        <span class="material-symbols-outlined text-xl">close</span>
-      </button>
-    </div>
-    <form id="grupoForm" class="space-y-4">
-      <div class="form-group">
-        <label>Nombre del Grupo</label>
-        <input type="text" id="gNombre" required placeholder="Ej: Apartamento 201"/>
-      </div>
-      <div class="form-group">
-        <label>Descripción (opcional)</label>
-        <input type="text" id="gDescGrupo" placeholder="Dirección, piso, etc."/>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block">Crear Grupo</button>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: Nueva Tarea -->
-<div id="modalTarea" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
-    <div class="modal-header flex justify-between items-center mb-md">
-      <div class="flex items-center gap-sm">
-        <span class="material-symbols-outlined text-secondary text-2xl">checklist</span>
-        <h3 class="font-bold text-lg text-on-surface">Nueva Tarea</h3>
-      </div>
-      <button id="closeModalTarea" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
-        <span class="material-symbols-outlined text-xl">close</span>
-      </button>
-    </div>
-    <form id="tareaForm" class="space-y-4">
-      <div class="form-group">
-        <label>Título</label>
-        <input type="text" id="tTitulo" required placeholder="Ej: Limpiar la cocina"/>
-      </div>
-      <div class="form-group">
-        <label>Descripción</label>
-        <textarea id="tDescripcion" placeholder="Detalles de la tarea..."></textarea>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm form-grid">
-        <div class="form-group">
-          <label>Vencimiento</label>
-          <input type="datetime-local" id="tVencimiento"/>
-        </div>
-        <div class="form-group">
-          <label>Asignar a</label>
-          <select id="tAsignadoA">
-            <option value="">Sin asignar</option>
-          </select>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block mt-2">Crear Tarea</button>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: Nuevo Item Inventario -->
-<div id="modalInventario" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-margin-mobile" style="display:none;">
-  <div class="modal-card w-full max-w-sm shadow-2xl rounded-2xl" style="animation:rsSlideUp 0.25s ease; background:var(--modal-bg); border:1px solid var(--modal-border); color:var(--color-on-surface);">
-    <div class="modal-header flex justify-between items-center mb-md">
-      <div class="flex items-center gap-sm">
-        <span class="material-symbols-outlined text-tertiary text-2xl">inventory_2</span>
-        <h3 class="font-bold text-lg text-on-surface">Nuevo Item</h3>
-      </div>
-      <button id="closeModalInventario" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors">
-        <span class="material-symbols-outlined text-xl">close</span>
-      </button>
-    </div>
-    <form id="inventarioForm" class="space-y-4">
-      <div class="form-group">
-        <label>Nombre del Producto</label>
-        <input type="text" id="iNombre" required placeholder="Ej: Papel Higiénico"/>
-      </div>
-      <div class="grid grid-cols-2 gap-sm form-grid">
-        <div class="form-group">
-          <label>Cantidad Actual</label>
-          <input type="number" id="iCantidad" value="1" step="0.1"/>
-        </div>
-        <div class="form-group">
-          <label>Unidad</label>
-          <input type="text" id="iUnidad" placeholder="unidades, pack, kg"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Stock Mínimo (Alerta)</label>
-        <input type="number" id="iStockMinimo" value="1"/>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block">Guardar</button>
-    </form>
-  </div>
-</div>
-
-<!-- Toast notification -->
+<!-- Toast + Loading -->
 <div id="status" class="toast fixed bottom-24 lg:bottom-8 right-4 lg:right-8 z-[1000] rounded-xl font-semibold text-sm px-4 py-3 shadow-xl border hidden" role="alert" aria-live="polite"></div>
+<div id="loading-overlay" class="loading-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999]" style="display:none;"><div class="spinner w-12 h-12 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin"></div></div>
 
-<!-- Loading overlay -->
-<div id="loading-overlay" class="loading-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999]" style="display:none;">
-  <div class="spinner w-12 h-12 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" style="box-shadow:0 0 20px rgba(99,102,241,0.3);"></div>
-</div>
-
-<!-- ============================================================
-     SCRIPTS
-============================================================ -->
 <script>
-  // ── Dark/Light Mode Toggle ────────────────────────────────
+  // Dark/Light mode helper (minimal para auth)
   const html = document.documentElement;
-  const themeToggle = document.getElementById('themeToggle');
-  const themeIcon   = document.getElementById('themeIcon');
-  const savedTheme  = localStorage.getItem('rentshare_theme') || 'light';
-
-  function applyTheme(theme) {
-    if (theme === 'dark') {
-      html.classList.add('dark');
-      document.body.style.backgroundColor = '';
-      themeIcon.textContent = 'light_mode';
-    } else {
-      html.classList.remove('dark');
-      document.body.style.backgroundColor = '';
-      themeIcon.textContent = 'dark_mode';
-    }
-    localStorage.setItem('rentshare_theme', theme);
-  }
+  const savedTheme = localStorage.getItem('rentshare_theme') || 'light';
+  function applyTheme(theme){ if(theme==='dark') html.classList.add('dark'); else html.classList.remove('dark'); localStorage.setItem('rentshare_theme', theme); }
   applyTheme(savedTheme);
-
-  themeToggle?.addEventListener('click', () => {
-    applyTheme(html.classList.contains('dark') ? 'light' : 'dark');
-  });
-
-  // ── Sidebar navigation helpers (visible after login) ─────
-  function showSidebar(show) {
-    const sidebar   = document.getElementById('sidebar');
-    const bottomNav = document.getElementById('bottomNav');
-    if (show) {
-      sidebar.style.removeProperty('display');
-      sidebar.classList.add('lg:flex');
-      bottomNav.style.removeProperty('display');
-      bottomNav.classList.add('flex');
-    } else {
-      sidebar.style.setProperty('display', 'none', 'important');
-      bottomNav.style.setProperty('display', 'none', 'important');
-    }
-  }
-
-  // Patch ui.showAuth / ui.showDashboard / ui.showGrupo after module loads
-  document.addEventListener('DOMContentLoaded', () => {
-    // Wait a tick for the module to import
-    setTimeout(() => {
-      // Patch ui module to also handle sidebar/bottomnav
-      const origShowAuth = window._rsShowAuth;
-      const origShowDash = window._rsShowDash;
-    }, 50);
-  });
-
-  // ── Sidebar nav link wiring (grupo tabs) ─────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    const sidebarLinks = {
-      sidebarDashboard:  null,   // handled by breadcrumb
-      sidebarGastos:     'tabGastos',
-      sidebarTareas:     'tabTareas',
-      sidebarInventario: 'tabInventario',
-      sidebarReportes:   'tabReportes',
-      sidebarMiembros:   'tabMiembros',
-    };
-
-    Object.entries(sidebarLinks).forEach(([sid, tabId]) => {
-      const el = document.getElementById(sid);
-      if (!el) return;
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (sid === 'sidebarDashboard') {
-          document.getElementById('breadcrumb')?.click();
-          return;
-        }
-        const tabEl = document.getElementById(tabId);
-        if (tabEl && document.getElementById('grupoSection').style.display !== 'none') {
-          tabEl.click();
-        }
-        // update sidebar active state
-        document.querySelectorAll('.sidebar-nav-item').forEach(a => {
-          a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
-          a.classList.add('text-on-surface-variant','font-medium');
-        });
-        el.classList.add('active','bg-primary-container','text-on-primary-container','font-bold');
-        el.classList.remove('text-on-surface-variant','font-medium');
-      });
-    });
-
-    // Bottom nav wiring
-    const bottomLinks = {
-      bottomDashboard:  () => document.getElementById('breadcrumb')?.click(),
-      bottomGastos:     () => document.getElementById('tabGastos')?.click(),
-      bottomTareas:     () => document.getElementById('tabTareas')?.click(),
-      bottomInventario: () => document.getElementById('tabInventario')?.click(),
-    };
-    Object.entries(bottomLinks).forEach(([bid, fn]) => {
-      document.getElementById(bid)?.addEventListener('click', (e) => { e.preventDefault(); fn(); });
-    });
-
-    // Patch ui module after load to handle sidebar visibility
-    const _origModule = {};
-    const checkPatch = setInterval(() => {
-      // Once the section is shown via JS, sync sidebar & navbar
-      const authEl  = document.getElementById('authSection');
-      const dashEl  = document.getElementById('dashboardSection');
-      const grupoEl = document.getElementById('grupoSection');
-      const navEl   = document.getElementById('navbar');
-
-      if (navEl && navEl.style.display !== 'none' && navEl.style.display !== '') {
-        showSidebar(true);
-        const fabBtn = document.getElementById('fabNuevoGasto');
-        if (fabBtn && grupoEl && grupoEl.style.display !== 'none') {
-          fabBtn.style.display = 'flex';
-        } else if (fabBtn) {
-          fabBtn.style.display = 'none';
-        }
-        // Update sidebar user info
-        const u = JSON.parse(localStorage.getItem('rentshare_user') || '{}');
-        if (u.nombre) {
-          const initial = u.nombre[0]?.toUpperCase() || 'A';
-          document.getElementById('sidebarAvatar').textContent = initial;
-          document.getElementById('navAvatar').textContent = initial;
-          document.getElementById('sidebarUserName').textContent = u.nombre;
-          document.getElementById('sidebarUserEmail').textContent = u.email || '';
-          document.getElementById('navUserName').textContent = u.nombre;
-        }
-        // Update balance button visibility
-        const balBtn = document.getElementById('btnVerBalance');
-        if (balBtn) {
-          balBtn.style.display = (grupoEl && grupoEl.style.display !== 'none') ? 'inline-flex' : 'none';
-        }
-      } else {
-        showSidebar(false);
-        const fabBtn = document.getElementById('fabNuevoGasto');
-        if (fabBtn) fabBtn.style.display = 'none';
-      }
-    }, 300);
-  });
 </script>
 
 <script type="module" src="js/main.js"></script>
