@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initModalesIfPresent() {
     if (document.getElementById('modalGasto')) initModales();
-});
+}
 
 // ─── AUTH ────────────────────────────────────────────────────
 function initAuth() {
