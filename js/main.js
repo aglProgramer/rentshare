@@ -11,6 +11,22 @@ let currentMiembros = [];
 let currentCat = '';
 let currentGastos = [];
 
+// ─── Cargar tema guardado ───────────────────────────────────
+(function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const html = document.documentElement;
+    if (savedTheme === 'dark') {
+        html.classList.add('dark');
+    } else {
+        html.classList.remove('dark');
+    }
+    // Actualizar icono si existe
+    const icon = document.getElementById('themeIcon');
+    if (icon) {
+        icon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+    }
+})();
+
 // ─── Init ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('rentshare_token');
@@ -177,8 +193,24 @@ function initAuth() {
 
 // ─── DASHBOARD ───────────────────────────────────────────────
 function initDashboard() {
+    // Navegación del sidebar
+    const sidebarDashboard = document.getElementById('sidebarDashboard');
+    if (sidebarDashboard) {
+        sidebarDashboard.addEventListener('click', (e) => {
+            e.preventDefault();
+            const currentPath = window.location.pathname;
+            if (currentPath.includes('/paginas/')) {
+                window.location.href = '../dashboard.html';
+            } else {
+                window.location.href = 'paginas/dashboard.html';
+            }
+        });
+    }
+
     // Clic en grupo y acciones sobre grupos
-    document.getElementById('gruposList').addEventListener('click', async (e) => {
+    const gruposList = document.getElementById('gruposList');
+    if (gruposList) {
+        gruposList.addEventListener('click', async (e) => {
         const card = e.target.closest('.grupo-card');
         if (!card || !card.dataset.id || card.dataset.id === 'undefined') return;
 
@@ -222,28 +254,55 @@ function initDashboard() {
 
         window.location.href = `paginas/grupo.html?grupoId=${card.dataset.id}`;
     });
+    }
 
     // Nuevo grupo modal
-    document.getElementById('btnNuevoGrupo').addEventListener('click', () => {
-        document.getElementById('modalGrupo').style.display = 'flex';
-    });
+    const btnNuevoGrupo = document.getElementById('btnNuevoGrupo');
+    if (btnNuevoGrupo) {
+        btnNuevoGrupo.addEventListener('click', () => {
+            document.getElementById('modalGrupo').style.display = 'flex';
+        });
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                const icon = document.getElementById('themeIcon');
+                if (icon) icon.textContent = 'dark_mode';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                const icon = document.getElementById('themeIcon');
+                if (icon) icon.textContent = 'light_mode';
+            }
+        });
+    }
 
     // Unirse a grupo
-    document.getElementById('unirseForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const codigo = document.getElementById('codigoInvitacion').value.trim();
-        if (!codigo) return;
-        try {
-            ui.loading(true);
-            await api.solicitarUnion(codigo);
-            ui.toast('¡Solicitud enviada! El admin debe aprobarla.', 'warning');
-            document.getElementById('codigoInvitacion').value = '';
-        } catch (err) {
-            ui.toast(err.message, 'error');
-        } finally {
-            ui.loading(false);
-        }
-    });
+    const unirseForm = document.getElementById('unirseForm');
+    if (unirseForm) {
+        unirseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const codigo = document.getElementById('codigoInvitacion').value.trim();
+            if (!codigo) return;
+            try {
+                ui.loading(true);
+                await api.solicitarUnion(codigo);
+                ui.toast('¡Solicitud enviada! El admin debe aprobarla.', 'warning');
+                document.getElementById('codigoInvitacion').value = '';
+            } catch (err) {
+                ui.toast(err.message, 'error');
+            } finally {
+                ui.loading(false);
+            }
+        });
+    }
 }
 
 async function loadDashboard() {
@@ -368,7 +427,7 @@ function initGrupo() {
             ui.loading(true);
             await api.salirGrupo(currentGrupo.id);
             ui.toast('Has salido del grupo.', 'success');
-            window.location.href = '../paginas/dashboard.html';
+            window.location.href = '../dashboard.html';
         } catch (err) {
             ui.toast(err.message, 'error');
         } finally {
@@ -383,7 +442,7 @@ function initGrupo() {
             ui.loading(true);
             await api.eliminarGrupo(currentGrupo.id);
             ui.toast('Grupo eliminado.', 'success');
-            window.location.href = '../paginas/dashboard.html';
+            window.location.href = '../dashboard.html';
         } catch (err) {
             ui.toast(err.message, 'error');
         } finally {
