@@ -200,7 +200,7 @@ function initDashboard() {
             e.preventDefault();
             const currentPath = window.location.pathname;
             if (currentPath.includes('/paginas/')) {
-                window.location.href = '../dashboard.html';
+                window.location.href = 'dashboard.html';
             } else {
                 window.location.href = 'paginas/dashboard.html';
             }
@@ -219,7 +219,7 @@ function initDashboard() {
                 const action = actionButton.dataset.action;
                 const grupoId = card.dataset.id;
                 if (action === 'enter') {
-                    window.location.href = `paginas/grupo.html?grupoId=${grupoId}`;
+                    window.location.href = `grupo.html?grupoId=${grupoId}`;
                     return;
                 }
                 if (action === 'leave') {
@@ -252,7 +252,7 @@ function initDashboard() {
                 }
             }
 
-            window.location.href = `paginas/grupo.html?grupoId=${card.dataset.id}`;
+            window.location.href = `grupo.html?grupoId=${card.dataset.id}`;
         });
     }
 
