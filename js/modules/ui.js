@@ -35,10 +35,14 @@ const ui = {
     },
 
     showDashboard() {
-        document.getElementById('authSection')?.style.setProperty('display', 'none');
-        document.getElementById('dashboardSection')?.style.setProperty('display', 'block');
-        document.getElementById('grupoSection')?.style.setProperty('display', 'none');
-        document.getElementById('navbar')?.style.setProperty('display', 'flex');
+        const authSection = document.getElementById('authSection');
+        if (authSection) authSection.style.display = 'none';
+        const dashboardSection = document.getElementById('dashboardSection');
+        if (dashboardSection) dashboardSection.style.display = 'block';
+        const grupoSection = document.getElementById('grupoSection');
+        if (grupoSection) grupoSection.style.display = 'none';
+        const navbar = document.getElementById('navbar');
+        if (navbar) navbar.style.display = 'flex';
         // Sidebar visible
         const sidebar = document.getElementById('sidebar');
         if (sidebar) sidebar.style.removeProperty('display');
@@ -73,11 +77,14 @@ const ui = {
         const balBtn = document.getElementById('btnVerBalance');
         if (balBtn) balBtn.style.display = 'none';
         // Breadcrumb
-        document.getElementById('breadcrumb')?.innerText = '';
+        const breadcrumbEl = document.getElementById('breadcrumb');
+        if (breadcrumbEl) breadcrumbEl.innerText = '';
         // User info
         const u = JSON.parse(localStorage.getItem('rentshare_user') || '{}');
-        document.getElementById('dashGreeting')?.innerText = `Hola, ${u.nombre || ''}`;
-        document.getElementById('navUserName')?.innerText = u.nombre || u.email || '';
+        const dashGreeting = document.getElementById('dashGreeting');
+        if (dashGreeting) dashGreeting.innerText = `Hola, ${u.nombre || ''}`;
+        const navUserName = document.getElementById('navUserName');
+        if (navUserName) navUserName.innerText = u.nombre || u.email || '';
         // Sidebar user info
         if (u.nombre) {
             const init = u.nombre[0]?.toUpperCase() || 'A';
