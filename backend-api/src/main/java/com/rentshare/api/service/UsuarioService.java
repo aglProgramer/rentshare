@@ -21,6 +21,7 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final CaptchaService captchaService;
 
+    @Transactional(readOnly = true)
     public Page<UsuarioResponse> listarTodos(Pageable pageable) {
         log.info("Fetching paginated users: {}", pageable);
         return usuarioRepository.findAll(pageable)

@@ -52,6 +52,7 @@ public class GrupoService {
         return toResponse(grupo, "ADMIN", 1);
     }
 
+    @Transactional(readOnly = true)
     public List<GrupoResponse> misGrupos(UUID usuarioId) {
         List<Grupo> grupos = grupoRepository.findByMiembroUsuarioId(usuarioId);
         return grupos.stream().map(g -> {
@@ -64,6 +65,7 @@ public class GrupoService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<UsuarioResponse> miembros(UUID grupoId) {
         return miembroGrupoRepository.findByGrupoId(grupoId).stream()
                 .map(m -> UsuarioResponse.builder()
@@ -156,6 +158,7 @@ public class GrupoService {
     /**
      * Admin del grupo ve las solicitudes pendientes
      */
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> solicitudesPendientes(UUID grupoId, UUID adminId) {
         verificarAdmin(grupoId, adminId);
         return invitacionGrupoRepository.findByGrupoIdAndEstado(grupoId, "PENDIENTE")
@@ -171,6 +174,7 @@ public class GrupoService {
     }
 
     // --- Balance ---
+    @Transactional(readOnly = true)
     public BalanceResponse calcularBalance(UUID grupoId) {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));

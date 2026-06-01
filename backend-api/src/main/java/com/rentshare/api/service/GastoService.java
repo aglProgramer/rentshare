@@ -25,6 +25,7 @@ public class GastoService {
     private final UsuarioRepository usuarioRepository;
     private final MiembroGrupoRepository miembroGrupoRepository;
 
+    @Transactional(readOnly = true)
     public Page<GastoResponse> listar(UUID grupoId, String categoria, Pageable pageable) {
         if (categoria != null && !categoria.isBlank()) {
             return gastoRepository.findByGrupoIdAndCategoria(grupoId, categoria, pageable)
@@ -109,6 +110,7 @@ public class GastoService {
         return toResponse(gastoRepository.save(gasto));
     }
 
+    @Transactional(readOnly = true)
     public com.rentshare.api.dto.response.StatsResponse obtenerStats(UUID grupoId) {
         List<Gasto> gastos = gastoRepository.findAll().stream()
                 .filter(g -> g.getGrupo().getId().equals(grupoId))

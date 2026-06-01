@@ -26,6 +26,7 @@ public class TareaService {
     private final UsuarioRepository usuarioRepository;
     private final MiembroGrupoRepository miembroGrupoRepository;
 
+    @Transactional(readOnly = true)
     public List<TareaResponse> listarPorGrupo(UUID grupoId) {
         return tareaRepository.findByGrupoId(grupoId).stream()
                 .map(this::toResponse)

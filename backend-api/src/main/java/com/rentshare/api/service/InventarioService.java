@@ -24,6 +24,7 @@ public class InventarioService {
     private final GrupoRepository grupoRepository;
     private final MiembroGrupoRepository miembroGrupoRepository;
 
+    @Transactional(readOnly = true)
     public List<InventarioResponse> listarPorGrupo(UUID grupoId) {
         return itemInventarioRepository.findByGrupoId(grupoId).stream()
                 .map(this::toResponse)
