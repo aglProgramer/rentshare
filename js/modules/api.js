@@ -55,7 +55,10 @@ const api = {
     balance: (grupoId) => api.request(`/grupos/${grupoId}/balance`),
 
     // GASTOS
-    gastos: (grupoId, categoria = '', page = 0) => api.request(`/gastos?grupoId=${grupoId}&categoria=${categoria}&page=${page}&size=20&sort=fechaGasto,desc`),
+    gastos: (grupoId, categoria = '', page = 0) => {
+        const catParam = categoria ? `&categoria=${categoria}` : '';
+        return api.request(`/gastos?grupoId=${grupoId}${catParam}&page=${page}&size=20&sort=fechaGasto,desc`);
+    },
     crearGasto: (body) => api.request('/gastos', { method: 'POST', body: JSON.stringify(body) }),
     eliminarGasto: (gastoId) => api.request(`/gastos/${gastoId}`, { method: 'DELETE' }),
     marcarPagado: (gastoId) => api.request(`/gastos/${gastoId}/pagar`, { method: 'PATCH' }),
