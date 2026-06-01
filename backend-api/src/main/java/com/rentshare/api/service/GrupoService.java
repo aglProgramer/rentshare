@@ -85,7 +85,7 @@ public class GrupoService {
     @Transactional
     public String generarCodigoInvitacion(UUID grupoId, UUID adminId) {
         verificarAdmin(grupoId, adminId);
-        // Código criptográficamente seguro: UUID v4 
+        // Código criptográficamente seguro: UUID v4
         String codigo = UUID.randomUUID().toString().replace("-", "");
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
@@ -180,7 +180,8 @@ public class GrupoService {
                 .orElseThrow(() -> new RuntimeException("Grupo no encontrado"));
 
         List<MiembroGrupo> miembros = miembroGrupoRepository.findByGrupoId(grupoId);
-        List<Gasto> gastos = gastoRepository.findByGrupoId(grupoId, org.springframework.data.domain.Pageable.unpaged()).getContent();
+        List<Gasto> gastos = gastoRepository.findByGrupoId(grupoId, org.springframework.data.domain.Pageable.unpaged())
+                .getContent();
 
         // Calcular cuánto pagó cada uno y cuánto le corresponde
         Map<UUID, BigDecimal> totalPagado = new HashMap<>();
@@ -223,6 +224,47 @@ public class GrupoService {
                 .totalGastos(totalGastos)
                 .balances(balances)
                 .build();
+    }
+
+    @Transactional
+    public void salirDeGrupo(UUID grupoId, UUID usuarioId) {
+        MiembroGrupo miembro = miembroGrupoRepository.findByGrupoIdAndUsuarioId(grupoId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("No eres miembro de este grupo"));
+
+        List<MiembroGrupo> miembros = miembroGrupoRepository.findByGrupoId(grupoId);
+        boolean esAdmin = "ADMIN".equals(miembro.getRol());
+
+        if (esAdmin && miembros.size() > 1) {
+            // Transferir admin al siguiente miembro si el admin actual se va
+            MiembroGrupo nuevoAdmin = miembros.stream()
+                    .filter(m -> !m.getUsuario().getId().equals(usuarioId))
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new RuntimeException("No se encontró un miembro para transferir la administración"));
+            nuevoAdmin.setRol("ADMIN");
+            miembroGrupoRepository.save(nuevoAdmin);
+        }
+
+        miembroGrupoRepository.deleteByGrupoIdAndUsuarioId(grupoId, usuarioId);
+
+        if (miembros.size() == 1) {
+            borrarGrupoYDatos(grupoId);
+        }
+    }
+
+    @Transactional
+    public void eliminarGrupo(UUID grupoId, UUID adminId) {
+        verificarAdmin(grupoId, adminId);
+        borrarGrupoYDatos(grupoId);
+    }
+
+    private void borrarGrupoYDatos(UUID grupoId) {
+        invitacionGrupoRepository.deleteByGrupoId(grupoId);
+        gastoRepository.deleteByGrupoId(grupoId);
+        tareaRepository.deleteByGrupoId(grupoId);
+        itemInventarioRepository.deleteByGrupoId(grupoId);
+        miembroGrupoRepository.deleteByGrupoId(grupoId);
+        grupoRepository.deleteById(grupoId);
     }
 
     // --- Helpers ---

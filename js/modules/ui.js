@@ -42,7 +42,7 @@ const ui = {
         // Sidebar visible
         const sidebar = document.getElementById('sidebar');
         sidebar.style.removeProperty('display');
-        
+
         // Hide group-specific sidebar items
         ['sidebarGastos', 'sidebarTareas', 'sidebarInventario', 'sidebarReportes', 'sidebarMiembros'].forEach(id => {
             const el = document.getElementById(id);
@@ -50,11 +50,11 @@ const ui = {
         });
 
         const bn = document.getElementById('bottomNav');
-        if (bn) { 
-            bn.style.removeProperty('display'); 
-            bn.style.display = 'flex'; 
+        if (bn) {
+            bn.style.removeProperty('display');
+            bn.style.display = 'flex';
         }
-        
+
         // Hide group-specific bottom items
         ['bottomGastos', 'bottomTareas', 'bottomInventario'].forEach(id => {
             const el = document.getElementById(id);
@@ -81,7 +81,7 @@ const ui = {
         // Sidebar user info
         if (u.nombre) {
             const init = u.nombre[0]?.toUpperCase() || 'A';
-            ['sidebarAvatar','navAvatar'].forEach(id => {
+            ['sidebarAvatar', 'navAvatar'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = init;
             });
@@ -92,11 +92,11 @@ const ui = {
         }
         // Sidebar active: dashboard
         document.querySelectorAll('.sidebar-nav-item').forEach(a => {
-            a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
-            a.classList.add('text-on-surface-variant','font-medium');
+            a.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'font-bold');
+            a.classList.add('text-on-surface-variant', 'font-medium');
         });
         const sd = document.getElementById('sidebarDashboard');
-        if (sd) { sd.classList.add('active','bg-primary-container','text-on-primary-container','font-bold'); sd.classList.remove('text-on-surface-variant','font-medium'); }
+        if (sd) { sd.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'font-bold'); sd.classList.remove('text-on-surface-variant', 'font-medium'); }
     },
 
     showGrupo(grupo) {
@@ -107,7 +107,7 @@ const ui = {
         // Sidebar
         const sidebar = document.getElementById('sidebar');
         sidebar.style.removeProperty('display');
-        
+
         // Show group-specific sidebar items
         ['sidebarGastos', 'sidebarTareas', 'sidebarInventario', 'sidebarReportes', 'sidebarMiembros'].forEach(id => {
             const el = document.getElementById(id);
@@ -115,9 +115,9 @@ const ui = {
         });
 
         const bn = document.getElementById('bottomNav');
-        if (bn) { 
-            bn.style.removeProperty('display'); 
-            bn.style.display = 'flex'; 
+        if (bn) {
+            bn.style.removeProperty('display');
+            bn.style.display = 'flex';
         }
 
         // Show group-specific bottom items
@@ -152,14 +152,16 @@ const ui = {
         const esAdmin = grupo.rolActual === 'ADMIN';
         document.getElementById('btnGenInvitacion').style.display = esAdmin ? 'inline-flex' : 'none';
         document.getElementById('btnSolicitudes').style.display = esAdmin ? 'inline-flex' : 'none';
+        const deleteBtn = document.getElementById('btnDeleteGroup');
+        if (deleteBtn) deleteBtn.style.display = esAdmin ? 'inline-flex' : 'none';
 
         // Sidebar active: gastos
         document.querySelectorAll('.sidebar-nav-item').forEach(a => {
-            a.classList.remove('active','bg-primary-container','text-on-primary-container','font-bold');
-            a.classList.add('text-on-surface-variant','font-medium');
+            a.classList.remove('active', 'bg-primary-container', 'text-on-primary-container', 'font-bold');
+            a.classList.add('text-on-surface-variant', 'font-medium');
         });
         const sg = document.getElementById('sidebarGastos');
-        if (sg) { sg.classList.add('active','bg-primary-container','text-on-primary-container','font-bold'); sg.classList.remove('text-on-surface-variant','font-medium'); }
+        if (sg) { sg.classList.add('active', 'bg-primary-container', 'text-on-primary-container', 'font-bold'); sg.classList.remove('text-on-surface-variant', 'font-medium'); }
     },
 
     // ====== DASHBOARD ======
@@ -175,11 +177,21 @@ const ui = {
         }
         el.innerHTML = grupos.map(g => `
             <div class="grupo-card" data-id="${g.id}" data-rol="${g.rolActual}" data-nombre="${g.nombre}">
-                <h3>${g.nombre}</h3>
-                <p>${g.descripcion || 'Sin descripción'}</p>
+                <div class="grupo-card-content">
+                    <div>
+                        <h3>${g.nombre}</h3>
+                        <p>${g.descripcion || 'Sin descripción'}</p>
+                    </div>
+                    <div class="grupo-actions">
+                        <button class="btn btn-secondary" data-action="enter">Entrar</button>
+                        ${g.rolActual === 'ADMIN'
+                ? `<button class="btn btn-danger" data-action="delete">Eliminar</button>`
+                : `<button class="btn btn-ghost" data-action="leave">Salir</button>`}
+                    </div>
+                </div>
                 <div class="grupo-meta">
                     <span class="badge badge-${g.rolActual === 'ADMIN' ? 'admin' : 'member'}">${g.rolActual}</span>
-                    <span style="color:var(--text-muted);font-size:0.8rem;">👥 ${g.totalMiembros} miembro${g.totalMiembros !== 1 ? 's' : ''}</span>
+                    <span>${g.totalMiembros} miembro${g.totalMiembros !== 1 ? 's' : ''}</span>
                 </div>
             </div>
         `).join('');
@@ -194,6 +206,25 @@ const ui = {
             <div class="stat-card">
                 <div class="stat-value">${grupos.filter(g => g.rolActual === 'ADMIN').length}</div>
                 <div class="stat-label">Que Administro</div>
+            </div>
+        `;
+    },
+
+    renderGroupSummary(summary) {
+        const el = document.getElementById('groupSummary');
+        if (!el) return;
+        el.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-value">${summary.miembros}</div>
+                <div class="stat-label">Miembros</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">$${Number(summary.totalGastado || 0).toLocaleString()}</div>
+                <div class="stat-label">Total Gastado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${summary.categorias || 0}</div>
+                <div class="stat-label">Categorías</div>
             </div>
         `;
     },
@@ -226,11 +257,11 @@ const ui = {
                     <div class="monto">$${Number(g.monto).toLocaleString()}</div>
                     <div class="gasto-actions">
                         ${miDivision && !miDivision.pagado && !yoPague
-                            ? `<button class="btn btn-success" style="font-size:0.75rem;padding:0.3rem 0.7rem;" onclick="window._pagarDivision('${g.id}')">Marcar Pagado</button>` 
-                            : ''}
-                        ${yoPague 
-                            ? `<button class="btn btn-danger" style="font-size:0.75rem;padding:0.3rem 0.7rem;" onclick="window._eliminarGasto('${g.id}')">🗑</button>` 
-                            : ''}
+                    ? `<button class="btn btn-success" style="font-size:0.75rem;padding:0.3rem 0.7rem;" onclick="window._pagarDivision('${g.id}')">Marcar Pagado</button>`
+                    : ''}
+                        ${yoPague
+                    ? `<button class="btn btn-danger" style="font-size:0.75rem;padding:0.3rem 0.7rem;" onclick="window._eliminarGasto('${g.id}')">🗑</button>`
+                    : ''}
                     </div>
                 </div>
             </div>`;
@@ -243,10 +274,10 @@ const ui = {
         el.innerHTML = `
             <p style="color:var(--text-muted);margin-bottom:1.5rem;">Total de gastos del grupo: <strong style="color:var(--text)">$${Number(balance.totalGastos).toLocaleString()}</strong></p>
             ${balance.balances.map(b => {
-                const val = Number(b.balance);
-                const cls = val > 0 ? 'balance-positivo' : val < 0 ? 'balance-negativo' : 'balance-neutro';
-                const estado = val > 0 ? `Le deben $${val.toLocaleString()}` : val < 0 ? `Debe $${Math.abs(val).toLocaleString()}` : 'Al día ✅';
-                return `<div class="balance-item ${cls}">
+            const val = Number(b.balance);
+            const cls = val > 0 ? 'balance-positivo' : val < 0 ? 'balance-negativo' : 'balance-neutro';
+            const estado = val > 0 ? `Le deben $${val.toLocaleString()}` : val < 0 ? `Debe $${Math.abs(val).toLocaleString()}` : 'Al día ✅';
+            return `<div class="balance-item ${cls}">
                     <div style="display:flex;align-items:center;gap:0.75rem;">
                         <div class="avatar">${b.nombre[0].toUpperCase()}</div>
                         <div>
@@ -256,7 +287,7 @@ const ui = {
                     </div>
                     <strong style="color:${val > 0 ? 'var(--success)' : val < 0 ? 'var(--error)' : 'var(--text-muted)'}">${estado}</strong>
                 </div>`;
-            }).join('')}
+        }).join('')}
         `;
     },
 
@@ -355,8 +386,8 @@ const ui = {
                     </div>
                 </div>
                 <div style="margin-top:1rem;display:flex;gap:0.5rem;">
-                    <button class="btn btn-ghost" style="flex:1;padding:0.25rem;" onclick="window._updateStock('${i.id}', ${Number(i.cantidad)-1})">-1</button>
-                    <button class="btn btn-ghost" style="flex:1;padding:0.25rem;" onclick="window._updateStock('${i.id}', ${Number(i.cantidad)+1})">+1</button>
+                    <button class="btn btn-ghost" style="flex:1;padding:0.25rem;" onclick="window._updateStock('${i.id}', ${Number(i.cantidad) - 1})">-1</button>
+                    <button class="btn btn-ghost" style="flex:1;padding:0.25rem;" onclick="window._updateStock('${i.id}', ${Number(i.cantidad) + 1})">+1</button>
                 </div>
             </div>`;
         }).join('');
@@ -404,9 +435,9 @@ const ui = {
                     backgroundColor: '#6366f1'
                 }]
             },
-            options: { 
+            options: {
                 plugins: { legend: { display: false } },
-                scales: { 
+                scales: {
                     y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#64748b' } },
                     x: { grid: { display: false }, ticks: { color: '#64748b' } }
                 }

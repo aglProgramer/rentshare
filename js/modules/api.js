@@ -52,6 +52,8 @@ const api = {
     solicitarUnion: (codigo) => api.request('/grupos/unirse', { method: 'POST', body: JSON.stringify({ codigo }) }),
     solicitudesPendientes: (grupoId) => api.request(`/grupos/${grupoId}/solicitudes`),
     responderSolicitud: (invId, aceptar) => api.request(`/grupos/solicitudes/${invId}/responder`, { method: 'POST', body: JSON.stringify({ aceptar }) }),
+    salirGrupo: (grupoId) => api.request(`/grupos/${grupoId}/salir`, { method: 'POST' }),
+    eliminarGrupo: (grupoId) => api.request(`/grupos/${grupoId}`, { method: 'DELETE' }),
     balance: (grupoId) => api.request(`/grupos/${grupoId}/balance`),
 
     // GASTOS

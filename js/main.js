@@ -130,19 +130,7 @@ function initAuth() {
             localStorage.setItem('rentshare_token', res.token);
             localStorage.setItem('rentshare_user', JSON.stringify(res.usuario));
             currentUser = res.usuario;
-            // Intentar redirigir al primer grupo si existe, sino al dashboard
-            try {
-                const grupos = await api.misGrupos();
-                if (Array.isArray(grupos) && grupos.length) {
-                    const first = grupos[0];
-                    window.location.href = `paginas/grupo.html?grupoId=${first.id}`;
-                } else {
-                    window.location.href = 'paginas/dashboard.html';
-                }
-            } catch (e) {
-                console.warn('No se pudo obtener grupos tras login, yendo al dashboard', e);
-                window.location.href = 'paginas/dashboard.html';
-            }
+            window.location.href = 'paginas/dashboard.html';
         } catch (err) {
             ui.toast(err.message, 'error');
         } finally {
@@ -189,15 +177,50 @@ function initAuth() {
 
 // ─── DASHBOARD ───────────────────────────────────────────────
 function initDashboard() {
-    // Clic en grupo
-    document.getElementById('gruposList').addEventListener('click', (e) => {
+    // Clic en grupo y acciones sobre grupos
+    document.getElementById('gruposList').addEventListener('click', async (e) => {
         const card = e.target.closest('.grupo-card');
         if (!card || !card.dataset.id || card.dataset.id === 'undefined') return;
 
-        currentGrupo = { id: card.dataset.id, nombre: card.dataset.nombre, rolActual: card.dataset.rol };
-        ui.showGrupo(currentGrupo);
-        document.getElementById('breadcrumb').onclick = () => { ui.showDashboard(); loadDashboard(); };
-        loadGrupo(currentGrupo.id);
+        const actionButton = e.target.closest('[data-action]');
+        if (actionButton) {
+            const action = actionButton.dataset.action;
+            const grupoId = card.dataset.id;
+            if (action === 'enter') {
+                window.location.href = `paginas/grupo.html?grupoId=${grupoId}`;
+                return;
+            }
+            if (action === 'leave') {
+                if (!confirm('¿Salir del grupo?')) return;
+                try {
+                    ui.loading(true);
+                    await api.salirGrupo(grupoId);
+                    ui.toast('Has salido del grupo.', 'success');
+                    loadDashboard();
+                } catch (err) {
+                    ui.toast(err.message, 'error');
+                } finally {
+                    ui.loading(false);
+                }
+                return;
+            }
+            if (action === 'delete') {
+                if (!confirm('¿Eliminar el grupo? Esta acción no se puede deshacer.')) return;
+                try {
+                    ui.loading(true);
+                    await api.eliminarGrupo(grupoId);
+                    ui.toast('Grupo eliminado.', 'success');
+                    loadDashboard();
+                } catch (err) {
+                    ui.toast(err.message, 'error');
+                } finally {
+                    ui.loading(false);
+                }
+                return;
+            }
+        }
+
+        window.location.href = `paginas/grupo.html?grupoId=${card.dataset.id}`;
     });
 
     // Nuevo grupo modal
@@ -338,6 +361,36 @@ function initGrupo() {
         }
     });
 
+    document.getElementById('btnLeaveGroup').addEventListener('click', async () => {
+        if (!currentGrupo) return;
+        if (!confirm('¿Estás seguro de que quieres salir de este grupo?')) return;
+        try {
+            ui.loading(true);
+            await api.salirGrupo(currentGrupo.id);
+            ui.toast('Has salido del grupo.', 'success');
+            window.location.href = '../paginas/dashboard.html';
+        } catch (err) {
+            ui.toast(err.message, 'error');
+        } finally {
+            ui.loading(false);
+        }
+    });
+
+    document.getElementById('btnDeleteGroup').addEventListener('click', async () => {
+        if (!currentGrupo) return;
+        if (!confirm('¿Eliminar el grupo? Esta acción no se puede deshacer.')) return;
+        try {
+            ui.loading(true);
+            await api.eliminarGrupo(currentGrupo.id);
+            ui.toast('Grupo eliminado.', 'success');
+            window.location.href = '../paginas/dashboard.html';
+        } catch (err) {
+            ui.toast(err.message, 'error');
+        } finally {
+            ui.loading(false);
+        }
+    });
+
     // Ver solicitudes pendientes (admin)
     document.getElementById('btnSolicitudes').addEventListener('click', async () => {
         if (!currentGrupo) return;
@@ -410,8 +463,27 @@ async function loadGrupo(grupoId) {
     currentCat = '';
     document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.filtro-btn[data-cat=""]').classList.add('active');
-    loadGastos(grupoId, '');
-    currentMiembros = await api.miembros(grupoId);
+    try {
+        ui.loading(true);
+        const grupos = await api.misGrupos();
+        const grupo = grupos.find(x => String(x.id) === String(grupoId));
+        if (grupo) {
+            currentGrupo = { id: grupo.id, nombre: grupo.nombre, rolActual: grupo.rolActual, descripcion: grupo.descripcion };
+            ui.showGrupo(currentGrupo);
+        }
+        currentMiembros = await api.miembros(grupoId);
+        const stats = await api.stats(grupoId).catch(() => null);
+        ui.renderGroupSummary({
+            miembros: currentMiembros.length,
+            totalGastado: stats?.totalGastado || 0,
+            categorias: stats?.gastosPorCategoria ? Object.keys(stats.gastosPorCategoria).length : 0
+        });
+        loadGastos(grupoId, '');
+    } catch (err) {
+        ui.toast(err.message, 'error');
+    } finally {
+        ui.loading(false);
+    }
 }
 
 async function loadGastos(grupoId, categoria) {

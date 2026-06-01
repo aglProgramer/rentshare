@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ItemInventarioRepository extends JpaRepository<ItemInventario, UUID> {
     List<ItemInventario> findByGrupoId(UUID grupoId);
+
+    void deleteByGrupoId(UUID grupoId);
 }

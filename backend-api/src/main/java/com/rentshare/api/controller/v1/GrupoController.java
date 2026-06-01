@@ -82,6 +82,20 @@ public class GrupoController {
         return ResponseEntity.ok(grupoService.calcularBalance(grupoId));
     }
 
+    @PostMapping("/{grupoId}/salir")
+    public ResponseEntity<Void> salir(@PathVariable UUID grupoId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        grupoService.salirDeGrupo(grupoId, getUsrId(userDetails));
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{grupoId}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID grupoId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        grupoService.eliminarGrupo(grupoId, getUsrId(userDetails));
+        return ResponseEntity.ok().build();
+    }
+
     private UUID getUsrId(UserDetails ud) {
         return usuarioRepository.findByEmail(ud.getUsername())
                 .orElseThrow().getId();

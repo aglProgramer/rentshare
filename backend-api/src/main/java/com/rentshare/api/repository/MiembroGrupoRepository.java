@@ -11,6 +11,12 @@ import java.util.UUID;
 @Repository
 public interface MiembroGrupoRepository extends JpaRepository<MiembroGrupo, UUID> {
     List<MiembroGrupo> findByGrupoId(UUID grupoId);
+
     Optional<MiembroGrupo> findByGrupoIdAndUsuarioId(UUID grupoId, UUID usuarioId);
+
     boolean existsByGrupoIdAndUsuarioId(UUID grupoId, UUID usuarioId);
+
+    void deleteByGrupoId(UUID grupoId);
+
+    void deleteByGrupoIdAndUsuarioId(UUID grupoId, UUID usuarioId);
 }

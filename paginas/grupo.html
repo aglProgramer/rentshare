@@ -85,14 +85,19 @@
 <section id="grupoSection" class="lg:ml-64 pt-16 min-h-screen rs-section">
   <div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-md">
     <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
-      <div class="flex items-center gap-sm flex-wrap">
-        <h1 id="grupoNombre" class="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Grupo</h1>
-        <span id="grupoRolBadge" class="badge"></span>
-      </div>
-      <div class="flex items-center gap-sm flex-wrap">
-        <button id="btnNuevoGasto" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.5rem;"><span class="material-symbols-outlined text-base">add</span>Nuevo Gasto</button>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div>
+          <h1 id="grupoNombre" class="text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Grupo</h1>
+          <span id="grupoRolBadge" class="badge"></span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="btnNuevoGasto" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.5rem;"><span class="material-symbols-outlined text-base">add</span>Nuevo Gasto</button>
+          <button id="btnLeaveGroup" class="btn btn-ghost">Salir del grupo</button>
+          <button id="btnDeleteGroup" class="btn btn-danger" style="display:none;">Eliminar grupo</button>
+        </div>
       </div>
     </header>
+    <div id="groupSummary" class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg"></div>
 
     <div class="tabs flex gap-0 border-b border-outline-variant mb-md overflow-x-auto">
       <button class="tab-btn active" id="tabGastos"><span class="material-symbols-outlined text-base align-middle mr-1">receipt_long</span>Gastos</button>

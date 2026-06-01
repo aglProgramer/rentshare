@@ -11,5 +11,8 @@ import java.util.UUID;
 @Repository
 public interface GastoRepository extends JpaRepository<Gasto, UUID> {
     Page<Gasto> findByGrupoId(UUID grupoId, Pageable pageable);
+
     Page<Gasto> findByGrupoIdAndCategoria(UUID grupoId, String categoria, Pageable pageable);
+
+    void deleteByGrupoId(UUID grupoId);
 }

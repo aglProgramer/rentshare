@@ -11,5 +11,8 @@ import java.util.UUID;
 @Repository
 public interface InvitacionGrupoRepository extends JpaRepository<InvitacionGrupo, UUID> {
     Optional<InvitacionGrupo> findByCodigo(String codigo);
+
     List<InvitacionGrupo> findByGrupoIdAndEstado(UUID grupoId, String estado);
+
+    void deleteByGrupoId(UUID grupoId);
 }
