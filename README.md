@@ -90,47 +90,97 @@ Además:
 
 **Estructura:**
 ```
-rentshare/
-├── index.html
+RentShare/
+│
+├── index.html                        # ← SPA principal (todas las vistas)
+│
+├── css/
+│   └── style.css                     # ← Estilos globales (14 KB)
+│
 ├── js/
-│   ├── main.js
-│   ├── auth.js
-│   ├── api.js
-│   ├── dashboard.js
-│   ├── grupos.js
-│   ├── gastos.js
-│   ├── balance.js
-│   ├── tareas.js
-│   ├── inventario.js
-│   ├── reportes.js
-│   └── utils.js
-└── css/
-    └── style.css
-```
+│   ├── main.js                       # ← Entry point, router, estado global (23 KB)
+│   └── modules/
+│       ├── api.js                    # ← Llamadas HTTP al backend (4 KB)
+│       └── ui.js                     # ← Renderizado dinámico de componentes (15 KB)
+│
+├── database/
+│   ├── schema.sql                    # ← DDL: tablas completas
+│   ├── seeds.sql                     # ← Datos de prueba
+│   └── new_features.sql              # ← Migraciones recientes
+│
+└── backend-api/                      # ← Spring Boot (Java)
+    ├── Dockerfile
+    ├── pom.xml
+    └── src/main/java/com/rentshare/api/
+        │
+        ├── RentShareApplication.java
+        │
+        ├── config/
+        │   ├── CorsConfig.java
+        │   └── SecurityConfig.java
+        │
+        ├── controller/v1/
+        │   ├── AuthController.java
+        │   ├── GastoController.java
+        │   ├── GrupoController.java
+        │   ├── InventarioController.java
+        │   ├── ReportesController.java
+        │   ├── TareaController.java
+        │   └── UsuarioController.java
+        │
+        ├── dto/
+        │   ├── request/
+        │   │   ├── CrearGastoRequest.java
+        │   │   ├── CrearGrupoRequest.java
+        │   │   ├── InventarioRequest.java
+        │   │   ├── LoginRequest.java
+        │   │   ├── RegisterRequest.java
+        │   │   └── TareaRequest.java
+        │   └── response/
+        │       ├── AuthResponse.java
+        │       ├── BalanceResponse.java
+        │       ├── GastoResponse.java
+        │       ├── GrupoResponse.java
+        │       ├── InventarioResponse.java
+        │       ├── StatsResponse.java
+        │       ├── TareaResponse.java
+        │       └── UsuarioResponse.java
+        │
+        ├── model/
+        │   ├── DivisionGasto.java
+        │   ├── Gasto.java
+        │   ├── Grupo.java
+        │   ├── InvitacionGrupo.java
+        │   ├── ItemInventario.java
+        │   ├── MiembroGrupo.java
+        │   ├── NotificationSettings.java
+        │   ├── RecordatorioPago.java
+        │   ├── Tarea.java
+        │   └── Usuario.java
+        │
+        ├── repository/
+        │   ├── GastoRepository.java
+        │   ├── GrupoRepository.java
+        │   ├── InvitacionRepository.java
+        │   ├── ItemInventarioRepository.java
+        │   ├── MiembroGrupoRepository.java
+        │   ├── NotificationRepository.java
+        │   ├── TareaRepository.java
+        │   └── UsuarioRepository.java
+        │
+        ├── security/
+        │   ├── CustomUserDetailsService.java
+        │   ├── JwtFilter.java
+        │   └── JwtUtils.java
+        │
+        └── service/
+            ├── CaptchaService.java
+            ├── GastoService.java
+            ├── GrupoService.java
+            ├── InventarioService.java
+            ├── TareaService.java
+            └── UsuarioService.java
 
-### Backend
-
-**Tecnologías:**
-- Java 17
-- Spring Boot 3
-- Spring Security
-- Spring Data JPA
-- Hibernate
-
-**Estructura:**
-```
-backend-api/
-└── src/main/java/com/rentshare/api/
-    ├── controller/
-    ├── service/
-    ├── repository/
-    ├── model/
-    ├── dto/
-    ├── security/
-    ├── config/
-    ├── exception/
-    └── resources/
-```
 
 ---
 
