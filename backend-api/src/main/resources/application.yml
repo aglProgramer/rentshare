@@ -6,7 +6,10 @@ spring:
     username: postgres.fcwbsbykxvsxwhkjvezg
     password: criadero123
     driver-class-name: org.postgresql.Driver
+    hikari:
+      auto-commit: false
   jpa:
+    open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
