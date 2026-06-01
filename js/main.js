@@ -302,7 +302,7 @@ function initGrupo() {
     });
 
     // Nuevo gasto
-    document.getElementById('btnNuevoGasto').addEventListener('click', async () => {
+    const handleNuevoGasto = async () => {
         if (!currentGrupo) return;
         try {
             currentMiembros = await api.miembros(currentGrupo.id);
@@ -313,7 +313,10 @@ function initGrupo() {
         } catch (err) {
             ui.toast(err.message, 'error');
         }
-    });
+    };
+    document.getElementById('btnNuevoGasto').addEventListener('click', handleNuevoGasto);
+    const fabNuevoGasto = document.getElementById('fabNuevoGasto');
+    if (fabNuevoGasto) fabNuevoGasto.addEventListener('click', handleNuevoGasto);
 
     // Dividir igual automáticamente
     document.getElementById('btnDividirIgual').addEventListener('click', () => {

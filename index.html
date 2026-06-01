@@ -20,9 +20,9 @@
   <script src="https://www.google.com/recaptcha/enterprise.js?render=6Lfrd-EsAAAAADV0hu4mT3ztOeJk8fZfmdO838JW"></script>
 
   <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script id="tailwind-config">
-    tailwind.config = {
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
       darkMode: "class",
       theme: {
         extend: {
@@ -107,6 +107,7 @@
       }
     }
   </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -42,8 +42,31 @@ const ui = {
         // Sidebar visible
         const sidebar = document.getElementById('sidebar');
         sidebar.style.removeProperty('display');
+        
+        // Hide group-specific sidebar items
+        ['sidebarGastos', 'sidebarTareas', 'sidebarInventario', 'sidebarReportes', 'sidebarMiembros'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
         const bn = document.getElementById('bottomNav');
-        if (bn) { bn.style.removeProperty('display'); bn.style.display = 'flex'; }
+        if (bn) { 
+            bn.style.removeProperty('display'); 
+            bn.style.display = 'flex'; 
+        }
+        
+        // Hide group-specific bottom items
+        ['bottomGastos', 'bottomTareas', 'bottomInventario'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        // Make Dashboard bottom icon centered
+        const bDash = document.getElementById('bottomDashboard');
+        if (bDash) {
+            bDash.style.flex = '1';
+            bDash.style.justifyContent = 'center';
+        }
+
         const fab = document.getElementById('fabNuevoGasto');
         if (fab) fab.style.display = 'none';
         // Balance button hidden on dashboard
@@ -84,8 +107,30 @@ const ui = {
         // Sidebar
         const sidebar = document.getElementById('sidebar');
         sidebar.style.removeProperty('display');
+        
+        // Show group-specific sidebar items
+        ['sidebarGastos', 'sidebarTareas', 'sidebarInventario', 'sidebarReportes', 'sidebarMiembros'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'flex'; // sidebar items use flex
+        });
+
         const bn = document.getElementById('bottomNav');
-        if (bn) { bn.style.removeProperty('display'); bn.style.display = 'flex'; }
+        if (bn) { 
+            bn.style.removeProperty('display'); 
+            bn.style.display = 'flex'; 
+        }
+
+        // Show group-specific bottom items
+        ['bottomGastos', 'bottomTareas', 'bottomInventario'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'flex';
+        });
+        // Reset Dashboard bottom icon styles
+        const bDash = document.getElementById('bottomDashboard');
+        if (bDash) {
+            bDash.style.flex = '';
+        }
+
         // FAB
         const fab = document.getElementById('fabNuevoGasto');
         if (fab) fab.style.display = 'flex';
