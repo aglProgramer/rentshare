@@ -249,23 +249,3 @@ CREATE INDEX idx_divisiones_gasto ON divisiones_gasto(gasto_id);
 CREATE INDEX idx_tareas_grupo ON tareas(grupo_id);
 CREATE INDEX idx_inventario_grupo ON inventario(grupo_id);
 ```
-
----
-
-## 🎯 8. Mapeo del Proyecto a la Rúbrica de Calificación
-
-RentShare fue diseñado estratégicamente para cumplir holgadamente con el 100% de los ítems obligatorios y sumar todos los puntos de la sección de **Requisitos adicionales (para mejor calificación ⭐)**:
-
-| Criterio del Docente | ¿Cómo lo cumple RentShare? | Calificación Estimada |
-|---|---|:---:|
-| **API REST Backend** | Implementada al 100% con Spring Boot, controladores REST estructurados en la versión `/api/v1/` y respuestas en JSON. | **Excelente** |
-| **Operaciones CRUD** | CRUDs completos implementados en Gastos, Tareas e Inventario. | **Excelente** |
-| **Base de Datos Relacional** | Modelo relacional de 8 tablas con relaciones declaradas mediante llaves foráneas e índices optimizados en PostgreSQL. | **Excelente** |
-| **Autenticación** | Sistema robusto con Spring Security + JWT sin estados y registro protegido por Google reCAPTCHA Enterprise. | **Excelente** |
-| **Interfaz Responsive** | Interfaz SPA responsiva adaptada con Tailwind CSS. Sidebar fijo en Desktop y Bottom Nav táctil en Mobile. | **Excelente** |
-| **Validación de Formularios** | Validaciones frontend antes de enviar registros y validaciones backend con anotaciones `@Valid` de Jakarta Validation. | **Excelente** |
-| **Lógica de Negocio Avanzada** | Motor matemático de cálculo de balance consolidado ($B = P - D$) y algoritmo de repartición proporcional. | **Excelente** |
-| **Dashboard con Estadísticas ⭐** | Bento grid dinámico que muestra resumen de grupos, grupos que administra e información centralizada. | **Puntos Extra ⭐** |
-| **Reportes y Consultas Avanzadas ⭐** | Gráficas estadísticas en la pestaña de Reportes con **Chart.js** (distribución de gastos por categoría y por inquilino). | **Puntos Extra ⭐** |
-| **Manejo de Roles y Permisos ⭐** | Restricciones estrictas según el rol (`ADMIN` vs `MEMBER`). Modales y botones administrativos ocultados por CSS/JS según el contexto. | **Puntos Extra ⭐** |
-| **Notificaciones ⭐** | Sistema de notificaciones en pantalla mediante alertas tipo Toast dinámicas con clases de éxito (`success`), advertencia (`warning`) y error. | **Puntos Extra ⭐** |
