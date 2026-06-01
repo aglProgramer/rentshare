@@ -513,13 +513,17 @@ function initGrupo() {
     }
 
     // Recalcular al cambiar monto
+    const gMontoInput = document.getElementById('gMonto');
+
     if (gMontoInput) {
         gMontoInput.addEventListener('input', () => {
             if (currentMiembros.length) {
-                const monto = parseFloat(document.getElementById('gMonto').value) || 0;
-                const checks = document.querySelectorAll('#divisionesContainer input[type=checkbox]:checked');
+                const monto = parseFloat(gMontoInput.value) || 0;
+                const checks = document.querySelectorAll(
+                    '#divisionesContainer input[type=checkbox]:checked'
+                );
 
-                if (checks.length) {
+                if (checks.length > 0) {
                     const parte = (monto / checks.length).toFixed(2);
 
                     checks.forEach(chk => {
@@ -534,8 +538,7 @@ function initGrupo() {
             }
         });
     }
-} // <- cierre de initGrupo()
-
+}
 async function loadGrupo(grupoId) {
     currentCat = '';
     document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
