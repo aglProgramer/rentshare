@@ -27,59 +27,30 @@
       theme: {
         extend: {
           colors: {
-            /* Light Mode — Material Design 3 */
-            "primary":                 "#24389c",
-            "on-primary":              "#ffffff",
-            "primary-container":       "#3f51b5",
-            "on-primary-container":    "#cacfff",
-            "primary-fixed":           "#dee0ff",
-            "primary-fixed-dim":       "#bac3ff",
-            "secondary":               "#416743",
-            "on-secondary":            "#ffffff",
-            "secondary-container":     "#c2eec0",
-            "on-secondary-container":  "#476d49",
-            "tertiary":                "#613a00",
-            "on-tertiary":             "#ffffff",
-            "tertiary-container":      "#7d5112",
-            "on-tertiary-container":   "#ffc88a",
-            "tertiary-fixed":          "#ffddb9",
-            "tertiary-fixed-dim":      "#f8bb73",
-            "surface":                 "#fbf8ff",
-            "surface-dim":             "#dbd9e2",
-            "surface-bright":          "#fbf8ff",
-            "surface-container-lowest":"#ffffff",
-            "surface-container-low":   "#f4f2fc",
-            "surface-container":       "#efedf6",
-            "surface-container-high":  "#e9e7f0",
-            "surface-container-highest":"#e3e1ea",
-            "surface-variant":         "#e3e1ea",
-            "on-surface":              "#1a1b22",
-            "on-surface-variant":      "#454652",
-            "background":              "#fbf8ff",
-            "on-background":           "#1a1b22",
-            "outline":                 "#757684",
-            "outline-variant":         "#c5c5d4",
-            "inverse-surface":         "#2f3037",
-            "inverse-on-surface":      "#f2eff9",
-            "inverse-primary":         "#bac3ff",
-            "error":                   "#ba1a1a",
+            "primary":                 "var(--color-primary)",
+            "on-primary":              "var(--color-on-primary)",
+            "primary-container":       "var(--color-primary-container)",
+            "on-primary-container":    "var(--color-on-primary-container)",
+            "secondary":               "var(--color-secondary)",
+            "on-secondary":            "var(--color-on-secondary)",
+            "surface":                 "var(--color-surface)",
+            "surface-dim":             "var(--color-surface-dim)",
+            "surface-container-lowest":"var(--color-surface-lowest)",
+            "surface-container-low":   "var(--color-surface-low)",
+            "surface-container":       "var(--color-surface-container)",
+            "surface-container-high":  "var(--color-surface-high)",
+            "surface-container-highest":"var(--color-surface-highest)",
+            "surface-variant":         "var(--color-surface-variant)",
+            "on-surface":              "var(--color-on-surface)",
+            "on-surface-variant":      "var(--color-on-surface-variant)",
+            "background":              "var(--color-background)",
+            "on-background":           "var(--color-on-background)",
+            "outline":                 "var(--color-outline)",
+            "outline-variant":         "var(--color-outline-variant)",
+            "inverse-surface":         "var(--color-inverse-surface)",
+            "inverse-on-surface":      "var(--color-inverse-on-surface)",
+            "error":                   "#ef4444",
             "on-error":                "#ffffff",
-            "error-container":         "#ffdad6",
-            "on-error-container":      "#93000a",
-            "surface-tint":            "#4355b9",
-            /* Dark Mode overrides */
-            "dark-bg":                 "#0a0f1e",
-            "dark-surface":            "#0e1322",
-            "dark-surface-low":        "#161b2b",
-            "dark-surface-container":  "#1a1f2f",
-            "dark-surface-high":       "#25293a",
-            "dark-surface-highest":    "#2f3445",
-            "dark-primary":            "#c0c1ff",
-            "dark-secondary":          "#bdc2ff",
-            "dark-on-surface":         "#dee1f7",
-            "dark-on-surface-variant": "#c7c4d7",
-            "dark-outline":            "#908fa0",
-            "dark-outline-variant":    "#464554",
           },
           fontFamily: {
             sans: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
@@ -140,29 +111,15 @@
     .bento-card:hover { transform: translateY(-2px); }
     /* Glass card for auth */
     .glass-card {
-      background: rgba(15,23,42,0.85);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(99,102,241,0.15);
     }
-    /* Dark mode sidebar */
-    .dark #sidebar {
-      background-color: #161b2b;
-      border-right: 1px solid rgba(99,102,241,0.12);
+    .dark .glass-card {
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(148,163,184,0.15);
     }
-    .dark .sidebar-nav-item { color: #c7c4d7; }
-    .dark .sidebar-nav-item:hover { background-color: #25293a; }
-    .dark .sidebar-nav-item.active {
-      background-color: rgba(99,102,241,0.20);
-      color: #c0c1ff;
-    }
-    /* Dark mode cards */
-    .dark .rs-card {
-      background-color: #1a1f2f;
-      border-color: rgba(99,102,241,0.14);
-      color: #dee1f7;
-    }
-    .dark .rs-card:hover { border-color: rgba(99,102,241,0.35); }
   </style>
 </head>
 
